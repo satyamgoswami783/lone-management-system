@@ -49,6 +49,9 @@ import HRVerificationDetail from './pages/hr/HRVerificationDetail';
 import HREmployees from './pages/hr/HREmployees';
 import HRReports from './pages/hr/HRReports';
 import AdminApplicationDetail from './pages/admin/AdminApplicationDetail';
+import CreditProfilePage from './pages/credit/CreditProfilePage';
+import RiskReviews from './pages/credit/RiskReviews';
+import RecoveryCaseDetail from './pages/recovery/RecoveryCaseDetail';
 
 function App() {
   return (
@@ -128,7 +131,8 @@ function App() {
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<CreditDashboard />} />
                 <Route path="queue" element={<CreditQueue />} />
-                <Route path="reviews" element={<ModulePlaceholder title="Risk Reviews" />} />
+                <Route path="profile/:id" element={<CreditProfilePage />} />
+                <Route path="reviews" element={<RiskReviews />} />
                 <Route path="history" element={<HistoryPage title="Assessment History" />} />
               </Routes>
             </Layout>
@@ -178,6 +182,7 @@ function App() {
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<RecoveryDashboard />} />
                 <Route path="list" element={<RecoveryList />} />
+                <Route path="case/:id" element={<RecoveryCaseDetail />} />
                 <Route path="collections" element={<HistoryPage title="Collections History" />} />
                 <Route path="tracking" element={<ModulePlaceholder title="Payment Tracking" />} />
               </Routes>

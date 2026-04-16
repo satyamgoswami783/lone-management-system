@@ -27,7 +27,7 @@ export const Badge = ({ children, variant = 'neutral', className }) => {
   );
 };
 
-export const StatCard = ({ title, value, subValue, icon: Icon, trend, variant = 'primary' }) => {
+export const StatCard = ({ title, value, subValue, icon: Icon, trend, variant = 'primary', onClick }) => {
   const iconVariants = {
     primary: 'bg-blue-600/20 text-blue-400 border-blue-500/20',
     success: 'bg-emerald-600/20 text-emerald-400 border-emerald-500/20',
@@ -36,7 +36,13 @@ export const StatCard = ({ title, value, subValue, icon: Icon, trend, variant = 
   };
 
   return (
-    <div className="glass p-6 rounded-3xl space-y-4 hover:shadow-[0_0_30px_rgba(255,255,255,0.02)] transition-all duration-300 group">
+    <div 
+      onClick={onClick}
+      className={cn(
+        "glass p-6 rounded-3xl space-y-4 hover:shadow-[0_0_30px_rgba(255,255,255,0.02)] transition-all duration-300 group",
+        onClick && "cursor-pointer hover:bg-slate-800/20 active:scale-[0.98]"
+      )}
+    >
       <div className="flex items-center justify-between">
         <div className={cn("p-2.5 rounded-2xl border transition-transform duration-300 group-hover:scale-110", iconVariants[variant])}>
           <Icon className="w-5 h-5" />

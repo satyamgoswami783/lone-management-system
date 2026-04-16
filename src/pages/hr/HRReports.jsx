@@ -19,10 +19,10 @@ const HRReports = () => {
     const { applications } = useLoans();
 
     // Derived stats
-    const totalVerifications = applications.length;
-    const approved = applications.filter(a => a.status.includes('Approved') || a.status === 'Paid').length;
-    const rejected = applications.filter(a => a.status.includes('Rejected') || a.status === 'Declined').length;
-    const pending = applications.filter(a => a.status === STATUSES.HR_PENDING || a.status === STATUSES.SUBMITTED).length;
+    const totalVerifications = (applications || []).length;
+    const approved = (applications || []).filter(a => a.status?.includes('Approved') || a.status === 'Paid').length;
+    const rejected = (applications || []).filter(a => a.status?.includes('Rejected') || a.status === 'Declined').length;
+    const pending = (applications || []).filter(a => a.status === STATUSES.HR_PENDING || a.status === STATUSES.SUBMITTED).length;
 
     const approvalRate = totalVerifications > 0 ? ((approved / totalVerifications) * 100).toFixed(1) : 0;
 
@@ -30,13 +30,13 @@ const HRReports = () => {
         const headers = ['Application ID', 'Employee', 'Company', 'Salary', 'Date', 'Status'];
         const csvContent = [
             headers.join(','),
-            ...applications.map(app => [
+            ...(applications || []).map(app => [
                 app.id,
                 app.name,
                 app.company,
                 app.salary,
-                new Date(app.date).toLocaleDateString(),
-                app.status
+                app.date ? new Date(app.date).toLocaleDateString() : 'N/A',
+                app.status || 'Pending'
             ].join(','))
         ].join('\n');
 
@@ -138,16 +138,16 @@ const HRReports = () => {
                 <div className="glass p-8 rounded-[40px] border-slate-800/50 bg-slate-900/40 space-y-8">
                     <h3 className="text-sm font-black text-blue-400 uppercase tracking-[0.2em]">Recent Log Activity</h3>
                     <div className="space-y-6">
-                        {applications.slice(0, 8).map((app, i) => (
+                        {(applications || []).slice(0, 8).map((app, i) => (
                             <div key={i} className="flex gap-4 items-start border-b border-slate-800/50 pb-4 last:border-0">
                                 <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
-                                    app.status.includes('Approved') ? 'bg-emerald-500' : 
-                                    app.status.includes('Rejected') ? 'bg-red-500' : 'bg-blue-500'
+                                    app.status?.includes('Approved') ? 'bg-emerald-500' : 
+                                    app.status?.includes('Rejected') ? 'bg-red-500' : 'bg-blue-500'
                                 }`}></div>
                                 <div>
-                                    <p className="text-xs font-bold text-slate-200">{app.status} - {app.name}</p>
+                                    <p className="text-xs font-bold text-slate-200">{app.status || 'Pending'} - {app.name || 'Anonymous'}</p>
                                     <p className="text-[10px] text-slate-600 font-bold uppercase mt-1">Ref: {app.id}</p>
-                                    <p className="text-[10px] text-slate-500 mt-0.5">{new Date(app.date).toLocaleDateString()}</p>
+                                    <p className="text-[10px] text-slate-500 mt-0.5">{app.date ? new Date(app.date).toLocaleDateString() : 'N/A'}</p>
                                 </div>
                             </div>
                         ))}

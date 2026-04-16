@@ -37,7 +37,7 @@ const HREmployees = () => {
     );
 
     const getActiveApplication = (name) => {
-        return applications.find(app => (app.name === name || app.email === name) && 
+        return (applications || []).find(app => (app.name === name || app.name === name) && 
             (app.status === STATUSES.HR_PENDING || app.status === STATUSES.SUBMITTED));
     };
 
@@ -75,7 +75,7 @@ const HREmployees = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <StatCard title="Total Staff" value={employees.length.toString()} icon={Users} variant="primary" />
-                <StatCard title="Active Applications" value={applications.length.toString()} icon={DollarSign} variant="success" />
+                <StatCard title="Active Applications" value={(applications || []).length.toString()} icon={DollarSign} variant="success" />
                 <StatCard title="Dept. Coverage" value="8" icon={Briefcase} variant="warning" />
                 <StatCard title="Compliance Rate" value="98%" icon={ShieldCheck} variant="primary" />
             </div>

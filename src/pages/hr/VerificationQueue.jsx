@@ -31,8 +31,11 @@ const VerificationQueue = () => {
     const [toast, setToast] = useState(null);
 
     // Filter logic
-    const queue = applications.filter(app => {
-        const matchesSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase()) || app.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const queue = (applications || []).filter(app => {
+        const name = app.name || '';
+        const id = app.id || '';
+        const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                             id.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = statusFilter === 'ALL' 
             ? (app.status === STATUSES.HR_PENDING || app.status === STATUSES.SUBMITTED)
             : app.status === statusFilter;
@@ -64,7 +67,7 @@ const VerificationQueue = () => {
 
     const stats = [
         { title: 'Total To Verify', value: queue.length.toString(), icon: Clock, variant: 'warning' },
-        { title: 'Rejected Overall', value: applications.filter(a => a.status.includes('Rejected')).length.toString(), icon: XCircle, variant: 'danger' },
+        { title: 'Rejected Overall', value: (applications || []).filter(a => a.status?.includes('Rejected')).length.toString(), icon: XCircle, variant: 'danger' },
         { title: 'Processing Rate', value: '92%', icon: TrendingUp, variant: 'success' },
     ];
 
@@ -97,7 +100,7 @@ const VerificationQueue = () => {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
             <SectionHeader 
                 title="Application Verification" 
                 description="Finalize employee eligibility and salary confirmation for pending loan requests."
@@ -109,8 +112,8 @@ const VerificationQueue = () => {
                 ))}
             </div>
 
-            <div className="glass rounded-[32px] overflow-hidden border border-slate-800/50">
-                <div className="p-6 border-b border-slate-800/50 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/20">
+            <div className="glass rounded-[32px] overflow-hidden border border-slate-800/50 shadow-xl">
+                <div className="p-6 border-b border-slate-800/50 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/10">
                     <div className="flex flex-col md:flex-row gap-4 flex-1">
                         <div className="relative flex-1 max-w-md">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -134,10 +137,10 @@ const VerificationQueue = () => {
                             </select>
                         </div>
                     </div>
-                    {statusFilter !== 'ALL' || searchTerm && (
+                    {(statusFilter !== 'ALL' || searchTerm) && (
                         <button 
                             onClick={() => {setSearchTerm(''); setStatusFilter('ALL');}}
-                            className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-white transition-all"
+                            className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-white transition-all underline underline-offset-4"
                         >
                             <FilterX className="w-4 h-4" />
                             Clear Filters
@@ -169,14 +172,14 @@ const VerificationQueue = () => {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="bg-slate-900/50 border-b border-slate-800/50">
+                            <thead className="bg-slate-900/50 border-b border-slate-800/50 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                                 <tr>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Applicant</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Priority</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Reference</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Requested</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                                    <th className="px-8 py-5">Applicant</th>
+                                    <th className="px-8 py-5">Priority</th>
+                                    <th className="px-8 py-5 text-center">Reference</th>
+                                    <th className="px-8 py-5">Requested</th>
+                                    <th className="px-8 py-5">Status</th>
+                                    <th className="px-8 py-5 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-800/50">
@@ -184,11 +187,11 @@ const VerificationQueue = () => {
                                     <tr key={app.id} className="hover:bg-slate-800/30 transition-all group">
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/10 flex items-center justify-center font-bold text-blue-400 text-lg">
-                                                    {app.name[0]}
+                                                <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/10 flex items-center justify-center font-bold text-blue-400 text-lg group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                                    {(app.name || 'U')[0]}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-slate-200 text-base">{app.name}</p>
+                                                    <p className="font-bold text-slate-200 text-base">{app.name || 'Anonymous'}</p>
                                                     <p className="text-xs text-slate-500 font-medium">{app.company}</p>
                                                 </div>
                                             </div>
@@ -206,27 +209,25 @@ const VerificationQueue = () => {
                                         <td className="px-8 py-6">
                                             <div className="space-y-1">
                                                 <p className="text-sm font-bold text-slate-200">R {app.amount?.toLocaleString()}</p>
-                                                <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{new Date(app.date).toLocaleDateString()}</p>
+                                                <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{app.date ? new Date(app.date).toLocaleDateString() : 'N/A'}</p>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
                                             <Badge variant={getStatusVariant(app.status)} className="px-4 py-1.5 shadow-lg shadow-black/20">
-                                                {app.status}
+                                                {app.status || 'Unknown'}
                                             </Badge>
                                         </td>
                                         <td className="px-8 py-6 text-right">
                                             <div className="flex justify-end gap-3">
                                                 <button 
                                                     onClick={() => handleVerify(app.id)}
-                                                    className="px-4 py-2.5 rounded-2xl bg-emerald-600/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all shadow-lg shadow-emerald-600/5 active:scale-95"
-                                                    title="Quick Approve"
+                                                    className="px-4 py-2.5 rounded-2xl bg-emerald-600/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all shadow-lg active:scale-95"
                                                 >
                                                     Approve
                                                 </button>
                                                 <button 
                                                     onClick={() => handleRejectClick(app.id)}
                                                     className="px-4 py-2.5 rounded-2xl bg-red-600/10 text-red-400 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95"
-                                                    title="Quick Reject"
                                                 >
                                                     Reject
                                                 </button>

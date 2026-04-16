@@ -22,9 +22,9 @@ const HRDashboard = () => {
     const navigate = useNavigate();
 
     // Derived stats
-    const pendingCount = applications.filter(app => app.status === STATUSES.HR_PENDING || app.status === STATUSES.SUBMITTED).length;
-    const approvedThisWeek = applications.filter(app => app.status.includes('Approved')).length; // Simplified for dummy
-    const rejectedCount = applications.filter(app => app.status.includes('Rejected')).length;
+    const pendingCount = (applications || []).filter(app => app.status === STATUSES.HR_PENDING || app.status === STATUSES.SUBMITTED).length;
+    const approvedThisWeek = (applications || []).filter(app => app.status?.includes('Approved')).length; 
+    const rejectedCount = (applications || []).filter(app => app.status?.includes('Rejected')).length;
 
     const stats = [
         { title: 'Total Pending Verifications', value: pendingCount.toString(), icon: Clock, variant: 'warning' },
@@ -32,7 +32,7 @@ const HRDashboard = () => {
         { title: 'Rejected Applications', value: rejectedCount.toString(), icon: XCircle, variant: 'danger' },
     ];
 
-    const recentVerifications = applications.slice(0, 5);
+    const recentVerifications = (applications || []).slice(0, 5);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -70,16 +70,16 @@ const HRDashboard = () => {
                         <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-800/30 transition-colors group">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center font-bold text-slate-500">
-                                    {row.name[0]}
+                                    {(row.name || 'U')[0]}
                                 </div>
                                 <div>
-                                    <p className="font-bold text-slate-200">{row.name}</p>
+                                    <p className="font-bold text-slate-200">{row.name || 'Anonymous'}</p>
                                     <p className="text-[10px] text-slate-500 font-mono">{row.id}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
-                                <Badge variant={row.status.includes('Approved') ? 'success' : 'warning'} className="text-[9px]">
-                                    {row.status}
+                                <Badge variant={row.status?.includes('Approved') ? 'success' : 'warning'} className="text-[9px]">
+                                    {row.status || 'Pending'}
                                 </Badge>
                                 <button 
                                     onClick={() => navigate(`/hr/verifications/${row.id}`)}

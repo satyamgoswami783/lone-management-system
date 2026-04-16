@@ -127,8 +127,9 @@ const AdminApplicationDetail = () => {
                             {steps.map((step, i) => {
                                 const isDone = currentStepIndex > i || isCompleted;
                                 const isActive = application.status === step.status;
+                                const label = step.label || 'Unknown';
                                 return (
-                                    <div key={i} className="flex flex-col items-center gap-3 bg-slate-950 p-2 rounded-2xl relative z-10">
+                                    <div key={i} className="flex flex-col items-center gap-3 bg-slate-950 p-2 rounded-2xl relative z-10 w-20">
                                         <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${
                                             isDone ? 'bg-emerald-500 border-emerald-400 text-white' : 
                                             isActive ? 'bg-blue-600 border-blue-400 text-white animate-pulse shadow-[0_0_15px_rgba(37,99,235,0.4)]' : 
@@ -140,12 +141,12 @@ const AdminApplicationDetail = () => {
                                             <span className={`text-[8px] font-black uppercase tracking-tighter text-center ${
                                                 isActive || isDone ? 'text-slate-200' : 'text-slate-600'
                                             }`}>
-                                                {step.label.split(' ')[0]}
+                                                {label.split(' ')[0]}
                                             </span>
                                             <span className={`text-[8px] font-black uppercase tracking-tighter text-center leading-[0.5] ${
                                                 isActive || isDone ? 'text-slate-200' : 'text-slate-600'
                                             }`}>
-                                                {step.label.split(' ')[1] || ''}
+                                                {label.split(' ')[1] || ''}
                                             </span>
                                         </div>
                                     </div>
