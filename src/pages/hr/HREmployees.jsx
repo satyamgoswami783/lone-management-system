@@ -1,0 +1,175 @@
+import React, { useState } from 'react';
+import { 
+  Users, 
+  Search, 
+  Filter, 
+  Eye, 
+  Briefcase, 
+  DollarSign,
+  ShieldCheck,
+  XCircle,
+  AlertCircle,
+} from 'lucide-react';
+import { SectionHeader, Badge, StatCard, Toast } from '../../components/ui/Shared';
+import { useLoans, STATUSES } from '../../context/LoanContext';
+import VerificationDetailsView from '../../components/hr/VerificationDetailsView';
+
+const HREmployees = () => {
+    const { applications, updateStatus } = useLoans();
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [toast, setToast] = useState(null);
+
+    const employees = [
+        { id: 'EMP-9021', name: 'Sarah Jenkins', dept: 'Engineering', role: 'Senior Developer', salary: 22500, joinDate: '2022-05-15', status: 'Active', email: 's.jenkins@techflow.io' },
+        { id: 'EMP-8842', name: 'Michael Chen', dept: 'Marketing', role: 'Growth Lead', salary: 18000, joinDate: '2021-11-20', status: 'Active', email: 'm.chen@techflow.io' },
+        { id: 'EMP-1029', name: 'Lerato Molefe', dept: 'Operations', role: 'HR Specialist', salary: 24000, joinDate: '2020-03-10', status: 'Active', email: 'l.molefe@techflow.io' },
+        { id: 'EMP-5521', name: 'David Smith', dept: 'Finance', role: 'Senior Accountant', salary: 45000, joinDate: '2019-08-01', status: 'On Leave', email: 'd.smith@techflow.io' },
+        { id: 'EMP-4432', name: 'John Doe', dept: 'Sales', role: 'Account Executive', salary: 15600, joinDate: '2023-01-15', status: 'Active', email: 'j.doe@techflow.io' },
+        { id: 'EMP-3211', name: 'Emily Brown', dept: 'Engineering', role: 'QA Engineer', salary: 19500, joinDate: '2022-10-12', status: 'Active', email: 'e.brown@techflow.io' },
+    ];
+
+    const filteredEmployees = employees.filter(emp => 
+        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        emp.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.dept.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const getActiveApplication = (name) => {
+        return applications.find(app => (app.name === name || app.email === name) && 
+            (app.status === STATUSES.HR_PENDING || app.status === STATUSES.SUBMITTED));
+    };
+
+    const activeApp = selectedEmployee ? getActiveApplication(selectedEmployee.name) : null;
+
+    const handleApprove = () => {
+        setIsLoading(true);
+        setTimeout(() => {
+            updateStatus(activeApp.id, STATUSES.HR_APPROVED, 'HR Manager');
+            setTimeout(() => {
+                updateStatus(activeApp.id, STATUSES.CREDIT_PENDING, 'System');
+                setIsLoading(false);
+                setToast({ message: 'HR Verification Successful!', type: 'success' });
+                setSelectedEmployee(null);
+            }, 500);
+        }, 800);
+    };
+
+    const handleReject = (reason) => {
+        setIsLoading(true);
+        setTimeout(() => {
+            updateStatus(activeApp.id, STATUSES.HR_REJECTED, 'HR Manager');
+            setIsLoading(false);
+            setToast({ message: `Application rejected: ${reason}`, type: 'danger' });
+            setSelectedEmployee(null);
+        }, 800);
+    };
+
+    return (
+        <div className="space-y-8 animate-in fade-in duration-700 pb-20">
+            <SectionHeader 
+                title="Personnel & Verifications" 
+                description="Consolidated view for HR management and live loan verification status."
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <StatCard title="Total Staff" value={employees.length.toString()} icon={Users} variant="primary" />
+                <StatCard title="Active Applications" value={applications.length.toString()} icon={DollarSign} variant="success" />
+                <StatCard title="Dept. Coverage" value="8" icon={Briefcase} variant="warning" />
+                <StatCard title="Compliance Rate" value="98%" icon={ShieldCheck} variant="primary" />
+            </div>
+
+            <div className="glass rounded-[32px] overflow-hidden border-slate-800/50 relative">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-3xl -mr-32 -mt-32"></div>
+                <div className="p-6 border-b border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/20 relative z-10">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                        <input 
+                            className="input-field pl-10 py-2.5 text-sm w-full md:w-96 bg-slate-950/50" 
+                            placeholder="Search employees..." 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <button className="flex items-center gap-2 px-6 py-2.5 glass rounded-xl text-slate-400 hover:text-white transition-all text-sm font-bold border-slate-800">
+                        <Filter className="w-4 h-4" />
+                        Directory Filters
+                    </button>
+                </div>
+
+                <div className="overflow-x-auto relative z-10">
+                    <table className="w-full text-left font-display">
+                        <thead>
+                            <tr className="bg-slate-900/50 border-b border-slate-800/50">
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">Employee</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">ID / Dept</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Verification</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/50">
+                            {filteredEmployees.map((emp) => {
+                                const hasActive = getActiveApplication(emp.name);
+                                return (
+                                    <tr key={emp.id} className="hover:bg-slate-800/30 transition-all group cursor-pointer" onClick={() => setSelectedEmployee(emp)}>
+                                        <td className="px-8 py-6">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center font-bold text-slate-400 group-hover:border-blue-500/50 transition-all">
+                                                    {emp.name[0]}
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-slate-200">{emp.name}</p>
+                                                    <p className="text-xs text-slate-500 font-medium">{emp.role}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="space-y-1">
+                                                <p className="text-sm text-slate-300 font-mono font-bold">{emp.id}</p>
+                                                <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{emp.dept}</p>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6 text-right">
+                                            {hasActive ? (
+                                                <Badge variant="warning" className="animate-pulse">Needs Verification</Badge>
+                                            ) : (
+                                                <div className="p-2 text-slate-500 group-hover:text-blue-400 bg-slate-900 border border-slate-800 rounded-xl transition-all inline-block">
+                                                    <Eye className="w-5 h-5" />
+                                                </div>
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Shared Verification Modal */}
+            {selectedEmployee && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/90 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setSelectedEmployee(null)}>
+                    <div className="glass w-full max-w-6xl max-h-[95vh] overflow-y-auto p-12 rounded-[60px] border-slate-800 space-y-10 animate-in zoom-in-95 duration-300 shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-3xl font-display font-bold text-white">Application Verification</h2>
+                            <button onClick={() => setSelectedEmployee(null)} className="p-3 bg-slate-900 rounded-2xl text-slate-500 hover:text-white border border-slate-800 transition-all">
+                                <XCircle className="w-6 h-6" />
+                            </button>
+                        </div>
+                        
+                        <VerificationDetailsView 
+                            application={activeApp}
+                            onApprove={handleApprove}
+                            onReject={handleReject}
+                            isLoading={isLoading}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+        </div>
+    );
+};
+
+export default HREmployees;

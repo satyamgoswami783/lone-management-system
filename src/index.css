@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-primary: oklch(0.6 0.18 260);
+  --color-secondary: oklch(0.7 0.12 180);
+  --color-accent: oklch(0.8 0.15 30);
+}
+
+@layer base {
+  :root {
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+  }
+
+  body {
+    @apply font-sans;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+  }
+  
+  .glass-hover {
+    @apply transition-all duration-300;
+  }
+  
+  .glass-hover:hover {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-primary {
+    @apply px-6 py-2.5 rounded-xl font-medium transition-all duration-300
+           bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20 active:scale-95;
+  }
+
+  .input-field {
+    @apply w-full bg-slate-900/50 border border-slate-700/50 px-4 py-2.5 rounded-lg
+           focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 
+           transition-all duration-200 placeholder:text-slate-500;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-700 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-600;
+}
