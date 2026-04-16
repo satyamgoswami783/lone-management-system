@@ -1,16 +1,16 @@
 import React from 'react';
-import { 
-  BarChart3, 
-  Download, 
-  TrendingUp, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
-  Calendar,
-  FileText,
-  PieChart,
-  ArrowUpRight,
-  ArrowDownRight
+import {
+    BarChart3,
+    Download,
+    TrendingUp,
+    CheckCircle2,
+    XCircle,
+    Clock,
+    Calendar,
+    FileText,
+    PieChart,
+    ArrowUpRight,
+    ArrowDownRight
 } from 'lucide-react';
 import { SectionHeader, StatCard, Badge } from '../../components/ui/Shared';
 import { useLoans, STATUSES } from '../../context/LoanContext';
@@ -53,11 +53,11 @@ const HRReports = () => {
 
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <SectionHeader 
-                title="Verification Analytics" 
+            <SectionHeader
+                title="Verification Analytics"
                 description="Comprehensive report of HR verification activity, approval rates, and performance trends."
                 actions={
-                    <button 
+                    <button
                         onClick={exportToCSV}
                         className="flex items-center gap-2 px-6 py-3 bg-blue-600 rounded-2xl text-white font-bold hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20"
                     >
@@ -91,16 +91,16 @@ const HRReports = () => {
                             {[45, 60, 30, 80, 50, 95, 70, 40, 65, 85, 30, 55].map((h, i) => (
                                 <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
                                     <div className="w-full relative flex items-end justify-center">
-                                        <div 
-                                            className="w-full bg-blue-600/20 rounded-t-lg transition-all border-x border-t border-blue-500/20 group-hover:bg-blue-600/40" 
+                                        <div
+                                            className="w-full bg-blue-600/20 rounded-t-lg transition-all border-x border-t border-blue-500/20 group-hover:bg-blue-600/40"
                                             style={{ height: `${h}%` }}
                                         ></div>
-                                        <div 
-                                            className="absolute bottom-0 w-2/3 bg-emerald-500/60 rounded-t-sm transition-all border-x border-t border-emerald-400 group-hover:bg-emerald-500" 
+                                        <div
+                                            className="absolute bottom-0 w-2/3 bg-emerald-500/60 rounded-t-sm transition-all border-x border-t border-emerald-400 group-hover:bg-emerald-500"
                                             style={{ height: `${h * 0.7}%` }}
                                         ></div>
                                     </div>
-                                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">M{i+1}</span>
+                                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">M{i + 1}</span>
                                 </div>
                             ))}
                         </div>
@@ -120,7 +120,7 @@ const HRReports = () => {
                         </div>
 
                         <div className="glass p-8 rounded-[40px] border-slate-800/50 bg-slate-900/40 space-y-6">
-                             <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between">
                                 <h4 className="text-sm font-black text-slate-500 uppercase tracking-widest">Volume Trends</h4>
                                 <TrendingUp className="w-4 h-4 text-emerald-400" />
                             </div>
@@ -144,6 +144,7 @@ const HRReports = () => {
                                     app.status?.includes('Approved') ? 'bg-emerald-500' : 
                                     app.status?.includes('Rejected') ? 'bg-red-500' : 'bg-blue-500'
                                 }`}></div>
+
                                 <div>
                                     <p className="text-xs font-bold text-slate-200">{app.status || 'Pending'} - {app.name || 'Anonymous'}</p>
                                     <p className="text-[10px] text-slate-600 font-bold uppercase mt-1">Ref: {app.id}</p>

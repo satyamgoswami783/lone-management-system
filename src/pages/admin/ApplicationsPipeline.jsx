@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  FileText, 
-  Search, 
-  Filter, 
-  MoreHorizontal, 
-  Eye,
-  CheckCircle2,
-  XCircle,
-  RotateCcw,
-  Clock,
-  Download
+import {
+    FileText,
+    Search,
+    Filter,
+    MoreHorizontal,
+    Eye,
+    CheckCircle2,
+    XCircle,
+    RotateCcw,
+    Clock,
+    Download
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLoans, STATUSES, WORKFLOW_SEQUENCE } from '../../context/LoanContext';
@@ -21,22 +21,23 @@ const ApplicationsPipeline = () => {
     const navigate = useNavigate();
 
 
-    const filteredApps = applications.filter(app => 
+    const filteredApps = applications.filter(app =>
         app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.status.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const getStatusVariant = (status) => {
-        switch(status) {
-            case STATUSES.APPROVED:
+        switch (status) {
             case STATUSES.PAID: return 'success';
-            case STATUSES.REJECTED: return 'danger';
+            case STATUSES.ACTIVE: return 'primary';
+            case STATUSES.APPROVED:
             case STATUSES.SUBMITTED:
             case STATUSES.HR_PENDING:
             case STATUSES.CREDIT_PENDING:
             case STATUSES.ADMIN_APPROVAL: return 'warning';
-            default: return 'primary';
+            case STATUSES.REJECTED: return 'danger';
+            default: return 'neutral';
         }
     };
 
@@ -62,8 +63,8 @@ const ApplicationsPipeline = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <SectionHeader 
-                title="Application Pipeline" 
+            <SectionHeader
+                title="Application Pipeline"
                 description="Monitor and manage all loan applications through their full lifecycle."
             />
 
@@ -71,9 +72,9 @@ const ApplicationsPipeline = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-4 bg-slate-950 p-2 rounded-2xl border border-slate-800 w-full max-w-md">
                         <Search className="w-5 h-5 text-slate-500 ml-2" />
-                        <input 
-                            className="bg-transparent border-none text-sm focus:ring-0 w-full text-slate-200" 
-                            placeholder="Search by name, ID or status..." 
+                        <input
+                            className="bg-transparent border-none text-sm focus:ring-0 w-full text-slate-200"
+                            placeholder="Search by name, ID or status..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -94,7 +95,7 @@ const ApplicationsPipeline = () => {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-900/50 border-b border-slate-800/50">
-                                <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Applicant</th>
+                                <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Employee</th>
                                 <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Amount</th>
                                 <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Status</th>
                                 <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Last Activity</th>
@@ -132,14 +133,14 @@ const ApplicationsPipeline = () => {
                                         <div className="flex justify-end gap-2">
                                             {app.status !== STATUSES.PAID && app.status !== STATUSES.REJECTED && (
                                                 <div className="flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-2xl border border-slate-800">
-                                                    <button 
+                                                    <button
                                                         onClick={(e) => { e.stopPropagation(); handleApprove(app.id, app.status); }}
                                                         className="p-2 text-emerald-500 hover:bg-emerald-500/20 rounded-xl transition-all hover:scale-110 active:scale-90"
                                                         title="Approve (Next Stage)"
                                                     >
                                                         <CheckCircle2 className="w-5 h-5" />
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         onClick={(e) => { e.stopPropagation(); handleReject(app.id); }}
                                                         className="p-2 text-red-500 hover:bg-red-500/20 rounded-xl transition-all hover:scale-110 active:scale-90"
                                                         title="Reject"
@@ -147,7 +148,7 @@ const ApplicationsPipeline = () => {
                                                         <XCircle className="w-5 h-5" />
                                                     </button>
                                                     {WORKFLOW_SEQUENCE.indexOf(app.status) > 0 && (
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => { e.stopPropagation(); handleSendBack(app.id, app.status); }}
                                                             className="p-2 text-orange-500 hover:bg-orange-500/20 rounded-xl transition-all hover:scale-110 active:scale-90"
                                                             title="Send Back (Prev Stage)"
@@ -159,7 +160,7 @@ const ApplicationsPipeline = () => {
                                                 </div>
                                             )}
 
-                                            <button 
+                                            <button
                                                 onClick={() => navigate(`/admin/applications/${app.id}`)}
                                                 className="p-2 text-slate-500 hover:text-blue-400 hover:bg-blue-400/10 rounded-lg transition-all"
                                                 title="View Details"

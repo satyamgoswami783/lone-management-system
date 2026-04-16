@@ -14,7 +14,9 @@ import {
   ExternalLink,
   FilterX,
   Activity,
-  CheckCircle2
+  CheckCircle2,
+  XCircle,
+  Plus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLoans, RECOVERY_STATUSES } from '../../context/LoanContext';
@@ -127,14 +129,14 @@ const RecoveryList = () => {
                 ))}
             </div>
 
-            <div className="glass rounded-[40px] overflow-hidden border border-slate-800/50 shadow-2xl relative">
+            <div className="glass rounded-[40px] overflow-hidden border border-slate-800/50 shadow-2xl relative shadow-blue-900/10">
                 <div className="p-8 border-b border-slate-800/50 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/10">
                     <div className="relative group flex-1 max-w-md">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
                         <input 
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="input-field pl-12 py-3.5 text-sm" 
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="input-field pl-12 py-3.5 text-sm bg-slate-950/50" 
                             placeholder="Search by Debtor Name or Case ID..." 
                         />
                     </div>
@@ -143,16 +145,13 @@ const RecoveryList = () => {
                         <select 
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
-                            className="input-field py-3 text-sm min-w-[180px]"
+                            className="bg-slate-900 border border-slate-800 rounded-2xl px-6 py-3.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
                         >
                             <option value="All">All Recovery Statuses</option>
                             {Object.values(RECOVERY_STATUSES).map(s => (
                                 <option key={s} value={s}>{s}</option>
                             ))}
                         </select>
-                        <button className="p-3 glass rounded-2xl text-slate-400 hover:text-white transition-all border border-slate-700">
-                            <Filter className="w-5 h-5" />
-                        </button>
                     </div>
                 </div>
 
@@ -166,7 +165,7 @@ const RecoveryList = () => {
                                             type="checkbox" 
                                             checked={selectedCases.length === filteredCases.length && filteredCases.length > 0}
                                             onChange={toggleSelectAll}
-                                            className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500 transition-all"
+                                            className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500 transition-all cursor-pointer"
                                         />
                                     </th>
                                 )}
@@ -187,20 +186,20 @@ const RecoveryList = () => {
                                                 type="checkbox" 
                                                 checked={selectedCases.includes(caseItem.id)}
                                                 onChange={() => toggleSelect(caseItem.id)}
-                                                className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500 transition-all"
+                                                className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500 transition-all cursor-pointer"
                                             />
                                         </td>
                                     )}
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-[18px] bg-slate-900 border border-slate-800 flex items-center justify-center font-bold text-slate-400 group-hover:bg-blue-600/10 group-hover:text-blue-400 transition-all">
-                                                <User className="w-5 h-5" />
+                                            <div className="w-12 h-12 rounded-[18px] bg-slate-950 border border-slate-800 flex items-center justify-center font-bold text-slate-400 group-hover:border-blue-500/50 transition-all">
+                                                <User className="w-5 h-5 transition-transform group-hover:scale-110" />
                                             </div>
                                             <div>
                                                 <p className="font-bold text-slate-200 group-hover:text-blue-400 transition-colors">
                                                     {caseItem.name || 'Anonymous Debtor'}
                                                 </p>
-                                                <p className="text-[10px] text-slate-500 uppercase font-mono font-bold mt-1">
+                                                <p className="text-[10px] text-slate-500 uppercase font-mono font-bold mt-1 tracking-widest">
                                                     {caseItem.id} • {caseItem.company}
                                                 </p>
                                             </div>
@@ -209,31 +208,31 @@ const RecoveryList = () => {
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-2">
                                             {caseItem.assignedAgent ? (
-                                                <div className="flex items-center gap-2 text-slate-300">
+                                                <div className="flex items-center gap-2 text-slate-400">
                                                     <div className="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                                                         <Activity className="w-3 h-3 text-emerald-500" />
                                                     </div>
                                                     <span className="text-xs font-bold">{caseItem.assignedAgent}</span>
                                                 </div>
                                             ) : (
-                                                <span className="text-slate-600 italic text-xs">Unassigned</span>
+                                                <span className="text-slate-600 italic text-xs font-medium">Not Assigned</span>
                                             )}
                                         </div>
                                     </td>
                                     <td className="px-8 py-6">
                                         <div className="space-y-1">
                                             <p className="font-bold text-slate-200 text-sm">R {caseItem.outstanding.toLocaleString()}</p>
-                                            <p className="text-[10px] text-red-500 font-black uppercase tracking-tighter">
+                                            <p className="text-[10px] text-red-500 font-black uppercase tracking-tighter bg-red-500/5 inline-block px-2 py-0.5 rounded-lg border border-red-500/10">
                                                 Arrears: R {caseItem.overdueAmount.toLocaleString()}
                                             </p>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6 text-center">
                                         <div className="inline-flex flex-col items-center">
-                                            <span className={`text-sm font-black font-display px-3 py-1 rounded-full ${
-                                                caseItem.dpd > 60 ? "bg-red-500/10 text-red-500" : 
-                                                caseItem.dpd > 30 ? "bg-amber-500/10 text-amber-500" :
-                                                caseItem.dpd > 0 ? "bg-blue-500/10 text-blue-500" : "bg-emerald-500/10 text-emerald-500"
+                                            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${
+                                                caseItem.dpd > 60 ? "border-red-500/30 bg-red-500/10 text-red-500" : 
+                                                caseItem.dpd > 30 ? "border-amber-500/30 bg-amber-500/10 text-amber-500" :
+                                                caseItem.dpd > 0 ? "border-blue-500/30 bg-blue-500/10 text-blue-500" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
                                             }`}>
                                                 {caseItem.dpd} DPD
                                             </span>
@@ -244,19 +243,16 @@ const RecoveryList = () => {
                                             caseItem.recoveryStatus === RECOVERY_STATUSES.LEGAL ? 'danger' : 
                                             caseItem.recoveryStatus === RECOVERY_STATUSES.IN_ARREARS ? 'warning' : 'primary'
                                         }>
-                                            {caseItem.recoveryStatus || 'Active'}
+                                            {caseItem.recoveryStatus || 'Active Collection'}
                                         </Badge>
                                     </td>
                                     <td className="px-8 py-6 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <button 
-                                                onClick={() => navigate(`/recovery/case/${caseItem.id}`)}
-                                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20 active:scale-95"
-                                            >
-                                                {role === ROLES.RECOVERY ? "Collect" : "Review"}
-                                                <ChevronRight className="w-3 h-3" />
-                                            </button>
-                                        </div>
+                                        <button 
+                                            onClick={() => navigate(`/recovery/case/${caseItem.id}`)}
+                                            className="px-6 py-2.5 rounded-2xl bg-blue-600 text-white font-bold text-[10px] uppercase tracking-widest hover:bg-blue-500 hover:shadow-[0_0_30px_rgba(37,99,235,0.3)] transition-all active:scale-95"
+                                        >
+                                            {role === ROLES.RECOVERY ? "Collect Now" : "Review Case"}
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -265,13 +261,13 @@ const RecoveryList = () => {
                 </div>
 
                 {filteredCases.length === 0 && (
-                    <div className="p-32 text-center flex flex-col items-center justify-center space-y-6">
-                        <div className="w-24 h-24 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-700">
+                    <div className="p-32 text-center flex flex-col items-center justify-center space-y-6 bg-slate-900/10">
+                        <div className="w-24 h-24 rounded-[40px] bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-700 shadow-inner">
                             <FilterX className="w-12 h-12" />
                         </div>
                         <div className="space-y-1">
-                            <h3 className="text-2xl font-display font-bold text-slate-400 tracking-tight">Portfolio Empty</h3>
-                            <p className="text-slate-600 max-w-sm mx-auto font-medium">No recoverable accounts match your current view. Good work!</p>
+                            <h3 className="text-2xl font-display font-bold text-slate-300 tracking-tight">No match found</h3>
+                            <p className="text-slate-500 max-w-sm mx-auto font-medium text-sm">No recoveries match the select criteria. Try adjusting your filters.</p>
                         </div>
                     </div>
                 )}
@@ -280,52 +276,53 @@ const RecoveryList = () => {
             {/* Bulk Action Bar - Only for Managers */}
             {isManager && selectedCases.length > 0 && (
                 <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-4xl px-6 animate-in slide-in-from-bottom-10 duration-500 z-50">
-                    <div className="glass rounded-3xl p-6 border-2 border-blue-500/50 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-between gap-8 bg-slate-950">
+                    <div className="glass rounded-[32px] p-6 border-2 border-blue-500/40 shadow-[0_20px_80px_rgba(0,0,0,0.8)] flex items-center justify-between gap-8 bg-slate-950/95 backdrop-blur-2xl">
                         <div className="flex items-center gap-6">
-                            <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center font-black text-white text-xl shadow-lg shadow-blue-600/40">
+                            <div className="w-16 h-16 rounded-[24px] bg-blue-600 flex items-center justify-center font-black text-white text-2xl shadow-xl shadow-blue-600/30">
                                 {selectedCases.length}
                             </div>
                             <div>
-                                <h4 className="text-lg font-display font-bold text-white tracking-tight">Cases Selected</h4>
-                                <p className="text-slate-500 text-sm font-medium">Perform bulk actions on these accounts.</p>
+                                <h4 className="text-xl font-display font-bold text-white tracking-tight">Cases Selected</h4>
+                                <p className="text-slate-500 text-sm font-medium">Batch operational actions.</p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4">
                             <div className="relative">
                                 <button 
                                     onClick={() => setShowBulkAssign(!showBulkAssign)}
-                                    className="px-6 py-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-slate-200 font-bold text-sm hover:border-blue-500 transition-all flex items-center gap-2 group"
+                                    className="px-8 py-4 rounded-[20px] bg-slate-900 border border-slate-800 text-slate-200 font-bold text-sm hover:border-blue-500 hover:bg-slate-800 transition-all flex items-center gap-3 group"
                                 >
-                                    <User className="w-4 h-4 text-slate-400 group-hover:text-blue-400" />
+                                    <User className="w-5 h-5 text-slate-500 group-hover:text-blue-400 group-hover:scale-110 transition-all" />
                                     Assign Agent
                                 </button>
                                 
                                 {showBulkAssign && (
-                                    <div className="absolute bottom-full mb-3 right-0 w-64 glass rounded-2xl border border-slate-800 shadow-2xl p-2 animate-in fade-in zoom-in-95">
+                                    <div className="absolute bottom-full mb-4 right-0 w-72 glass rounded-[24px] border border-slate-800 shadow-2xl p-3 animate-in fade-in zoom-in-95 bg-slate-950/90 backdrop-blur-3xl">
+                                        <p className="px-4 py-2 text-[10px] font-black text-slate-600 uppercase tracking-widest border-b border-slate-800 mb-2">Available Recovery Agents</p>
                                         {AGENTS.map(agent => (
                                             <button 
                                                 key={agent}
                                                 onClick={() => handleBulkAssign(agent)}
-                                                className="w-full text-left px-4 py-3 rounded-xl hover:bg-blue-600 text-sm font-bold text-slate-300 hover:text-white transition-all mb-1 last:mb-0"
+                                                className="w-full text-left px-4 py-4 rounded-xl hover:bg-blue-600 group transition-all mb-1 last:mb-0"
                                             >
-                                                {agent}
+                                                <span className="text-sm font-bold text-slate-300 group-hover:text-white">{agent}</span>
                                             </button>
                                         ))}
                                     </div>
                                 )}
                             </div>
                             
-                            <button className="px-6 py-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-slate-200 font-bold text-sm hover:border-red-500 transition-all flex items-center gap-2 group">
-                                <AlertTriangle className="w-4 h-4 text-slate-400 group-hover:text-red-400" />
-                                Escalate
+                            <button className="px-8 py-4 rounded-[20px] bg-slate-900 border border-slate-800 text-slate-200 font-bold text-sm hover:border-red-500/50 hover:bg-red-500/5 transition-all flex items-center gap-3 group">
+                                <AlertTriangle className="w-5 h-5 text-slate-500 group-hover:text-red-400 group-hover:scale-110 transition-all" />
+                                Legal Escalation
                             </button>
                             
                             <button 
                                 onClick={() => setSelectedCases([])}
-                                className="p-3.5 rounded-2xl bg-slate-900/50 text-slate-500 hover:text-white transition-all font-bold text-sm"
+                                className="p-4 rounded-[20px] bg-slate-900/50 text-slate-500 hover:text-white transition-all border border-transparent hover:border-slate-700"
                             >
-                                <Plus className="w-5 h-5 rotate-45" />
+                                <Plus className="w-6 h-6 rotate-45" />
                             </button>
                         </div>
                     </div>

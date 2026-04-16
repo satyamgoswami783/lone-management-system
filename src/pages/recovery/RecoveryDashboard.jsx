@@ -11,7 +11,12 @@ import {
   ArrowRight,
   ChevronRight,
   ShieldCheck,
-  Calendar
+  Calendar,
+  Search,
+  Filter,
+  Phone,
+  MessageSquare,
+  User
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLoans, RECOVERY_STATUSES } from '../../context/LoanContext';
@@ -92,109 +97,111 @@ const RecoveryDashboard = () => {
         },
     ];
 
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <SectionHeader 
-        title={isManager ? "Administrative Recovery Control" : "Recovery Performance Dashboard"} 
-        description={isManager ? "Corporate-level oversight of global delinquency metrics and agent productivity." : `Welcome back, ${user?.name}. Manage your assigned accounts and track your performance.`}
-      />
+    return (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <SectionHeader
+                title={isManager ? "Administrative Recovery Control" : "Recovery Performance Dashboard"}
+                description={isManager ? "Corporate-level oversight of global delinquency metrics and agent productivity." : `Welcome back, ${user?.name}. Manage your assigned accounts and track your performance.`}
+            />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {stats.map((stat, i) => (
-            <StatCard key={i} {...stat} />
-        ))}
-      </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {stats.map((stat, i) => (
+                    <StatCard key={i} {...stat} />
+                ))}
+            </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Aging Analysis */}
-        <div className="glass rounded-[40px] p-8 border border-slate-800/50 flex flex-col">
-            <h3 className="text-xl font-display font-bold mb-8 flex items-center gap-3 text-slate-200">
-                <PieChart className="w-5 h-5 text-blue-400" />
-                {isManager ? 'Global Aging' : 'My Portfolio Aging'}
-            </h3>
-            <div className="space-y-6 flex-1">
-                <AgingBar label="DPD 1-30" count={recoveryData.agingBuckets.low} color="bg-emerald-500" total={recoveryData.cases.length} />
-                <AgingBar label="DPD 31-60" count={recoveryData.agingBuckets.mid} color="bg-amber-500" total={recoveryData.cases.length} />
-                <AgingBar label="DPD 60+" count={recoveryData.agingBuckets.high} color="bg-red-500" total={recoveryData.cases.length} />
-            </div>
-            
-            <div className={`mt-12 p-6 rounded-[24px] border border-slate-800/50 ${recoveryData.agingBuckets.high > 0 ? 'bg-red-500/5' : 'bg-emerald-500/5'}`}>
-                <div className="flex items-center gap-3 text-slate-400 mb-2">
-                    <Activity className="w-5 h-5" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">System Advisory</span>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed font-medium">
-                    {recoveryData.agingBuckets.high > 0 
-                        ? `${recoveryData.agingBuckets.high} cases require immediate escalation to legal.` 
-                        : "Your current portfolio is healthy with no critically aged debts."}
-                </p>
-            </div>
-        </div>
-
-        {/* Priority Accounts */}
-        <div className="lg:col-span-2 glass rounded-[40px] border border-slate-800/50 overflow-hidden flex flex-col">
-            <div className="p-8 border-b border-slate-800/50 flex items-center justify-between bg-slate-900/10">
-                <div className="flex items-center gap-3">
-                    <Calendar className="w-6 h-6 text-slate-500" />
-                    <h3 className="text-xl font-display font-bold">Priority Collections</h3>
-                </div>
-                <button 
-                    onClick={() => navigate('/recovery/list')}
-                    className="text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1 group"
-                >
-                    View All {isManager ? 'Global' : 'My'} Cases
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-            </div>
-            <div className="flex-1 overflow-auto">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="bg-slate-950/20 text-[10px] font-black text-slate-600 uppercase tracking-widest border-b border-slate-800/40">
-                            <th className="px-8 py-5">Borrower</th>
-                            <th className="px-8 py-5">Arrears</th>
-                            <th className="px-8 py-5">Assigned Agent</th>
-                            <th className="px-8 py-5 text-right">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800/40 font-medium">
-                        {recoveryData.cases.slice(0, 5).map((row) => (
-                            <tr key={row.id} className="hover:bg-slate-800/30 transition-colors group">
-                                <td className="px-8 py-6">
-                                    <div className="font-bold text-slate-200">{row.name || 'Anonymous'}</div>
-                                    <div className="text-[10px] text-slate-500 font-mono font-bold mt-1 uppercase">{row.id}</div>
-                                </td>
-                                <td className="px-8 py-6 text-sm text-red-500 font-bold">
-                                    R {row.installments?.filter(i => i.status !== 'PAID' && new Date(i.dueDate) < new Date())
-                                        .reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0).toLocaleString()}
-                                </td>
-                                <td className="px-8 py-6">
-                                    <div className="flex items-center gap-2 text-slate-400 text-xs">
-                                        <User className="w-3 h-3" />
-                                        {row.assignedAgent || 'Unassigned'}
-                                    </div>
-                                </td>
-                                <td className="px-8 py-6 text-right">
-                                    <button 
-                                        onClick={() => navigate(`/recovery/case/${row.id}`)}
-                                        className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-500 hover:text-white hover:border-blue-500/50 transition-all active:scale-95"
-                                    >
-                                        <ChevronRight className="w-4 h-4" />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                {recoveryData.cases.length === 0 && (
-                    <div className="p-20 text-center">
-                        <p className="text-slate-600 font-medium italic text-sm">No priority cases found in your current view.</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Aging Analysis */}
+                <div className="glass rounded-[40px] p-8 border border-slate-800/50 flex flex-col shadow-xl">
+                    <h3 className="text-xl font-display font-bold mb-8 flex items-center gap-3 text-slate-200">
+                        <PieChart className="w-5 h-5 text-blue-400" />
+                        {isManager ? 'Global Aging' : 'My Portfolio Aging'}
+                    </h3>
+                    <div className="space-y-6 flex-1">
+                        <AgingBar label="DPD 1-30" count={recoveryData.agingBuckets.low} color="bg-emerald-500" total={recoveryData.cases.length} />
+                        <AgingBar label="DPD 31-60" count={recoveryData.agingBuckets.mid} color="bg-amber-500" total={recoveryData.cases.length} />
+                        <AgingBar label="DPD 60+" count={recoveryData.agingBuckets.high} color="bg-red-500" total={recoveryData.cases.length} />
                     </div>
-                )}
+                </div>
+
+                {/* Priority Collections */}
+                <div className="lg:col-span-2 glass rounded-[40px] border border-slate-800/50 overflow-hidden flex flex-col shadow-xl">
+                    <div className="p-8 border-b border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/10">
+                        <div className="flex items-center gap-3">
+                            <Calendar className="w-6 h-6 text-slate-500" />
+                            <h3 className="text-xl font-display font-bold text-slate-100">Priority Collections</h3>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="relative hidden md:block">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                <input className="input-field pl-9 py-1.5 text-xs w-48 bg-slate-950/50" placeholder="Search..." />
+                            </div>
+                            <button 
+                                onClick={() => navigate('/recovery/list')}
+                                className="text-xs font-black text-blue-400 uppercase tracking-[0.2em] hover:text-white transition-all flex items-center gap-1 group"
+                            >
+                                View All Cases
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="bg-slate-950/20 text-[10px] font-black text-slate-600 uppercase tracking-widest border-b border-slate-800/40">
+                                    <th className="px-8 py-5">Borrower</th>
+                                    <th className="px-8 py-5 text-center">Outstanding</th>
+                                    <th className="px-8 py-5">Status / Assignment</th>
+                                    <th className="px-8 py-5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800/40 font-medium">
+                                {recoveryData.cases.slice(0, 5).map((row) => (
+                                    <tr key={row.id} className="hover:bg-slate-800/30 transition-colors group cursor-pointer" onClick={() => navigate(`/recovery/case/${row.id}`)}>
+                                        <td className="px-8 py-6">
+                                            <div className="font-bold text-slate-200">{row.name || 'Anonymous'}</div>
+                                            <div className="text-[10px] text-slate-500 font-mono font-bold mt-1 uppercase tracking-tighter">Ref: {row.id}</div>
+                                        </td>
+                                        <td className="px-8 py-6 text-center">
+                                            <p className="text-sm font-bold text-red-500">
+                                                R {row.installments?.filter(i => i.status !== 'PAID' && new Date(i.dueDate) < new Date())
+                                                    .reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0).toLocaleString()}
+                                            </p>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="space-y-2">
+                                                <Badge variant={row.recoveryStatus === RECOVERY_STATUSES.PTP_FAILED ? 'danger' : 'warning'}>
+                                                    {row.recoveryStatus || 'In Arrears'}
+                                                </Badge>
+                                                <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                                                    <User className="w-3 h-3" />
+                                                    {row.assignedAgent || 'Unassigned'}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-6 text-right">
+                                            <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                                <button className="p-2 text-slate-500 hover:text-blue-400 rounded-lg transition-colors" title="Contact"><Phone className="w-4 h-4" /></button>
+                                                <button className="p-2 text-slate-500 hover:text-emerald-400 rounded-lg transition-colors" title="Message"><MessageSquare className="w-4 h-4" /></button>
+                                                <button className="p-2 text-slate-500 hover:text-purple-400 rounded-lg transition-colors" title="History" onClick={() => navigate(`/recovery/case/${row.id}`)}><History className="w-4 h-4" /></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {recoveryData.cases.length === 0 && (
+                                    <tr>
+                                        <td colSpan="4" className="p-20 text-center text-slate-600 font-medium italic text-sm">
+                                            No priority cases found.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 const AgingBar = ({ label, count, color, total }) => {
@@ -205,9 +212,9 @@ const AgingBar = ({ label, count, color, total }) => {
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</span>
                 <span className="text-xs font-black text-slate-500">{count} Cases</span>
             </div>
-            <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800/20">
+            <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800/10 shadow-inner">
                 <div 
-                    className={`h-full ${color} shadow-lg transition-all duration-1000 ease-out`} 
+                    className={`h-full ${color} shadow-lg transition-all duration-1000 ease-out shadow-${color}`} 
                     style={{ width: `${percentage}%` }}
                 />
             </div>

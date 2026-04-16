@@ -1,129 +1,135 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
-  History, 
   Search, 
-  Filter, 
-  Download, 
   Calendar, 
-  User, 
-  FileText,
-  BadgeCheck,
-  XCircle,
-  Clock
+  ArrowRightLeft,
+  Banknote,
+  ShieldCheck,
+  Clock,
+  Activity
 } from 'lucide-react';
 import { useLoans, STATUSES } from '../../context/LoanContext';
 import { SectionHeader, Badge } from '../../components/ui/Shared';
 import { useAuth } from '../../context/AuthContext';
 
 const HistoryPage = ({ title }) => {
-    const { applications } = useLoans();
+    const { auditLogs, applications } = useLoans();
     const { user } = useAuth();
+    const [searchQuery, setSearchQuery] = useState('');
 
-    // Determine what history is relevant based on the user's role
-    // For HR: Show history of their company
-    // For Finance: Show history of payouts
-    // For Credit: Show history of reviews
-    // For Recovery: Show history of collections
-    
-    let filteredHistory = applications;
-    
-    if (user?.role === 'hr') {
-        filteredHistory = applications.filter(app => app.company === user.company);
-    } else if (user?.role === 'finance') {
-        filteredHistory = applications.filter(app => [STATUSES.DISBURSED, STATUSES.ADMIN_APPROVED].includes(app.status));
-    } else if (user?.role === 'recovery') {
-        filteredHistory = applications.filter(app => [STATUSES.DEFAULTED, STATUSES.CLOSED].includes(app.status));
-    }
+    const historyRows = useMemo(() => {
+        return auditLogs.map(log => {
+            const app = applications.find(a => a.id === log.appId);
+            return {
+                ...log,
+                EmployeeName: app?.name || 'Unknown',
+                idNumber: app?.idNumber || 'N/A'
+            };
+        }).filter(row => {
+            const matchesSearch = row.EmployeeName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                row.appId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                row.type.toLowerCase().includes(searchQuery.toLowerCase());
+            
+            if (user?.role === 'finance' || user?.role === 'management') {
+                const financeEventTypes = ['DISBURSED', 'PAID', 'FAILED'];
+                return matchesSearch && financeEventTypes.includes(row.type);
+            }
+            return matchesSearch;
+        });
+    }, [auditLogs, applications, searchQuery, user]);
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="space-y-8 animate-in duration-700 pb-20">
             <SectionHeader 
-                title={title || "Action History"} 
-                description="View a complete audit trail of past loan applications and system actions."
+                title={title || "Portfolio Transparency Logs"} 
+                description="Verifiable history of all loan lifecycle events, disbursements, and settlement actions."
             />
 
-            <div className="glass p-8 rounded-[40px] space-y-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex items-center gap-4 bg-slate-950 p-2 rounded-2xl border border-slate-800 w-full max-w-md">
-                        <Search className="w-5 h-5 text-slate-500 ml-2" />
-                        <input className="bg-transparent border-none text-sm focus:ring-0 w-full text-slate-200" placeholder="Search by ID, applicant, or company..." />
-                    </div>
-                    <div className="flex gap-3">
-                        <button className="flex items-center gap-2 px-5 py-2.5 glass rounded-xl text-sm font-bold text-slate-300 hover:text-white transition-all">
-                            <Filter className="w-4 h-4" />
-                            Filters
-                        </button>
-                        <button className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm font-bold text-slate-300 hover:text-white transition-all">
-                            <Download className="w-4 h-4" />
-                            Export
-                        </button>
+            <div className="glass p-10 rounded-[48px] border-slate-800 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/5 blur-[120px] rounded-full group-hover:bg-blue-600/10 transition-colors"></div>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10 relative z-10">
+                    <div className="relative w-full max-w-md">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                        <input 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="input-field pl-12 h-12 bg-slate-900 focus:bg-white" 
+                            placeholder="Search history reference..." 
+                        />
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                <div className="overflow-x-auto relative z-10">
+                    <table className="w-full text-left font-display">
                         <thead>
-                            <tr className="bg-slate-900/50 border-b border-slate-800/50">
-                                <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date & Time</th>
-                                <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Applicant</th>
-                                <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Event / Action</th>
-                                <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Final Status</th>
-                                <th className="px-8 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Reference</th>
+                            <tr className="bg-slate-900 border-b border-slate-800">
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left">Timestamp</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left">Identity</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left">Event Sequence</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left">Execution Status</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">System Integrity ID</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-800/50">
-                            {filteredHistory.map((app) => (
-                                <tr key={app.id} className="hover:bg-slate-800/30 transition-colors">
-                                    <td className="px-8 py-6">
-                                        <div className="flex items-center gap-3">
-                                            <Calendar className="w-4 h-4 text-slate-500" />
+                        <tbody className="divide-y divide-slate-800">
+                            {historyRows.length > 0 ? historyRows.map((log) => (
+                                <tr key={log.id} className="hover:bg-slate-900/50 transition-all group">
+                                    <td className="px-8 py-7">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-2.5 bg-slate-900 rounded-xl text-slate-500 border border-slate-800 group-hover:text-blue-500 transition-colors">
+                                                <Calendar className="w-4 h-4" />
+                                            </div>
                                             <div>
-                                                <p className="text-sm font-bold text-slate-200">{new Date(app.date).toLocaleDateString()}</p>
-                                                <p className="text-[10px] text-slate-500 uppercase font-mono">{new Date(app.date).toLocaleTimeString()}</p>
+                                                <p className="text-sm font-bold text-slate-200">{new Date(log.timestamp).toLocaleDateString()}</p>
+                                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">
+                                                    {new Date(log.timestamp).toLocaleTimeString()}
+                                                </p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-6">
+                                    <td className="px-8 py-7">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center font-bold text-slate-500 group-hover:scale-110 transition-transform">
+                                                {log.EmployeeName[0]}
+                                            </div>
+                                            <div>
+                                                <span className="text-sm font-bold text-slate-200">{log.EmployeeName}</span>
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-1">ID: {log.idNumber.slice(0, 8)}...</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-7">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-[10px] text-blue-400">
-                                                {app.name[0]}
+                                            <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+                                                <Activity className="w-4 h-4" />
                                             </div>
-                                            <span className="text-sm font-medium text-slate-300">{app.name}</span>
+                                            <span className="text-sm font-bold text-slate-400">
+                                                {log.type}
+                                            </span>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <div className="flex items-center gap-2 text-sm text-slate-400">
-                                            {app.status === STATUSES.DISBURSED ? (
-                                                <BadgeCheck className="w-4 h-4 text-emerald-500" />
-                                            ) : app.status === STATUSES.DECLINED ? (
-                                                <XCircle className="w-4 h-4 text-red-500" />
-                                            ) : (
-                                                <Clock className="w-4 h-4 text-blue-500" />
-                                            )}
-                                            {app.status === STATUSES.DISBURSED ? "Funds Successfully Disbursed" : `Moved to ${app.status}`}
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-6">
+                                    <td className="px-8 py-7">
                                         <Badge 
                                             variant={
-                                                app.status === STATUSES.DISBURSED ? 'success' : 
-                                                (app.status === STATUSES.DECLINED || app.status === STATUSES.HR_REJECTED) ? 'danger' : 'primary'
+                                                log.status === STATUSES.ACTIVE ? 'primary' : 
+                                                log.status === STATUSES.PAID ? 'success' : 
+                                                log.status === STATUSES.REJECTED ? 'danger' : 'warning'
                                             }
                                         >
-                                            {app.status}
+                                            {log.status}
                                         </Badge>
                                     </td>
-                                    <td className="px-8 py-6 text-right">
-                                        <span className="text-xs font-mono text-slate-500">{app.id}</span>
+                                    <td className="px-8 py-7 text-right">
+                                        <span className="text-xs font-mono font-bold text-slate-500 tracking-tight group-hover:text-blue-500 transition-colors">
+                                            {log.transactionId || log.appId}
+                                        </span>
                                     </td>
                                 </tr>
-                            ))}
-                            {filteredHistory.length === 0 && (
+                            )) : (
                                 <tr>
-                                    <td colSpan={5} className="px-8 py-20 text-center">
-                                        <div className="flex flex-col items-center justify-center space-y-3">
-                                            <Clock className="w-12 h-12 text-slate-800" />
-                                            <p className="text-slate-500 font-medium">No history found for this view.</p>
+                                    <td colSpan={5} className="px-8 py-32 text-center">
+                                        <div className="flex flex-col items-center justify-center space-y-4">
+                                            <Clock className="w-12 h-12 text-slate-700" />
+                                            <p className="text-slate-500 font-medium">No history items found matched your search.</p>
                                         </div>
                                     </td>
                                 </tr>

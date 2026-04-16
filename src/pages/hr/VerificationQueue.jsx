@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { 
-  Users, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
-  Search, 
-  Filter, 
-  Eye, 
-  FileText,
-  Briefcase,
-  TrendingUp,
-  AlertCircle,
-  AlertTriangle,
-  ChevronRight,
-  ArrowUpDown,
-  FilterX
+import {
+    Users,
+    CheckCircle2,
+    XCircle,
+    Clock,
+    Search,
+    Filter,
+    Eye,
+    FileText,
+    Briefcase,
+    TrendingUp,
+    AlertCircle,
+    AlertTriangle,
+    ChevronRight,
+    ArrowUpDown,
+    FilterX
 } from 'lucide-react';
 import { useLoans, STATUSES } from '../../context/LoanContext';
 import { StatCard, SectionHeader, Badge, Toast } from '../../components/ui/Shared';
@@ -49,7 +49,7 @@ const VerificationQueue = () => {
     };
 
     const getStatusVariant = (status) => {
-        switch(status) {
+        switch (status) {
             case STATUSES.SUBMITTED:
             case STATUSES.HR_PENDING: return 'warning';
             case STATUSES.HR_APPROVED:
@@ -101,8 +101,8 @@ const VerificationQueue = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
-            <SectionHeader 
-                title="Application Verification" 
+            <SectionHeader
+                title="Application Verification"
                 description="Finalize employee eligibility and salary confirmation for pending loan requests."
             />
 
@@ -117,16 +117,16 @@ const VerificationQueue = () => {
                     <div className="flex flex-col md:flex-row gap-4 flex-1">
                         <div className="relative flex-1 max-w-md">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                            <input 
-                                className="input-field pl-10 py-2.5 text-sm w-full" 
-                                placeholder="Search by name or APP ID..." 
+                            <input
+                                className="input-field pl-10 py-2.5 text-sm w-full"
+                                placeholder="Search by name or APP ID..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
                         <div className="flex items-center gap-2">
                             <Filter className="w-4 h-4 text-slate-500 ml-2" />
-                            <select 
+                            <select
                                 className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -138,8 +138,8 @@ const VerificationQueue = () => {
                         </div>
                     </div>
                     {(statusFilter !== 'ALL' || searchTerm) && (
-                        <button 
-                            onClick={() => {setSearchTerm(''); setStatusFilter('ALL');}}
+                        <button
+                            onClick={() => { setSearchTerm(''); setStatusFilter('ALL'); }}
                             className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-white transition-all underline underline-offset-4"
                         >
                             <FilterX className="w-4 h-4" />
@@ -159,11 +159,11 @@ const VerificationQueue = () => {
                             <FilterX className="w-10 h-10" />
                         </div>
                         <div className="space-y-2">
-                             <h3 className="text-2xl font-display font-bold text-slate-400">No results found</h3>
-                             <p className="text-slate-600 max-w-xs mx-auto text-sm">We couldn't find any applications matching your criteria. Try adjusting your search or filters.</p>
+                            <h3 className="text-2xl font-display font-bold text-slate-400">No results found</h3>
+                            <p className="text-slate-600 max-w-xs mx-auto text-sm">We couldn't find any applications matching your criteria. Try adjusting your search or filters.</p>
                         </div>
-                        <button 
-                            onClick={() => {setSearchTerm(''); setStatusFilter('ALL');}}
+                        <button
+                            onClick={() => { setSearchTerm(''); setStatusFilter('ALL'); }}
                             className="px-6 py-2.5 bg-slate-800 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-700 transition-all"
                         >
                             Reset Dashboard
@@ -202,9 +202,9 @@ const VerificationQueue = () => {
                                             </Badge>
                                         </td>
                                         <td className="px-8 py-6 text-center">
-                                             <span className="text-xs font-mono font-bold text-slate-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+                                            <span className="text-xs font-mono font-bold text-slate-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
                                                 {app.id}
-                                             </span>
+                                            </span>
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className="space-y-1">
@@ -219,19 +219,19 @@ const VerificationQueue = () => {
                                         </td>
                                         <td className="px-8 py-6 text-right">
                                             <div className="flex justify-end gap-3">
-                                                <button 
+                                                <button
                                                     onClick={() => handleVerify(app.id)}
                                                     className="px-4 py-2.5 rounded-2xl bg-emerald-600/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all shadow-lg active:scale-95"
                                                 >
                                                     Approve
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={() => handleRejectClick(app.id)}
                                                     className="px-4 py-2.5 rounded-2xl bg-red-600/10 text-red-400 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95"
                                                 >
                                                     Reject
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={() => navigate(`/hr/verifications/${app.id}`)}
                                                     className="p-3 bg-slate-900 border border-slate-800 text-slate-500 hover:text-blue-400 hover:bg-blue-400/10 rounded-2xl transition-all shadow-xl active:scale-95"
                                                 >
@@ -260,22 +260,22 @@ const VerificationQueue = () => {
                                 <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mt-1">Application: {selectedAppId}</p>
                             </div>
                         </div>
-                        
+
                         <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-3">
                             <p className="text-slate-300 text-sm leading-relaxed">
-                                You are about to decline this verification request. This action will notify the applicant and stop further processing.
+                                You are about to decline this verification request. This action will notify the Employee and stop further processing.
                             </p>
                             <p className="text-xs text-slate-500 font-medium">To provide a specific reason like absenteeism or discipline, please go to the detailed verification page.</p>
                         </div>
-                        
+
                         <div className="flex gap-4">
-                            <button 
+                            <button
                                 onClick={() => setShowRejectModal(false)}
                                 className="flex-1 py-4 bg-slate-800 rounded-2xl text-sm font-bold text-slate-400 hover:text-white transition-all"
                             >
                                 Cancel
                             </button>
-                            <button 
+                            <button
                                 onClick={confirmReject}
                                 className="flex-1 py-4 bg-red-600 rounded-2xl text-sm font-bold text-white hover:bg-red-500 transition-all font-display shadow-lg shadow-red-600/20 active:scale-95"
                             >

@@ -25,11 +25,11 @@ function cn(...inputs) {
 }
 
 const menuItems = {
-  [ROLES.APPLICANT]: [
-    { title: 'Dashboard', icon: LayoutDashboard, path: '/applicant/dashboard' },
-    { title: 'Apply Loan', icon: FileEdit, path: '/applicant/apply' },
-    { title: 'My Status', icon: Clock, path: '/applicant/status' },
-    { title: 'Statements', icon: FileText, path: '/applicant/statements' },
+  [ROLES.Employee]: [
+    { title: 'Dashboard', icon: LayoutDashboard, path: '/employee/dashboard' },
+    { title: 'Apply Loan', icon: FileEdit, path: '/employee/apply' },
+    { title: 'My Status', icon: Clock, path: '/employee/status' },
+    { title: 'Statements', icon: FileText, path: '/employee/statements' },
   ],
   [ROLES.HR]: [
     { title: 'Verification List', icon: Users, path: '/hr/verifications' },
@@ -84,7 +84,7 @@ const DashboardLayout = ({ children }) => {
           {/* Logo */}
           <div className="h-16 flex items-center px-6 gap-3">
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-lg">L</div>
-            {isSidebarOpen && <span className="font-display font-bold text-xl tracking-tight">Antigravity LMS</span>}
+            {isSidebarOpen && <span className="font-display font-bold text-xl tracking-tight">Corporate LMS</span>}
           </div>
 
           {/* Navigation */}
