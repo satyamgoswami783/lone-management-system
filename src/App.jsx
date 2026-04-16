@@ -5,8 +5,8 @@ import LoginPage from './pages/auth/LoginPage';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import Layout from './components/layout/Layout';
 import ModulePlaceholder from './pages/shared/ModulePlaceholder';
-import ApplicantDashboard from './pages/applicant/ApplicantDashboard';
-import LoanApplication from './pages/applicant/LoanApplication';
+import EmployeeDashboard from './pages/employee/EmployeeDashboard';
+import LoanApplication from './pages/employee/LoanApplication';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import HRDashboard from './pages/hr/HRDashboard';
 import CreditDashboard from './pages/credit/CreditDashboard';
@@ -31,8 +31,8 @@ const PlaceholderPage = ({ title }) => (
   </div>
 );
 
-import MyStatus from './pages/applicant/MyStatus';
-import Statements from './pages/applicant/Statements';
+import MyStatus from './pages/employee/MyStatus';
+import Statements from './pages/employee/Statements';
 import VerificationQueue from './pages/hr/VerificationQueue';
 import CreditQueue from './pages/credit/CreditQueue';
 import PayoutQueue from './pages/finance/PayoutQueue';
@@ -42,9 +42,10 @@ import RecoveryList from './pages/recovery/RecoveryList';
 import HistoryPage from './pages/shared/HistoryPage';
 import UserManagement from './pages/admin/UserManagement';
 import Reconciliation from './pages/finance/Reconciliation';
-import DocumentsCenter from './pages/applicant/DocumentsCenter';
+import ManagementAnalytics from './pages/management/ManagementAnalytics';
+import DocumentsCenter from './pages/employee/DocumentsCenter';
 import Profile from './pages/shared/Profile';
-import ApplicationFullView from './pages/applicant/ApplicationFullView';
+import ApplicationFullView from './pages/employee/ApplicationFullView';
 import HRVerificationDetail from './pages/hr/HRVerificationDetail';
 import HREmployees from './pages/hr/HREmployees';
 import HRReports from './pages/hr/HRReports';
@@ -54,17 +55,17 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-white font-display text-2xl">Registration Page</div>} />
-      
+      <Route path="/register" element={<div className="min-h-screen bg-white flex items-center justify-center text-slate-200 font-display text-2xl lowercase font-bold tracking-tight">registration in progress...</div>} />
+
       {/* Role-Based Protected Routes */}
       <Route
-        path="/applicant/*"
+        path="/employee/*"
         element={
-          <ProtectedRoute allowedRoles={[ROLES.APPLICANT]}>
+          <ProtectedRoute allowedRoles={[ROLES.EMPLOYEE]}>
             <Layout>
               <Routes>
                 <Route index element={<Navigate to="dashboard" replace />} />
-                <Route path="dashboard" element={<ApplicantDashboard />} />
+                <Route path="dashboard" element={<EmployeeDashboard />} />
                 <Route path="apply" element={<LoanApplication />} />
                 <Route path="status" element={<MyStatus />} />
                 <Route path="statements" element={<Statements />} />
@@ -162,7 +163,7 @@ function App() {
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<ManagementDashboard />} />
                 <Route path="reports" element={<ManagementReports />} />
-                <Route path="analytics" element={<ModulePlaceholder title="Executive Analytics" />} />
+                <Route path="analytics" element={<ManagementAnalytics />} />
               </Routes>
             </Layout>
           </ProtectedRoute>
@@ -186,12 +187,14 @@ function App() {
         }
       />
 
-      {/* Fallback */}
       <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/unauthorized" element={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white space-y-4">
-        <h1 className="text-6xl font-display font-bold text-red-500">403</h1>
-        <p className="text-xl text-slate-400">Access Denied: You do not have permission to view this page.</p>
-        <button onClick={() => window.history.back()} className="btn-primary">Go Back</button>
+      <Route path="/unauthorized" element={<div className="min-h-screen bg-white flex flex-col items-center justify-center text-slate-200 space-y-6">
+        <h1 className="text-8xl font-display font-black text-red-500 tracking-tighter">403</h1>
+        <div className="text-center space-y-2">
+            <p className="text-2xl font-bold tracking-tight">Access Denied</p>
+            <p className="text-slate-400 font-medium lowercase">you do not have permission to view this section.</p>
+        </div>
+        <button onClick={() => window.history.back()} className="btn-primary mt-4">Return back</button>
       </div>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

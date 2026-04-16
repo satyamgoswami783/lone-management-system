@@ -23,13 +23,13 @@ import {
 import { ROLES } from '../context/AuthContext';
 
 export const menuConfig = {
-  [ROLES.APPLICANT]: [
-    { title: 'Dashboard', icon: LayoutDashboard, path: '/applicant/dashboard' },
-    { title: 'Apply Loan', icon: FileEdit, path: '/applicant/apply' },
-    { title: 'My Status', icon: Clock, path: '/applicant/status' },
-    { title: 'Statements', icon: FileText, path: '/applicant/statements' },
-    { title: 'Letters & Documents', icon: Mail, path: '/applicant/documents' },
-    { title: 'Profile', icon: UserCircle, path: '/applicant/profile' },
+  [ROLES.EMPLOYEE]: [
+    { title: 'Dashboard', icon: LayoutDashboard, path: '/employee/dashboard' },
+    { title: 'Apply Loan', icon: FileEdit, path: '/employee/apply' },
+    { title: 'My Status', icon: Clock, path: '/employee/status' },
+    { title: 'Statements', icon: FileText, path: '/employee/statements' },
+    { title: 'Letters & Documents', icon: Mail, path: '/employee/documents' },
+    { title: 'Profile', icon: UserCircle, path: '/employee/profile' },
     { title: 'Logout', icon: LogOut, path: '/logout', action: 'logout' },
   ],
   [ROLES.HR]: [
@@ -59,7 +59,7 @@ export const menuConfig = {
     {
       group: 'ENTITY MANAGEMENT',
       items: [
-        { title: 'Applicants', icon: Users, path: '/admin/users' },
+        { title: 'Employees', icon: Users, path: '/admin/users' },
         // { title: 'Employers', icon: Building2, path: '/admin/companies' },
       ]
     },

@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { 
-  Users, 
-  Search, 
-  Filter, 
-  Eye, 
-  Briefcase, 
-  DollarSign,
-  ShieldCheck,
-  XCircle,
-  AlertCircle,
+import {
+    Users,
+    Search,
+    Filter,
+    Eye,
+    Briefcase,
+    DollarSign,
+    ShieldCheck,
+    XCircle,
+    AlertCircle,
 } from 'lucide-react';
 import { SectionHeader, Badge, StatCard, Toast } from '../../components/ui/Shared';
 import { useLoans, STATUSES } from '../../context/LoanContext';
@@ -30,14 +30,14 @@ const HREmployees = () => {
         { id: 'EMP-3211', name: 'Emily Brown', dept: 'Engineering', role: 'QA Engineer', salary: 19500, joinDate: '2022-10-12', status: 'Active', email: 'e.brown@techflow.io' },
     ];
 
-    const filteredEmployees = employees.filter(emp => 
-        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const filteredEmployees = employees.filter(emp =>
+        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.dept.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const getActiveApplication = (name) => {
-        return applications.find(app => (app.name === name || app.email === name) && 
+        return applications.find(app => (app.name === name || app.email === name) &&
             (app.status === STATUSES.HR_PENDING || app.status === STATUSES.SUBMITTED));
     };
 
@@ -68,8 +68,8 @@ const HREmployees = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-            <SectionHeader 
-                title="Personnel & Verifications" 
+            <SectionHeader
+                title="Personnel & Verifications"
                 description="Consolidated view for HR management and live loan verification status."
             />
 
@@ -80,19 +80,19 @@ const HREmployees = () => {
                 <StatCard title="Compliance Rate" value="98%" icon={ShieldCheck} variant="primary" />
             </div>
 
-            <div className="glass rounded-[32px] overflow-hidden border-slate-800/50 relative">
+            <div className="glass rounded-[40px] overflow-hidden border-slate-800 relative shadow-sm">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-3xl -mr-32 -mt-32"></div>
-                <div className="p-6 border-b border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/20 relative z-10">
+                <div className="p-8 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-slate-900/40 relative z-10">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                        <input 
-                            className="input-field pl-10 py-2.5 text-sm w-full md:w-96 bg-slate-950/50" 
-                            placeholder="Search employees..." 
+                        <input
+                            className="input-field pl-10 py-2.5 text-sm w-full md:w-96 bg-slate-950/50"
+                            placeholder="Search employees..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <button className="flex items-center gap-2 px-6 py-2.5 glass rounded-xl text-slate-400 hover:text-white transition-all text-sm font-bold border-slate-800">
+                    <button className="flex items-center gap-2 px-6 py-3 glass rounded-2xl text-slate-500 hover:text-blue-600 hover:border-blue-500/30 transition-all text-[10px] font-black uppercase tracking-widest border-slate-800">
                         <Filter className="w-4 h-4" />
                         Directory Filters
                     </button>
@@ -150,14 +150,14 @@ const HREmployees = () => {
             {selectedEmployee && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/90 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setSelectedEmployee(null)}>
                     <div className="glass w-full max-w-6xl max-h-[95vh] overflow-y-auto p-12 rounded-[60px] border-slate-800 space-y-10 animate-in zoom-in-95 duration-300 shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-3xl font-display font-bold text-white">Application Verification</h2>
-                            <button onClick={() => setSelectedEmployee(null)} className="p-3 bg-slate-900 rounded-2xl text-slate-500 hover:text-white border border-slate-800 transition-all">
+                        <div className="flex justify-between items-center mb-8 border-b border-slate-800 pb-6">
+                            <h2 className="text-4xl font-display font-black text-slate-200 tracking-tighter lowercase">application verification.</h2>
+                            <button onClick={() => setSelectedEmployee(null)} className="p-3 bg-slate-900 rounded-2xl text-slate-500 hover:text-red-500 hover:bg-red-50 border border-slate-800 transition-all">
                                 <XCircle className="w-6 h-6" />
                             </button>
                         </div>
-                        
-                        <VerificationDetailsView 
+
+                        <VerificationDetailsView
                             application={activeApp}
                             onApprove={handleApprove}
                             onReject={handleReject}

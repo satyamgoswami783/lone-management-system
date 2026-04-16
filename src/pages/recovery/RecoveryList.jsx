@@ -1,14 +1,14 @@
 import React from 'react';
-import { 
-  Users, 
-  AlertTriangle, 
-  PhoneCall, 
-  Calendar, 
-  DollarSign, 
-  Search, 
-  Filter,
-  MessageCircle,
-  Clock
+import {
+    Users,
+    AlertTriangle,
+    PhoneCall,
+    Calendar,
+    DollarSign,
+    Search,
+    Filter,
+    MessageCircle,
+    Clock
 } from 'lucide-react';
 import { SectionHeader, Badge, StatCard } from '../../components/ui/Shared';
 
@@ -21,8 +21,8 @@ const RecoveryList = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <SectionHeader 
-                title="Recoveries Case Management" 
+            <SectionHeader
+                title="Recoveries Case Management"
                 description="Manage defaulted loans and handle manual collection processes for exited employees."
             />
 

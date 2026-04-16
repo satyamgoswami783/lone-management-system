@@ -1,35 +1,83 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
-  BarChart3, 
   TrendingUp, 
-  PieChart, 
-  ArrowUpRight, 
-  ArrowDownRight, 
   Users, 
   DollarSign, 
   Calendar,
-  Download
+  Download,
+  Search,
+  Filter as FilterIcon,
+  ArrowDownRight
 } from 'lucide-react';
-import { SectionHeader, StatCard } from '../../components/ui/Shared';
+import { useLoans, STATUSES } from '../../context/LoanContext';
+import { SectionHeader, StatCard, Badge, Toast } from '../../components/ui/Shared';
 
 const ManagementReports = () => {
+    const { applications, getExecutiveStats, getAnalyticsData } = useLoans();
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('ALL');
+    const [toast, setToast] = useState(null);
+
+    const statsData = useMemo(() => getExecutiveStats(), [getExecutiveStats]);
+    const analytics = useMemo(() => getAnalyticsData(), [getAnalyticsData]);
+
+    const filteredApps = useMemo(() => {
+        return applications.filter(app => {
+            const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                app.id.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesStatus = statusFilter === 'ALL' || app.status === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+    }, [applications, searchQuery, statusFilter]);
+
     const kpis = [
-        { title: 'Portfolio Value', value: 'R 2.4M', icon: DollarSign, variant: 'primary', trend: { type: 'up', value: 15 } },
-        { title: 'Collection Rate', value: '98.2%', icon: TrendingUp, variant: 'success', trend: { type: 'up', value: 2 } },
-        { title: 'Default Rate', value: '1.4%', icon: ArrowDownRight, variant: 'danger', trend: { type: 'down', value: 0.5 } },
-        { title: 'Active Borrowers', value: '1,240', icon: Users, variant: 'primary', trend: { type: 'up', value: 8 } },
+        { title: 'Portfolio Value', value: `R ${(applications.reduce((sum, a) => sum + Number(a.amount), 0)).toLocaleString()}`, icon: DollarSign, variant: 'primary' },
+        { title: 'Total Revenue', value: `R ${Math.round(statsData.totalRevenue).toLocaleString()}`, icon: TrendingUp, variant: 'success' },
+        { title: 'Default Rate', value: `${analytics.defaultRate}%`, icon: ArrowDownRight, variant: 'danger' },
+        { title: 'Active Borrowers', value: statsData.activeClients.toString(), icon: Users, variant: 'primary' },
     ];
 
+    const handleExportCSV = () => {
+        if (filteredApps.length === 0) return;
+        
+        const headers = ['ID', 'Employee', 'Company', 'Amount', 'Status', 'Date', 'ID Number'];
+        const rows = filteredApps.map(app => [
+            app.id,
+            app.name,
+            app.company,
+            app.amount,
+            app.status,
+            new Date(app.date).toLocaleDateString(),
+            app.idNumber
+        ]);
+
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + headers.map(e => e.join(",")).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `lms_report_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        setToast({ message: `Exported ${filteredApps.length} records successfully.`, type: 'success' });
+    };
+
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="flex justify-between items-end">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <SectionHeader 
-                    title="Executive Insights" 
-                    description="Real-time key performance indicators and financial health metrics."
+                    title="Financial Transparency Report" 
+                    description="Real-time key performance indicators and verified financial health metrics."
                 />
-                <button className="flex items-center gap-2 px-6 py-3 bg-slate-900 border border-slate-800 rounded-2xl text-sm font-bold text-slate-300 hover:text-white transition-all shadow-xl">
-                    <Download className="w-4 h-4" />
-                    Download Report
+                <button 
+                    onClick={handleExportCSV}
+                    className="flex items-center gap-2 px-8 py-4 bg-blue-600 rounded-[24px] text-xs font-black uppercase tracking-widest text-white hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20 active:scale-95"
+                >
+                    <Download className="w-5 h-5" />
+                    Download Multi-Lens CSV
                 </button>
             </div>
 
@@ -39,74 +87,97 @@ const ManagementReports = () => {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                {/* Growth Chart Mockup */}
-                <div className="glass p-8 rounded-[40px] space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-display font-bold">Disbursement Trends</h3>
-                        <div className="flex gap-2">
-                            {['7D', '1M', '6M', '1Y'].map(t => (
-                                <button key={t} className={`px-3 py-1 rounded-lg text-xs font-bold ${t === '1M' ? 'bg-blue-600' : 'bg-slate-950 text-slate-500'}`}>{t}</button>
-                            ))}
+            {/* Filter Hub */}
+            <div className="glass p-8 rounded-[40px] border border-slate-800/50 space-y-6">
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4 bg-slate-950 px-6 py-3 rounded-2xl border border-slate-800 w-full lg:max-w-md group focus-within:border-blue-500/50 transition-all">
+                        <Search className="w-5 h-5 text-slate-500 group-focus-within:text-blue-400" />
+                        <input 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-transparent border-none text-sm focus:ring-0 w-full text-slate-200 font-bold placeholder:text-slate-700 outline-none" 
+                            placeholder="Filter by Name, Reference or ID..." 
+                        />
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-slate-900 rounded-xl border border-slate-800">
+                            <FilterIcon className="w-4 h-4 text-slate-500" />
+                            <select 
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="bg-transparent border-none text-xs font-black uppercase tracking-widest text-slate-300 focus:ring-0 cursor-pointer outline-none"
+                            >
+                                <option value="ALL">All Statuses</option>
+                                {Object.values(STATUSES).map(s => (
+                                    <option key={s} value={s}>{s}</option>
+                                ))}
+                            </select>
                         </div>
-                    </div>
-                    <div className="h-64 flex items-end gap-2 px-2">
-                        {[40, 60, 45, 90, 65, 80, 55, 75, 95, 100, 85, 90].map((h, i) => (
-                            <div key={i} className="flex-1 bg-blue-600/20 rounded-t-lg relative group transition-all hover:bg-blue-600/40" style={{ height: `${h}%` }}>
-                                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-blue-600 rounded-t-lg shadow-[0_0_15px_rgba(37,99,235,0.3)]"></div>
-                                <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-md border border-slate-800 whitespaces-nowrap pointer-events-none">
-                                    R {h * 1000}
-                                </div>
+                        <div className="h-10 w-px bg-slate-800 hidden lg:block" />
+                        <div className="flex items-center gap-6">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest leading-none">Record Count</span>
+                                <span className="text-xl font-bold text-white">{filteredApps.length}</span>
                             </div>
-                        ))}
-                    </div>
-                    <div className="flex justify-between px-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
-                        <span>Jan</span>
-                        <span>Feb</span>
-                        <span>Mar</span>
-                        <span>Apr</span>
-                        <span>May</span>
-                        <span>Jun</span>
-                        <span>Jul</span>
-                        <span>Aug</span>
-                        <span>Sep</span>
-                        <span>Oct</span>
-                        <span>Nov</span>
-                        <span>Dec</span>
+                        </div>
                     </div>
                 </div>
 
-                {/* Risk Distribution */}
-                <div className="glass p-8 rounded-[40px] space-y-8">
-                    <h3 className="text-xl font-display font-bold">Portfolio Risk Profile</h3>
-                    <div className="flex gap-8 items-center h-full">
-                        <div className="w-48 h-48 rounded-full border-[16px] border-slate-900 relative flex items-center justify-center">
-                            <div className="absolute inset-0 rounded-full border-[16px] border-emerald-500 border-l-transparent border-b-transparent rotate-45"></div>
-                            <div className="text-center">
-                                <p className="text-3xl font-display font-bold">92%</p>
-                                <p className="text-[10px] text-slate-500 uppercase font-bold">Low Risk</p>
-                            </div>
-                        </div>
-                        <div className="flex-1 space-y-6">
-                            {[
-                                { label: 'Low Risk (A+)', value: 84, color: 'bg-emerald-500' },
-                                { label: 'Medium Risk (B)', value: 12, color: 'bg-blue-500' },
-                                { label: 'High Risk (C)', value: 4, color: 'bg-red-500' },
-                            ].map(item => (
-                                <div key={item.label} className="space-y-2">
-                                    <div className="flex justify-between text-xs font-bold">
-                                        <span className="text-slate-400">{item.label}</span>
-                                        <span className="text-slate-200">{item.value}%</span>
-                                    </div>
-                                    <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                                        <div className={`h-full ${item.color} rounded-full`} style={{ width: `${item.value}%` }}></div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="border-b border-slate-800/50 bg-slate-950/30">
+                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Employee</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Amount</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Status</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Company</th>
+                                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/30">
+                            {filteredApps.length > 0 ? filteredApps.map((app) => (
+                                <tr key={app.id} className="hover:bg-slate-900/40 transition-all group">
+                                    <td className="px-6 py-5">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center font-bold text-slate-500 text-xs">
+                                                {app.name[0]}
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-slate-200 text-sm">{app.name}</p>
+                                                <p className="text-[9px] text-slate-600 font-mono tracking-tighter">REF: {app.id}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-5">
+                                        <span className="text-sm font-bold text-emerald-400">R {Number(app.amount).toLocaleString()}</span>
+                                    </td>
+                                    <td className="px-6 py-5">
+                                        <Badge variant={
+                                            app.status === STATUSES.PAID ? 'success' : 
+                                            app.status === STATUSES.ACTIVE ? 'primary' : 'warning'
+                                        }>{app.status}</Badge>
+                                    </td>
+                                    <td className="px-6 py-5 underline decoration-slate-800 underline-offset-4 decoration-dashed">
+                                        <span className="text-xs font-medium text-slate-400">{app.company}</span>
+                                    </td>
+                                    <td className="px-6 py-5">
+                                        <span className="text-xs font-bold text-slate-500">{new Date(app.date).toLocaleDateString()}</span>
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-20 text-center">
+                                        <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-700 italic">No matching records found in this lens</p>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
+            {toast && <Toast {...toast} onClose={() => setToast(null)} />}
         </div>
     );
 };

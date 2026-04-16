@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  ShieldCheck, 
-  Search, 
-  Filter, 
-  ChevronRight, 
-  AlertCircle, 
-  CheckCircle2, 
-  TrendingUp,
-  BarChart3,
-  FileSearch,
-  MessageSquare
+import {
+    ShieldCheck,
+    Search,
+    Filter,
+    ChevronRight,
+    AlertCircle,
+    CheckCircle2,
+    TrendingUp,
+    BarChart3,
+    FileSearch,
+    MessageSquare
 } from 'lucide-react';
 import { useLoans, STATUSES } from '../../context/LoanContext';
 import { SectionHeader, Badge, StatCard } from '../../components/ui/Shared';
@@ -17,10 +17,10 @@ import { SectionHeader, Badge, StatCard } from '../../components/ui/Shared';
 const CreditQueue = () => {
     const { applications, updateStatus } = useLoans();
     const [selectedApp, setSelectedApp] = useState(null);
-    
+
     // Show applications that are HR_APPROVED or CREDIT_PENDING
     const queue = applications.filter(app => app.status === STATUSES.CREDIT_PENDING || app.status === STATUSES.HR_APPROVED);
-    
+
     const stats = [
         { title: 'In Queue', value: queue.length.toString(), icon: ShieldCheck, variant: 'primary' },
         { title: 'Avg Score', value: '724', icon: TrendingUp, variant: 'success' },
@@ -40,8 +40,8 @@ const CreditQueue = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <SectionHeader 
-                title="Credit Assessment Queue" 
+            <SectionHeader
+                title="Credit Assessment Queue"
                 description="Perform risk assessment and affordability checks on verified applications."
             />
 
@@ -61,8 +61,8 @@ const CreditQueue = () => {
                         </div>
                         <div className="divide-y divide-slate-800/50">
                             {queue.map((app) => (
-                                <button 
-                                    key={app.id} 
+                                <button
+                                    key={app.id}
                                     onClick={() => setSelectedApp(app)}
                                     className={`w-full p-6 text-left hover:bg-slate-800/30 transition-all flex items-center justify-between group ${selectedApp?.id === app.id ? 'bg-blue-600/5 border-l-4 border-blue-600' : ''}`}
                                 >
@@ -123,7 +123,7 @@ const CreditQueue = () => {
                                             <p className="text-xs text-slate-300 italic">"Employee in good standing. 3 years tenure. No active disciplinary issues."</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="space-y-4 pt-4">
                                         <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Documents</h3>
                                         <div className="flex gap-2">
@@ -166,26 +166,26 @@ const CreditQueue = () => {
                                     <MessageSquare className="w-3 h-3" />
                                     Risk Review Notes
                                 </h3>
-                                <textarea 
-                                    className="input-field min-h-[100px] text-sm py-4" 
+                                <textarea
+                                    className="input-field min-h-[100px] text-sm py-4"
                                     placeholder="Confirm affordability and risk assessment notes for final approval..."
                                 />
                             </div>
 
                             <div className="flex gap-4 pt-4">
-                                <button 
+                                <button
                                     onClick={() => handleApprove(selectedApp.id)}
                                     className="flex-1 btn-primary py-4 text-lg"
                                 >
                                     Recommend Approval
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => handleDecline(selectedApp.id)}
                                     className="flex-1 py-4 rounded-2xl border border-red-500/20 text-red-400 font-bold hover:bg-red-500 hover:text-white transition-all"
                                 >
                                     Reject Application
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setSelectedApp(null)}
                                     className="px-6 py-4 rounded-2xl border border-slate-800 text-slate-500 hover:text-white transition-all"
                                 >

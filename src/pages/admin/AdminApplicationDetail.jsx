@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  CheckCircle2, 
-  XCircle, 
-  RotateCcw,
-  User,
-  Briefcase,
-  Wallet,
-  FileText,
-  ShieldCheck,
-  AlertCircle,
-  Clock
+import {
+    ArrowLeft,
+    CheckCircle2,
+    XCircle,
+    RotateCcw,
+    User,
+    Briefcase,
+    Wallet,
+    FileText,
+    ShieldCheck,
+    AlertCircle,
+    Clock
 } from 'lucide-react';
 
 import { useLoans, STATUSES } from '../../context/LoanContext';
@@ -32,6 +32,7 @@ const AdminApplicationDetail = () => {
         STATUSES.CREDIT_PENDING,
         STATUSES.ADMIN_APPROVAL,
         STATUSES.APPROVED,
+        STATUSES.ACTIVE,
         STATUSES.PAID
     ];
 
@@ -95,7 +96,7 @@ const AdminApplicationDetail = () => {
             {/* Header */}
             <div className="flex items-center gap-6 glass p-8 rounded-[40px] border-slate-800/50 bg-slate-900/40 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-10 -mt-10"></div>
-                <button 
+                <button
                     onClick={() => navigate('/admin/applications')}
                     className="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all shadow-xl active:scale-95 relative z-10"
                 >
@@ -129,22 +130,19 @@ const AdminApplicationDetail = () => {
                                 const isActive = application.status === step.status;
                                 return (
                                     <div key={i} className="flex flex-col items-center gap-3 bg-slate-950 p-2 rounded-2xl relative z-10">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${
-                                            isDone ? 'bg-emerald-500 border-emerald-400 text-white' : 
-                                            isActive ? 'bg-blue-600 border-blue-400 text-white animate-pulse shadow-[0_0_15px_rgba(37,99,235,0.4)]' : 
-                                            'bg-slate-900 border-slate-800 text-slate-600'
-                                        }`}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${isDone ? 'bg-emerald-500 border-emerald-400 text-white' :
+                                                isActive ? 'bg-blue-600 border-blue-400 text-white animate-pulse shadow-[0_0_15px_rgba(37,99,235,0.4)]' :
+                                                    'bg-slate-900 border-slate-800 text-slate-600'
+                                            }`}>
                                             {isDone ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
                                         </div>
                                         <div className="flex flex-col items-center">
-                                            <span className={`text-[8px] font-black uppercase tracking-tighter text-center ${
-                                                isActive || isDone ? 'text-slate-200' : 'text-slate-600'
-                                            }`}>
+                                            <span className={`text-[8px] font-black uppercase tracking-tighter text-center ${isActive || isDone ? 'text-slate-200' : 'text-slate-600'
+                                                }`}>
                                                 {step.label.split(' ')[0]}
                                             </span>
-                                            <span className={`text-[8px] font-black uppercase tracking-tighter text-center leading-[0.5] ${
-                                                isActive || isDone ? 'text-slate-200' : 'text-slate-600'
-                                            }`}>
+                                            <span className={`text-[8px] font-black uppercase tracking-tighter text-center leading-[0.5] ${isActive || isDone ? 'text-slate-200' : 'text-slate-600'
+                                                }`}>
                                                 {step.label.split(' ')[1] || ''}
                                             </span>
                                         </div>
@@ -155,8 +153,8 @@ const AdminApplicationDetail = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <DetailSection 
-                            title="Applicant Profile" 
+                        <DetailSection
+                            title="Employee Profile"
                             icon={User}
                             items={[
                                 { label: 'Full Name', value: application.name },
@@ -165,8 +163,8 @@ const AdminApplicationDetail = () => {
                                 { label: 'Verified Income', value: `R ${application.salary?.toLocaleString() || '25,000'}` },
                             ]}
                         />
-                        <DetailSection 
-                            title="Financing Goals" 
+                        <DetailSection
+                            title="Financing Goals"
                             icon={Wallet}
                             items={[
                                 { label: 'Request Amount', value: `R ${application.amount?.toLocaleString()}`, highlight: true },
@@ -190,7 +188,7 @@ const AdminApplicationDetail = () => {
                                         <FileText className="w-6 h-6" />
                                     </div>
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{doc}</span>
-                                    <button 
+                                    <button
                                         onClick={() => setPreviewTarget({ title: `${doc}.pdf` })}
                                         className="w-full py-2.5 bg-slate-900 rounded-xl text-[9px] font-black uppercase hover:bg-slate-800 transition-all tracking-tighter"
                                     >
@@ -204,17 +202,18 @@ const AdminApplicationDetail = () => {
 
                 {/* Right Column: Actions */}
                 <div className="space-y-8">
-                    <div className="glass p-8 rounded-[40px] border-slate-800/50 bg-slate-950/50 space-y-6 sticky top-8">
+                    <div className="glass p-8 rounded-[40px] border-slate-800/50 bg-slate-950/50 space-y-6">
+
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
                                 <ShieldCheck className="w-4 h-4" />
                             </div>
                             <h3 className="text-lg font-display font-bold text-white">Decision Authority</h3>
                         </div>
-                        
+
                         {!isProcessed ? (
                             <div className="space-y-4">
-                                <button 
+                                <button
                                     onClick={handleApprove}
                                     disabled={isLoading}
                                     className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-2xl font-black uppercase text-xs tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 active:scale-95"
@@ -222,8 +221,8 @@ const AdminApplicationDetail = () => {
                                     {isLoading ? <Clock className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                                     {nextStage === STATUSES.PAID ? 'Finalize & Disburse' : `Move to ${nextStage}`}
                                 </button>
-                                
-                                <button 
+
+                                <button
                                     onClick={handleReject}
                                     disabled={isLoading}
                                     className="w-full py-4 bg-slate-900 border border-slate-800 hover:bg-red-600/10 hover:border-red-500/30 text-slate-400 hover:text-red-400 disabled:opacity-50 rounded-2xl font-black uppercase text-xs tracking-widest transition-all flex items-center justify-center gap-2"
@@ -235,7 +234,7 @@ const AdminApplicationDetail = () => {
                                 {prevStage && (
                                     <div className="pt-4 border-t border-slate-800/50 space-y-3">
                                         <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest text-center">Lifecycle Reversal</p>
-                                        <button 
+                                        <button
                                             onClick={handleSendBack}
                                             disabled={isLoading}
                                             className="w-full py-3 bg-slate-900 border border-slate-800 rounded-2xl text-[10px] font-black uppercase text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2 border-dashed"
@@ -247,9 +246,8 @@ const AdminApplicationDetail = () => {
                                 )}
                             </div>
                         ) : (
-                            <div className={`p-6 rounded-[32px] border flex flex-col items-center text-center gap-4 ${
-                                isCompleted ? 'bg-emerald-600/10 border-emerald-500/30' : 'bg-red-600/10 border-red-500/30'
-                            }`}>
+                            <div className={`p-6 rounded-[32px] border flex flex-col items-center text-center gap-4 ${isCompleted ? 'bg-emerald-600/10 border-emerald-500/30' : 'bg-red-600/10 border-red-500/30'
+                                }`}>
                                 {isCompleted ? (
                                     <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center text-white mb-2 shadow-xl shadow-emerald-500/20">
                                         <CheckCircle2 className="w-8 h-8" />
@@ -264,8 +262,8 @@ const AdminApplicationDetail = () => {
                                         {isCompleted ? 'Disbursement Finalized' : 'Application Rejected'}
                                     </h4>
                                     <p className="text-[11px] text-slate-500 mt-1 leading-relaxed px-4">
-                                        {isCompleted 
-                                            ? 'This application has successfully passed all verification gates and funds have been allocated.' 
+                                        {isCompleted
+                                            ? 'This application has successfully passed all verification gates and funds have been allocated.'
                                             : 'The application request has been formally declined by the administrative office and archived.'}
                                     </p>
                                 </div>
@@ -275,9 +273,9 @@ const AdminApplicationDetail = () => {
 
 
                     {/* Audit Log (Minimal) */}
-                    <div className="glass p-8 rounded-[40px] border-slate-800/50 bg-slate-900/20">
-                        <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-6 border-b border-slate-800 pb-4">Audit Trail</h3>
-                        <div className="space-y-6">
+                    <div className="glass p-8 rounded-[40px] border-slate-800/50 bg-slate-900/20 max-h-[400px] flex flex-col">
+                        <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-6 border-b border-slate-800 pb-4 flex-shrink-0">Audit Trail</h3>
+                        <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar">
                             {(application.auditHistory || []).slice().reverse().map((log, i) => (
                                 <div key={i} className="flex gap-4 relative">
                                     {i < (application.auditHistory || []).length - 1 && (
@@ -294,11 +292,12 @@ const AdminApplicationDetail = () => {
                             ))}
                         </div>
                     </div>
+
                 </div>
             </div>
 
-            <DocumentPreviewModal 
-                isOpen={!!previewTarget} 
+            <DocumentPreviewModal
+                isOpen={!!previewTarget}
                 onClose={() => setPreviewTarget(null)}
                 documentTitle={previewTarget?.title}
             />

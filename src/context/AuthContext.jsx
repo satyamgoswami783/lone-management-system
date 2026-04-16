@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext(null);
 
 export const ROLES = {
-  APPLICANT: 'applicant',
+  EMPLOYEE: 'employee',
   HR: 'hr',
   ADMIN: 'admin',
   CREDIT: 'credit',
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (email, password, role = ROLES.APPLICANT) => {
+  const login = (email, password, role = ROLES.Employee) => {
     // Mock login logic
     const mockUser = {
       id: '1',

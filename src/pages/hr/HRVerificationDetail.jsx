@@ -20,13 +20,13 @@ const HRVerificationDetail = () => {
         // Simulate network delay
         setTimeout(() => {
             updateStatus(application.id, STATUSES.HR_APPROVED, 'HR Manager');
-            
+
             // Move to next stage automatically after HR approval
             setTimeout(() => {
                 updateStatus(application.id, STATUSES.CREDIT_PENDING, 'System');
                 setIsLoading(false);
                 setToast({ message: 'HR Verification Successful! Moving to Credit Assessment.', type: 'success' });
-                
+
                 // Redirect back to queue after showing toast
                 setTimeout(() => navigate('/hr/verifications'), 1500);
             }, 500);
@@ -39,7 +39,7 @@ const HRVerificationDetail = () => {
             updateStatus(application.id, STATUSES.HR_REJECTED, 'HR Manager');
             setIsLoading(false);
             setToast({ message: `Application ${application.id} rejected. Redirecting...`, type: 'danger' });
-            
+
             // Redirect back to queue after showing toast
             setTimeout(() => navigate('/hr/verifications'), 1500);
         }, 1200);
@@ -50,7 +50,7 @@ const HRVerificationDetail = () => {
             {/* Minimal Header */}
             <div className="flex items-center gap-6 glass p-8 rounded-[40px] border-slate-800/50 bg-slate-900/40 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-10 -mt-10"></div>
-                <button 
+                <button
                     onClick={() => navigate('/hr/verifications')}
                     className="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all shadow-xl active:scale-95 relative z-10"
                 >
@@ -69,7 +69,7 @@ const HRVerificationDetail = () => {
                 </div>
             </div>
 
-            <VerificationDetailsView 
+            <VerificationDetailsView
                 application={application}
                 onApprove={handleApprove}
                 onReject={handleReject}

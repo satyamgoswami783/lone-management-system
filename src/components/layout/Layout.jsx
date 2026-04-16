@@ -1,145 +1,74 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { useAuth } from '../../context/AuthContext';
-import { 
-  Bell, 
-  Search, 
-  ChevronDown, 
-  Menu,
-  X
-} from 'lucide-react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-function cn(...inputs) {
-  return twMerge(clsx(inputs));
-}
+import { useAuth, ROLES } from '../../context/AuthContext';
+import { Bell, Search, User } from 'lucide-react';
 
 const Layout = ({ children }) => {
+  const { user, role, isAuthenticated } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  const { user, role, logout } = useAuth();
+  const location = useLocation();
 
-  // Handle window resize for mobile state
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setIsSidebarOpen(false);
-      } else {
-        setIsSidebarOpen(true);
-      }
-    };
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
-    window.addEventListener('resize', handleResize);
-    handleResize(); // Initial check
-
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // Redirect to individual role dashboards if at root of module
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  if (pathSegments.length === 1 && Object.values(ROLES).includes(pathSegments[0])) {
+    return <Navigate to={`/${pathSegments[0]}/dashboard`} replace />;
+  }
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100 overflow-hidden">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <Sidebar 
-          isOpen={isSidebarOpen} 
-          toggle={() => setIsSidebarOpen(!isSidebarOpen)} 
-          isMobile={false}
-        />
-      </div>
-
-      {/* Mobile Sidebar (Drawer) */}
-      <div className="lg:hidden">
-        <Sidebar 
-          isOpen={isMobileMenuOpen} 
-          isMobile={true} 
-          closeMobile={() => setIsMobileMenuOpen(false)} 
-        />
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        {/* Modern Header / Navbar */}
-        <header className="h-20 glass-bg border-b border-slate-800/50 flex items-center justify-between px-6 lg:px-10 z-30 flex-shrink-0">
+    <div className="flex min-h-screen bg-white text-slate-200">
+      <Sidebar 
+        isOpen={isSidebarOpen} 
+        toggle={() => setIsSidebarOpen(!isSidebarOpen)} 
+      />
+      
+      <main className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <header className="h-20 flex items-center justify-between px-8 bg-white border-b border-slate-800 sticky top-0 z-30">
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            
-            <div className="hidden md:flex items-center gap-3 bg-slate-900/50 px-4 py-2 rounded-2xl border border-slate-800 group focus-within:border-blue-600/50 transition-all">
-              <Search className="w-4 h-4 text-slate-500 group-focus-within:text-blue-400" />
-              <input 
-                type="text" 
-                placeholder="Search anything..." 
-                className="bg-transparent border-none focus:ring-0 text-sm w-64 placeholder:text-slate-600"
-              />
-            </div>
+             <div className="lg:hidden p-2 text-slate-400">
+                <button onClick={() => setIsSidebarOpen(true)}>
+                    <User className="w-6 h-6" />
+                </button>
+             </div>
+             <div className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-slate-900 border border-slate-800 rounded-full text-slate-500 w-96 group focus-within:border-blue-500/50 transition-all">
+                <Search className="w-4 h-4 group-focus-within:text-blue-500 transition-colors" />
+                <input 
+                  type="text" 
+                  placeholder="search anything..." 
+                  className="bg-transparent border-none outline-none text-sm w-full placeholder:text-slate-500 lowercase font-medium" 
+                />
+             </div>
           </div>
 
-          <div className="flex items-center gap-4 md:gap-6">
-            {/* Notifications */}
-            <button className="relative p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-blue-400 hover:border-blue-500/30 transition-all group">
-              <Bell className="w-5 h-5 transition-transform group-hover:rotate-12" />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-blue-600 rounded-full border-2 border-slate-900 shadow-[0_0_10px_rgba(37,99,235,0.5)]"></span>
+          <div className="flex items-center gap-6">
+            <button className="relative p-2.5 bg-slate-900 border border-slate-800 rounded-2xl text-slate-500 hover:text-blue-500 hover:border-blue-500/30 transition-all">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600 rounded-full border-2 border-white shadow-[0_0_10px_rgba(47,128,237,0.4)]"></span>
             </button>
-
-            {/* User Profile Dropdown */}
-            <div className="relative pl-4 border-l border-slate-800/50">
-              <div 
-                onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                className="flex items-center gap-3 cursor-pointer group"
-              >
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-bold text-slate-200 group-hover:text-blue-400 transition-colors">{user?.name}</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black leading-none mt-0.5">{role}</p>
+            <div className="hidden sm:flex items-center gap-4 pl-6 border-l border-slate-800">
+                <div className="text-right">
+                    <p className="text-sm font-bold text-slate-200 lowercase leading-none">{user?.name}</p>
+                    <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-1.5">{role}</p>
                 </div>
-                <div className="relative">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center font-bold text-white shadow-lg group-hover:scale-105 transition-transform">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20">
                     {user?.name?.[0]}
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-950 shadow-lg"></div>
                 </div>
-                <ChevronDown className={cn("w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-all", isUserDropdownOpen && "rotate-180")} />
-              </div>
-
-              {/* Dropdown Menu */}
-              {isUserDropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setIsUserDropdownOpen(false)} />
-                  <div className="absolute right-0 mt-4 w-56 glass-bg border border-slate-800 rounded-2xl shadow-2xl z-50 py-2 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-                    <div className="px-4 py-3 border-b border-slate-800/50 mb-1">
-                      <p className="text-xs font-bold text-slate-100">{user?.name}</p>
-                      <p className="text-[10px] text-slate-500 truncate">{user?.email}</p>
-                    </div>
-                    <button className="w-full text-left px-4 py-2 text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition-all">Profile Settings</button>
-                    <button className="w-full text-left px-4 py-2 text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition-all">Support Ticket</button>
-                    <div className="h-px bg-slate-800 my-1" />
-                    <button 
-                      onClick={() => {
-                        logout();
-                        setIsUserDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-xs text-red-400 hover:bg-red-500/10 transition-all flex items-center gap-2"
-                    >
-                      Log Out
-                    </button>
-                  </div>
-                </>
-              )}
             </div>
           </div>
         </header>
 
-        {/* Dynamic Content Pane with Smooth Transitions */}
-        <main className="flex-1 overflow-y-auto custom-scrollbar bg-slate-950/50">
-          <div className="p-6 lg:p-10 max-w-[1600px] mx-auto min-h-full">
-            {children}
+        {/* Page Content */}
+        <div className="p-8 lg:p-12 overflow-y-auto no-scrollbar">
+          <div className="max-w-[1600px] mx-auto">
+            {children || <Outlet />}
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };

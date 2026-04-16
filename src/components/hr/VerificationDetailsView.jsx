@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  User, 
-  Briefcase, 
-  Wallet, 
-  ShieldQuestion, 
-  FileText, 
-  CheckCircle2, 
-  XCircle, 
+import {
+  User,
+  Briefcase,
+  Wallet,
+  ShieldQuestion,
+  FileText,
+  CheckCircle2,
+  XCircle,
   AlertCircle,
   Eye,
   Info,
@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { Badge, Toast } from '../ui/Shared';
 import { STATUSES } from '../../context/LoanContext';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import DocumentPreviewModal from '../ui/DocumentPreviewModal';
 
 const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }) => {
@@ -28,23 +30,23 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
 
   if (!application) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-6 text-center animate-in fade-in zoom-in duration-500">
-        <div className="w-24 h-24 rounded-[40px] bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-700 shadow-inner">
-          <AlertCircle className="w-12 h-12" />
+      <div className="flex flex-col items-center justify-center py-20 space-y-8 text-center animate-in duration-700">
+        <div className="w-28 h-28 rounded-[48px] bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-700 shadow-inner">
+          <AlertCircle className="w-14 h-14" />
         </div>
-        <div className="space-y-2">
-          <h3 className="text-2xl font-display font-bold text-slate-300">No Active Loan Request</h3>
-          <p className="text-slate-500 max-w-xs mx-auto text-sm leading-relaxed">
-            This employee does not have any pending loan applications that require HR verification at this time.
+        <div className="space-y-3 px-6">
+          <h3 className="text-3xl font-display font-black text-slate-200 lowercase tracking-tighter">No Active Loan Request</h3>
+          <p className="text-slate-400 max-w-sm mx-auto text-lg font-medium leading-relaxed lowercase italic">
+            this employee does not have any pending requests requiring verification.
           </p>
         </div>
       </div>
     );
   }
 
-  const isProcessed = application.status === STATUSES.HR_APPROVED || 
-                     application.status === STATUSES.HR_REJECTED || 
-                     application.status === STATUSES.CREDIT_PENDING;
+  const isProcessed = application.status === STATUSES.HR_APPROVED ||
+    application.status === STATUSES.HR_REJECTED ||
+    application.status === STATUSES.CREDIT_PENDING;
 
   const handleApprove = () => {
     onApprove();
@@ -68,46 +70,45 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
 
   const steps = [
     { label: 'Submitted', active: true, done: true },
-    { 
-        label: 'HR Verified', 
-        active: application.status === STATUSES.HR_APPROVED || application.status === STATUSES.CREDIT_PENDING, 
-        done: application.status === STATUSES.HR_APPROVED || application.status === STATUSES.CREDIT_PENDING 
+    {
+      label: 'HR Verified',
+      active: application.status === STATUSES.HR_APPROVED || application.status === STATUSES.CREDIT_PENDING,
+      done: application.status === STATUSES.HR_APPROVED || application.status === STATUSES.CREDIT_PENDING
     },
-    { 
-        label: 'Credit Assessment', 
-        active: application.status === STATUSES.CREDIT_PENDING, 
-        done: false 
+    {
+      label: 'Credit Assessment',
+      active: application.status === STATUSES.CREDIT_PENDING,
+      done: false
     }
   ];
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-700">
+    <div className="space-y-12 animate-in duration-700">
       {/* Status Flow Stepper */}
-      <div className="glass p-8 rounded-[40px] border-slate-800/50 bg-slate-900/20">
-        <div className="flex items-center justify-between max-w-4xl mx-auto relative">
-          <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-800 -translate-y-1/2 -z-10"></div>
+      <div className="glass p-10 rounded-[48px] border-slate-800 bg-white shadow-sm">
+        <div className="flex items-center justify-between max-w-4xl mx-auto relative px-8">
+          <div className="absolute top-1/2 left-0 w-full h-[3px] bg-slate-800 -translate-y-1/2 -z-10"></div>
           {steps.map((step, i) => (
-            <div key={i} className="flex flex-col items-center gap-3 bg-slate-950 p-2 rounded-2xl relative z-10 transition-all duration-500">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
-                step.done ? 'bg-emerald-500 border-emerald-400 text-white' : 
-                step.active ? 'bg-blue-600 border-blue-400 text-white animate-pulse' : 
-                'bg-slate-900 border-slate-800 text-slate-600'
-              }`}>
-                {step.done ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
+            <div key={i} className="flex flex-col items-center gap-4 bg-white p-3 rounded-2xl relative z-10 transition-all duration-500">
+              <div className={cn("w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all", 
+                  step.done ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20' :
+                  step.active ? 'bg-blue-600 border-blue-600 text-white animate-pulse shadow-lg shadow-blue-500/20' :
+                  'bg-white border-slate-700 text-slate-500'
+                )}>
+                {step.done ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
               </div>
-              <span className={`text-[10px] font-black uppercase tracking-widest ${
-                step.active || step.done ? 'text-slate-200' : 'text-slate-600'
-              }`}>{step.label}</span>
+              <span className={cn("text-[9px] font-black uppercase tracking-[0.2em]", 
+                  step.active || step.done ? 'text-slate-200' : 'text-slate-500'
+                )}>{step.label}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {/* Left Panel: Personal & Employment */}
-        <div className="space-y-8">
-          <DetailCard 
-            title="Applicant Identity" 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="space-y-10">
+          <DetailCard
+            title="Employee Identity"
             icon={User}
             items={[
               { label: 'Full Legal Name', value: application.name },
@@ -116,8 +117,8 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
               { label: 'Email Address', value: application.email },
             ]}
           />
-          <DetailCard 
-            title="Employment Context" 
+          <DetailCard
+            title="Employment Context"
             icon={Briefcase}
             items={[
               { label: 'Current Employer', value: application.company || 'TechFlow SA' },
@@ -128,32 +129,32 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
           />
 
           {/* Documents Section */}
-          <div className="glass p-8 rounded-[40px] border-slate-800/50 space-y-6 bg-slate-900/40">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-slate-900 rounded-xl text-blue-400 shadow-lg">
-                <FileText className="w-5 h-5" />
+          <div className="glass p-10 rounded-[48px] border-slate-800 space-y-8 bg-white shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 border border-blue-100">
+                <FileText className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-display font-bold text-white">Document Repository</h3>
+              <h3 className="text-2xl font-display font-black text-slate-200 tracking-tight lowercase">documents gallery.</h3>
             </div>
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-5">
               {[
-                { name: 'Payslip', type: 'payslip' },
-                { name: 'ID Document', type: 'id_copy' },
+                { name: 'Payslip Archive', type: 'payslip' },
+                { name: 'Identity Copy', type: 'id_copy' },
                 { name: 'Bank Statement', type: 'bank_statement' }
               ].map((doc) => (
-                <div key={doc.name} className="flex items-center justify-between p-5 bg-slate-950 border border-slate-800 rounded-3xl group hover:border-blue-500/30 transition-all">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-500 group-hover:text-blue-400 transition-all">
-                      <FileText className="w-6 h-6" />
+                <div key={doc.name} className="flex items-center justify-between p-6 bg-slate-900 border border-slate-800 rounded-[32px] group hover:border-blue-500/30 transition-all shadow-sm">
+                  <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-slate-500 group-hover:text-blue-600 group-hover:rotate-6 transition-all border border-slate-800">
+                      <FileText className="w-7 h-7" />
                     </div>
-                    <div className="space-y-0.5">
-                      <p className="font-bold text-slate-200">{doc.name}</p>
-                      <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">PDF • Verified Integrity</p>
+                    <div className="space-y-1">
+                      <p className="font-bold text-slate-200 lowercase">{doc.name}</p>
+                      <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">PDF format • verified</p>
                     </div>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setPreviewTarget({ title: `${doc.name}.pdf`, type: doc.type })}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase hover:bg-blue-500 shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
+                    className="px-8 py-2.5 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 shadow-xl shadow-blue-500/20 transition-all"
                   >
                     View
                   </button>
@@ -163,112 +164,111 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
           </div>
         </div>
 
-        {/* Right Panel: Loan & NCA */}
-        <div className="space-y-8">
-          <DetailCard 
-            title="Loan Financials" 
+        <div className="space-y-10">
+          <DetailCard
+            title="Loan Financials"
             icon={Wallet}
             variant="blue"
             items={[
-              { label: 'Requested Principal', value: `R ${application.amount?.toLocaleString()}`, highlight: 'text-blue-400 border-blue-500/20 bg-blue-500/5' },
+              { label: 'Requested Principal', value: `R ${application.amount?.toLocaleString()}`, highlight: 'text-blue-600' },
               { label: 'Agreed Repayment Term', value: '12 Months' },
-              { label: 'Collection Method', value: 'Payroll Deduction / Stop Order' },
+              { label: 'Collection Method', value: 'Payroll Deduction' },
             ]}
           />
 
-          <div className="glass p-8 rounded-[40px] border-slate-800/50 space-y-8 bg-slate-900/60 transition-all border-l-4 border-l-orange-500/50">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-500/20 rounded-xl text-orange-400">
-                  <ShieldQuestion className="w-5 h-5" />
+          <div className="glass p-10 rounded-[48px] border-slate-800 space-y-10 bg-white border-l-8 border-l-amber-500/30 shadow-sm relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-3xl p-1"></div>
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-amber-50 rounded-2xl text-amber-600 border border-amber-100">
+                  <ShieldQuestion className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-display font-bold text-slate-100">NCA Mandatory Check</h3>
+                <h3 className="text-2xl font-display font-black text-slate-200 tracking-tight lowercase">legal disclosure.</h3>
               </div>
-              <Badge variant="warning">Regulatory</Badge>
+              <Badge variant="warning">Compliance</Badge>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-5 relative z-10">
               {[
                 { question: 'Under Administration?', value: application.nca?.isUnderAdministration ? 'Yes' : 'No', type: application.nca?.isUnderAdministration ? 'danger' : 'success' },
                 { question: 'Under Debt Review?', value: application.nca?.isUnderDebtReview ? 'Yes' : 'No', type: application.nca?.isUnderDebtReview ? 'danger' : 'success' },
                 { question: 'Emergency Loan?', value: application.nca?.isEmergencyLoan ? 'Yes' : 'No', type: 'primary' },
               ].map((q, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-slate-950/50 border border-slate-800 rounded-[20px] hover:border-slate-700 transition-all">
+                <div key={i} className="flex items-center justify-between p-5 bg-slate-900 border border-slate-800 rounded-3xl hover:border-slate-700 transition-all">
                   <span className="text-sm font-bold text-slate-400 tracking-tight">{q.question}</span>
-                  <Badge variant={q.type} className="px-4 py-1">{q.value}</Badge>
+                  <Badge variant={q.type} className="px-5 py-1.5">{q.value}</Badge>
                 </div>
               ))}
-              <div className="p-6 bg-slate-950/80 border border-slate-800/50 rounded-[32px] space-y-3">
-                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Purpose of Credit:</span>
-                <p className="text-sm text-slate-200 font-medium leading-relaxed italic border-l-2 border-slate-800 pl-4">
-                  "{application.nca?.loanPurpose || application.purpose || 'Not Specified'}"
+              <div className="p-8 bg-slate-900 border border-slate-800 rounded-[32px] space-y-4">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Purpose of Credit:</span>
+                <p className="text-base text-slate-200 font-bold leading-relaxed italic border-l-4 border-blue-500/20 pl-6 lowercase">
+                  "{application.nca?.loanPurpose || application.purpose || 'not specified'}"
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex gap-4">
-            <button 
+          <div className="flex gap-6">
+            <button
               onClick={() => setShowRejectModal(true)}
               disabled={isLoading || isProcessed}
-              className="flex-1 cursor-pointer flex items-center justify-center gap-2 py-5 bg-red-600/10 border border-red-500/20 rounded-3xl text-red-500 hover:bg-red-600 hover:text-white font-black uppercase text-xs tracking-widest transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+              className="flex-1 cursor-pointer flex items-center justify-center gap-3 py-6 bg-red-50 border border-red-100 rounded-[32px] text-red-600 hover:bg-red-600 hover:text-white font-black uppercase text-xs tracking-[0.2em] transition-all shadow-sm active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
             >
               <XCircle className="w-5 h-5" />
-              Reject Verification
+              Reject
             </button>
-            <button 
+            <button
               onClick={() => setShowApproveModal(true)}
               disabled={isLoading || isProcessed}
-              className="flex-1 cursor-pointer flex items-center justify-center gap-2 py-5 bg-emerald-600 rounded-3xl text-white font-black uppercase text-xs tracking-widest hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-600/20 active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+              className="flex-1 cursor-pointer flex items-center justify-center gap-3 py-6 bg-blue-600 rounded-[32px] text-white font-black uppercase text-xs tracking-[0.2em] hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/20 active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
             >
               <CheckCircle2 className="w-5 h-5" />
-              Approve Verification
+              Approve
             </button>
           </div>
-          
+
           {isProcessed && (
-              <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-3xl text-center space-y-2 animate-in slide-in-from-top-2">
-                  <p className="text-sm font-bold text-slate-400">Application has already been processed</p>
-                  <p className="text-[10px] text-slate-600 uppercase font-black tracking-widest">Final Status: {application.status}</p>
-              </div>
+            <div className="p-8 bg-blue-50 border border-blue-100 rounded-[32px] text-center space-y-2 animate-in slide-in-from-top-4">
+              <p className="text-sm font-bold text-blue-600">This application has been finalized</p>
+              <p className="text-[10px] text-blue-500 uppercase font-black tracking-widest opacity-60">Status: {application.status.toLowerCase()}</p>
+            </div>
           )}
         </div>
       </div>
 
       {/* Approval Confirmation Modal */}
       {showApproveModal && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-slate-950/95 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="glass w-full max-w-lg p-10 rounded-[48px] border-slate-800 space-y-8 animate-in zoom-in-95 duration-300 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-5 text-emerald-500">
-              <div className="w-14 h-14 rounded-3xl bg-emerald-600/10 flex items-center justify-center border border-emerald-500/20">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-slate-200/40 backdrop-blur-xl animate-in duration-300">
+          <div className="glass w-full max-w-lg p-12 rounded-[60px] border-slate-800 space-y-10 animate-in zoom-in-95 duration-500 shadow-2xl shadow-blue-500/10" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-6 text-emerald-600">
+              <div className="w-16 h-16 rounded-[24px] bg-emerald-50 flex items-center justify-center border border-emerald-100 shadow-sm">
                 <ShieldCheck className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h2 className="text-3xl font-display font-bold text-white">Confirm Approval</h2>
-                <p className="text-sm text-slate-500 font-medium uppercase tracking-widest font-mono">APP ID: {application.id}</p>
+                <h2 className="text-4xl font-display font-black text-slate-200 tracking-tighter lowercase leading-none">confirm.</h2>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] font-mono mt-2">REFERENCE: {application.id}</p>
               </div>
             </div>
-            
-            <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl">
-                <p className="text-slate-300 text-sm leading-relaxed">
-                    Are you sure you want to approve this verification? This action will move the application to the <strong>Credit Assessment</strong> stage.
-                </p>
+
+            <div className="bg-slate-900 border border-slate-800 p-8 rounded-[32px]">
+              <p className="text-slate-400 text-lg font-medium leading-relaxed lowercase italic">
+                are you certain you want to verify this request? this will escalate it to <strong className="text-slate-200">credit assessment</strong>.
+              </p>
             </div>
 
             <div className="flex gap-4">
-              <button 
+              <button
                 onClick={() => setShowApproveModal(false)}
-                className="flex-1 py-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-black text-slate-500 hover:text-white transition-all active:scale-95 uppercase tracking-widest cursor-pointer"
+                className="flex-1 py-5 bg-white border border-slate-800 rounded-[24px] text-[10px] font-black text-slate-500 hover:text-slate-200 transition-all uppercase tracking-widest"
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={handleApprove}
                 disabled={isLoading}
-                className="flex-1 py-4 bg-emerald-600 rounded-2xl text-xs font-black text-white hover:bg-emerald-500 transition-all disabled:opacity-50 active:scale-95 shadow-2xl shadow-emerald-600/40 uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer"
+                className="flex-1 py-5 bg-blue-600 rounded-[24px] text-[10px] font-black text-white hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/30 flex items-center justify-center gap-3 uppercase tracking-widest"
               >
-                {isLoading && <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>}
-                {isLoading ? 'Processing...' : 'Confirm Approval'}
+                {isLoading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : 'Confirm'}
               </button>
             </div>
           </div>
@@ -277,40 +277,41 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
 
       {/* Rejection Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-slate-950/95 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="glass w-full max-w-xl p-10 rounded-[48px] border-slate-800 space-y-8 animate-in zoom-in-95 duration-300 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-5 text-red-500">
-              <div className="w-14 h-14 rounded-3xl bg-red-600/10 flex items-center justify-center border border-red-500/20">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-slate-200/40 backdrop-blur-xl animate-in duration-300">
+          <div className="glass w-full max-w-xl p-12 rounded-[60px] border-slate-800 space-y-10 animate-in zoom-in-95 duration-500 shadow-2xl shadow-red-500/10" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-6 text-red-600">
+              <div className="w-16 h-16 rounded-[24px] bg-red-50 flex items-center justify-center border border-red-100 shadow-sm">
                 <AlertCircle className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h2 className="text-3xl font-display font-bold">Declare Rejection</h2>
-                <p className="text-sm text-slate-500 font-medium uppercase tracking-widest font-mono">APP ID: {application.id}</p>
+                <h2 className="text-4xl font-display font-black text-slate-200 tracking-tighter lowercase leading-none">reject.</h2>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] font-mono mt-2">REFERENCE: {application.id}</p>
               </div>
             </div>
-            
-            <div className="space-y-6">
+
+            <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3">
                 {rejectionReasons.map((reason) => (
-                  <button 
+                  <button
                     key={reason}
                     onClick={() => setRejectReason(reason)}
-                    className={`text-left px-6 py-4 rounded-3xl border transition-all text-sm font-bold flex items-center justify-between ${
-                      rejectReason === reason 
-                      ? 'bg-blue-600/10 border-blue-500 text-blue-300 shadow-inner' 
-                      : 'bg-slate-950/50 border-slate-800 text-slate-500 hover:border-slate-700 hover:text-slate-300'
-                    }`}
+                    className={cn(
+                        "text-left px-8 py-5 rounded-[28px] border transition-all text-sm font-bold flex items-center justify-between shadow-sm",
+                        rejectReason === reason
+                        ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-500/20"
+                        : "bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-500"
+                    )}
                   >
                     {reason}
-                    {rejectReason === reason && <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)]"></div>}
+                    {rejectReason === reason && <div className="w-3 h-3 rounded-full bg-white shadow-lg"></div>}
                   </button>
                 ))}
               </div>
 
               {rejectReason === 'Other' && (
-                <textarea 
-                  className="input-field w-full h-32 p-6 text-sm bg-slate-950 border-slate-800 focus:border-red-500/50 transition-all rounded-[32px] placeholder:text-slate-700 mt-2"
-                  placeholder="Provide audit-trail justification..."
+                <textarea
+                  className="input-field w-full h-32 p-8 text-sm focus:border-red-500/50 rounded-[32px] mt-4 shadow-inner"
+                  placeholder="provide specific audit-trail justification..."
                   value={otherReason}
                   onChange={(e) => setOtherReason(e.target.value)}
                 />
@@ -318,27 +319,26 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
             </div>
 
             <div className="flex gap-4">
-              <button 
+              <button
                 onClick={() => setShowRejectModal(false)}
-                className="flex-1 py-4 bg-slate-900 border border-slate-800 rounded-2xl text-xs font-black text-slate-500 hover:text-white transition-all active:scale-95 uppercase tracking-widest"
+                className="flex-1 py-5 bg-white border border-slate-800 rounded-[24px] text-[10px] font-black text-slate-500 hover:text-slate-200 transition-all uppercase tracking-widest"
               >
                 Back
               </button>
-              <button 
+              <button
                 onClick={handleReject}
                 disabled={!rejectReason || (rejectReason === 'Other' && !otherReason) || isLoading}
-                className="flex-1 py-4 bg-red-600 rounded-2xl text-xs font-black text-white hover:bg-red-500 transition-all disabled:opacity-50 active:scale-95 shadow-2xl shadow-red-600/40 uppercase tracking-widest flex items-center justify-center gap-2"
+                className="flex-1 py-5 bg-red-600 rounded-[24px] text-[10px] font-black text-white hover:bg-red-500 transition-all shadow-xl shadow-red-600/30 flex items-center justify-center gap-3 uppercase tracking-widest"
               >
-                {isLoading && <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>}
-                {isLoading ? 'Processing...' : 'Confirm Rejection'}
+                {isLoading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : 'Confirm'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <DocumentPreviewModal 
-        isOpen={!!previewTarget} 
+      <DocumentPreviewModal
+        isOpen={!!previewTarget}
         onClose={() => setPreviewTarget(null)}
         documentTitle={previewTarget?.title}
         documentType={previewTarget?.type}
@@ -349,29 +349,36 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
 
 const DetailCard = ({ title, icon: Icon, items, variant = 'slate' }) => {
   const iconColors = {
-    slate: 'bg-slate-950/80 text-blue-400',
-    blue: 'bg-blue-600/20 text-blue-400 shadow-blue-500/20 shadow-inner'
+    slate: 'bg-slate-900 text-blue-600 border-slate-800',
+    blue: 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 border-blue-500'
   };
 
   return (
-    <div className="glass p-8 rounded-[40px] border-slate-800/50 space-y-6 hover:border-slate-700/50 transition-all bg-slate-900/40 group overflow-hidden relative">
-      <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-3xl rounded-full translate-x-12 -translate-y-12"></div>
-      <div className="flex items-center gap-3 relative z-10">
-         <div className={`p-2 rounded-xl border border-slate-800/50 ${iconColors[variant]}`}>
-            <Icon className="w-5 h-5" />
-         </div>
-         <h3 className="text-xl font-display font-bold text-slate-100">{title}</h3>
+    <div className="glass p-10 rounded-[48px] border-slate-800 space-y-8 hover:shadow-xl transition-all duration-500 bg-white group overflow-hidden relative shadow-sm">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 blur-3xl rounded-full translate-x-12 -translate-y-12 transition-all group-hover:bg-blue-600/10"></div>
+      <div className="flex items-center gap-4 relative z-10">
+        <div className={cn("p-3 rounded-2xl border transition-all duration-500 group-hover:scale-110", iconColors[variant])}>
+          <Icon className="w-6 h-6" />
+        </div>
+        <h3 className="text-2xl font-display font-black text-slate-200 lowercase tracking-tight">{title}</h3>
       </div>
-      <div className="space-y-5 relative z-10">
+      <div className="space-y-6 relative z-10">
         {items.map((item, i) => (
-          <div key={i} className={`space-y-1.5 border-l-2 border-slate-800 pl-6 py-1 group-hover:border-blue-500/50 transition-all ${item.highlight || ''}`}>
-            <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.2em]">{item.label}</p>
-            <p className={`text-base font-bold transition-all ${item.variant === 'success' ? 'text-emerald-400' : 'text-slate-300'}`}>{item.value}</p>
+          <div key={i} className={cn("space-y-1.5 border-l-4 border-slate-800 pl-8 py-2 group-hover:border-blue-500/30 transition-all", item.highlight ? "border-blue-600/40" : "")}>
+            <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em]">{item.label}</p>
+            <p className={cn("text-lg font-bold transition-all lowercase leading-none", 
+                item.variant === 'success' ? 'text-emerald-600' : 
+                item.highlight ? 'text-blue-600 text-2xl font-black' : 'text-slate-300'
+            )}>{item.value}</p>
           </div>
         ))}
       </div>
     </div>
   );
 };
+
+function cn(...inputs) {
+  return twMerge(clsx(inputs));
+}
 
 export default VerificationDetailsView;
