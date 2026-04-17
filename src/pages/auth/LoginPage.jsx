@@ -106,9 +106,10 @@ const LoginPage = () => {
             {Object.entries(ROLES).map(([key, role]) => (
               <button
                 key={role}
+                type="button"
                 disabled={isLoggingIn}
                 onClick={() => handleLogin(null, `${role}@lms.demo`, 'password123', role)}
-                className="px-3 py-3 text-[9px] font-black uppercase tracking-widest bg-slate-50 text-slate-600 rounded-xl border border-slate-200 transition-all hover:bg-blue-600 hover:text-white hover:border-blue-600 text-center shadow-sm"
+                className="px-3 py-3 text-[9px] font-black uppercase tracking-widest bg-white text-slate-200 rounded-xl border border-slate-700 transition-all hover:bg-blue-600 hover:text-white hover:border-blue-600 text-center shadow-sm disabled:opacity-50"
               >
                 {key === 'EMPLOYEE' ? 'EMPLOYEE' : key}
               </button>

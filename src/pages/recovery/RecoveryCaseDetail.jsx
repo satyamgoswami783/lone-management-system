@@ -146,12 +146,12 @@ const RecoveryCaseDetail = () => {
     const isManager = role === ROLES.ADMIN || role === ROLES.MANAGEMENT;
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+        <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 overflow-x-hidden min-w-0">
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div className="flex-1">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 min-w-0">
+                <div className="flex-1 min-w-0">
                     <button 
                         onClick={() => navigate('/recovery/list')}
                         className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors text-sm font-bold mb-4"
@@ -159,31 +159,33 @@ const RecoveryCaseDetail = () => {
                         <ArrowLeft className="w-4 h-4" />
                         Back to Portfolio
                     </button>
-                    <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 rounded-[32px] bg-red-600/10 border-2 border-red-500/20 flex items-center justify-center shadow-2xl shadow-red-600/10">
-                            <User className="w-10 h-10 text-red-500" />
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6 min-w-0">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[32px] bg-red-600/10 border-2 border-red-500/20 flex items-center justify-center shadow-2xl shadow-red-600/10 shrink-0">
+                            <User className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
                         </div>
-                        <div>
-                            <div className="flex items-center gap-3">
-                                <h1 className="text-4xl font-display font-bold text-slate-200 tracking-tight">{loan.name || 'Unknown Debtor'}</h1>
-                                <Badge variant={financials.dpd > 90 ? 'danger' : financials.dpd > 0 ? 'warning' : 'success'}>
+                        <div className="min-w-0 flex-1">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-slate-200 tracking-tight break-words">
+                                {loan.name || 'Unknown Debtor'}
+                            </h1>
+                            <div className="flex flex-wrap items-center gap-2 mt-3">
+                                <Badge variant={financials.dpd > 90 ? 'danger' : financials.dpd > 0 ? 'warning' : 'success'} className="whitespace-nowrap">
                                     {financials.dpd > 0 ? `${financials.dpd} Days Overdue` : 'Up to Date'}
                                 </Badge>
-                                <Badge variant="neutral">
+                                <Badge variant="neutral" className="max-w-full truncate">
                                     {loan.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}
                                 </Badge>
                             </div>
-                            <p className="text-slate-500 font-mono text-sm mt-2 flex items-center gap-2">
-                                <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300 font-bold">{loan.id}</span>
-                                <ChevronRight className="w-4 h-4" />
-                                <span className="text-slate-400 font-bold">{loan.company}</span>
+                            <p className="text-slate-500 font-mono text-xs sm:text-sm mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
+                                <span className="bg-slate-800 px-2 py-0.5 rounded text-slate-300 font-bold break-all">{loan.id}</span>
+                                <ChevronRight className="w-4 h-4 shrink-0 hidden sm:inline" />
+                                <span className="text-slate-400 font-bold break-words min-w-0">{loan.company}</span>
                             </p>
                         </div>
                     </div>
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2 sm:gap-3 min-w-0">
                     {/* Letter Actions for Recovery */}
-                    <div className="flex items-center gap-2 p-1.5 bg-slate-950 border border-slate-800 rounded-2xl mr-2">
+                    <div className="flex items-center gap-1 sm:gap-2 p-1 sm:p-1.5 bg-slate-950 border border-slate-800 rounded-2xl shrink-0">
                          <button 
                             onClick={() => setLetterModal({
                                 isOpen: true,
@@ -191,7 +193,7 @@ const RecoveryCaseDetail = () => {
                                 title: 'Settlement Quotation',
                                 content: getSettlementLetter(loan, user, financials.totalOutstanding)
                             })}
-                            className="px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-400 text-[10px] font-black uppercase tracking-widest transition-all"
+                            className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl hover:bg-red-500/10 text-red-400 text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all"
                         >
                             Settlement
                         </button>
@@ -203,7 +205,7 @@ const RecoveryCaseDetail = () => {
                                     title: 'Closure Certificate',
                                     content: getPaidUpLetter(loan, user)
                                 })}
-                                className="px-4 py-2.5 rounded-xl hover:bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest transition-all"
+                                className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl hover:bg-emerald-500/10 text-emerald-400 text-[9px] sm:text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all"
                             >
                                 Paid-up
                             </button>
@@ -212,13 +214,13 @@ const RecoveryCaseDetail = () => {
 
                     <button 
                         onClick={() => setShowInteractionModal(true)}
-                        className="px-6 py-4 rounded-2xl border border-slate-700 text-slate-300 font-bold text-sm hover:border-slate-500 hover:text-white transition-all bg-slate-900/40"
+                        className="flex-1 min-w-[8rem] sm:flex-none px-4 sm:px-6 py-3 sm:py-4 rounded-2xl border border-slate-700 text-slate-300 font-bold text-sm hover:border-slate-500 hover:text-white transition-all bg-slate-900/40"
                     >
                         Log Activity
                     </button>
                     <button 
                         onClick={() => setShowPaymentModal(true)}
-                        className="px-8 py-4 rounded-2xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-500 hover:scale-[1.02] transition-all shadow-xl shadow-emerald-600/20 active:scale-95"
+                        className="flex-1 min-w-[10rem] sm:flex-none px-4 sm:px-8 py-3 sm:py-4 rounded-2xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-500 hover:scale-[1.02] transition-all shadow-xl shadow-emerald-600/20 active:scale-95"
                     >
                         Record Repayment
                     </button>
@@ -236,17 +238,17 @@ const RecoveryCaseDetail = () => {
             />
 
             {/* Financial Status Board */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="glass rounded-[40px] p-8 border border-slate-800/50 relative overflow-hidden group">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 min-w-0">
+                <div className="glass rounded-3xl sm:rounded-[40px] p-4 sm:p-6 md:p-8 border border-slate-800/50 relative overflow-hidden group sm:col-span-2 lg:col-span-1 min-w-0">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                         <DollarSign className="w-16 h-16 text-blue-500" />
                     </div>
                     <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Total Outstanding</p>
-                    <h3 className="text-3xl font-display font-bold text-slate-200">R {financials.totalOutstanding.toLocaleString()}</h3>
-                    <div className="mt-4 flex items-center gap-2 text-xs font-bold text-slate-400">
-                        <span className="text-emerald-500">Principal: R {financials.principalOutstanding.toLocaleString()}</span>
-                        <span className="w-1 h-1 rounded-full bg-slate-700" />
-                        <span className="text-red-400">Log: R {financials.totalPenalty.toLocaleString()}</span>
+                    <h3 className="text-2xl sm:text-3xl font-display font-bold text-slate-200 break-words">R {financials.totalOutstanding.toLocaleString()}</h3>
+                    <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] sm:text-xs font-bold text-slate-400">
+                        <span className="text-emerald-500 whitespace-nowrap">Principal: R {financials.principalOutstanding.toLocaleString()}</span>
+                        <span className="w-1 h-1 rounded-full bg-slate-700 shrink-0 hidden sm:inline" />
+                        <span className="text-red-400 whitespace-nowrap">Penalty: R {financials.totalPenalty.toLocaleString()}</span>
                     </div>
                 </div>
                 
@@ -270,11 +272,11 @@ const RecoveryCaseDetail = () => {
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 min-w-0">
                 {/* Main Content Area */}
-                <div className="lg:col-span-2 space-y-8">
-                    <div className="glass rounded-[40px] border border-slate-800/50 overflow-hidden shadow-2xl">
-                        <div className="flex border-b border-slate-800/50 bg-slate-900/20">
+                <div className="lg:col-span-2 space-y-6 sm:space-y-8 min-w-0">
+                    <div className="glass rounded-3xl sm:rounded-[40px] border border-slate-800/50 overflow-hidden shadow-2xl min-w-0">
+                        <div className="flex overflow-x-auto overscroll-x-contain border-b border-slate-800/50 bg-slate-900/20 [-webkit-overflow-scrolling:touch]">
                             {[
                                 { id: 'installments', label: 'Repayment Schedule', icon: Calendar },
                                 { id: 'timeline', label: 'Action Logs', icon: History },
@@ -282,20 +284,21 @@ const RecoveryCaseDetail = () => {
                             ].map(tab => (
                                 <button
                                     key={tab.id}
+                                    type="button"
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center gap-3 px-8 py-6 text-sm font-bold border-b-2 transition-all ${
+                                    className={`flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 text-xs sm:text-sm font-bold border-b-2 transition-all shrink-0 ${
                                         activeTab === tab.id 
                                             ? "border-blue-500 text-blue-400 bg-blue-500/5" 
                                             : "border-transparent text-slate-500 hover:text-slate-300"
                                     }`}
                                 >
-                                    <tab.icon className="w-4 h-4" />
-                                    {tab.label}
+                                    <tab.icon className="w-4 h-4 shrink-0" />
+                                    <span className="whitespace-nowrap">{tab.label}</span>
                                 </button>
                             ))}
                         </div>
 
-                        <div className="p-10 bg-slate-950/20 min-h-[400px]">
+                        <div className="p-4 sm:p-6 md:p-10 bg-slate-950/20 min-h-[280px] sm:min-h-[400px] overflow-x-hidden">
                             {activeTab === 'installments' && (
                                 <InstallmentList 
                                     installments={loan.installments || []} 
@@ -317,9 +320,9 @@ const RecoveryCaseDetail = () => {
                 </div>
 
                 {/* Sidebar Context */}
-                <div className="space-y-8">
-                    <div className="glass rounded-[40px] p-8 border border-slate-800/50 bg-slate-900/10">
-                        <h3 className="text-lg font-display font-bold mb-8 flex items-center gap-3 text-slate-200">
+                <div className="space-y-6 sm:space-y-8 min-w-0">
+                    <div className="glass rounded-3xl sm:rounded-[40px] p-4 sm:p-6 md:p-8 border border-slate-800/50 bg-slate-900/10 min-w-0">
+                        <h3 className="text-base sm:text-lg font-display font-bold mb-6 sm:mb-8 flex items-center gap-3 text-slate-200">
                             <Briefcase className="w-5 h-5 text-blue-400" />
                             Collector Assignment
                         </h3>
@@ -343,7 +346,7 @@ const RecoveryCaseDetail = () => {
                         </div>
                     </div>
 
-                    <div className="glass rounded-[40px] p-8 border border-slate-800/50 bg-blue-600/5 relative overflow-hidden group">
+                    <div className="glass rounded-3xl sm:rounded-[40px] p-4 sm:p-6 md:p-8 border border-slate-800/50 bg-blue-600/5 relative overflow-hidden group min-w-0">
                         <TrendingUp className="absolute -bottom-4 -right-4 w-32 h-32 text-blue-600/10 group-hover:scale-110 transition-transform duration-700" />
                         <h3 className="text-lg font-display font-bold mb-4 relative z-10 text-slate-200">Risk Advisory</h3>
                         <p className="text-slate-400 text-sm leading-relaxed relative z-10">
@@ -563,7 +566,7 @@ const ActionTimeline = ({ loan }) => {
                                 {new Date(event.date).toLocaleString()}
                             </span>
                         </div>
-                        <div className="bg-slate-900/50 p-5 rounded-3xl border border-slate-700 group-hover:border-slate-500 transition-all max-w-2xl shadow-sm">
+                        <div className="bg-slate-900/50 p-4 sm:p-5 rounded-3xl border border-slate-700 group-hover:border-slate-500 transition-all max-w-full sm:max-w-2xl shadow-sm min-w-0">
                             <p className="font-bold text-slate-200 text-base mb-2">{event.outcome}</p>
                             {event.notes && <p className="text-slate-400 text-sm leading-relaxed">{event.notes}</p>}
                         </div>
@@ -626,9 +629,9 @@ const PtpHistory = ({ history, onAdd }) => (
 );
 
 const InfoBar = ({ label, value, danger }) => (
-    <div className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{label}</span>
-        <span className={`text-sm font-bold ${danger ? 'text-red-500' : 'text-slate-300'}`}>{value}</span>
+    <div className="flex items-start sm:items-center justify-between gap-3 py-2 border-b border-white/5 last:border-0 min-w-0">
+        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest shrink-0">{label}</span>
+        <span className={`text-sm font-bold text-right break-words min-w-0 max-w-[65%] sm:max-w-[55%] ${danger ? 'text-red-500' : 'text-slate-300'}`}>{value}</span>
     </div>
 );
 
