@@ -58,7 +58,7 @@ const ApplicationsPipeline = () => {
 
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">
             <SectionHeader
                 title="Application Pipeline"
                 description="Monitor and manage all loan applications through their full lifecycle."

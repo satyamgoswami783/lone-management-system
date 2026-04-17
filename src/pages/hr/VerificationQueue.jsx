@@ -99,152 +99,154 @@ const VerificationQueue = () => {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
-            <SectionHeader
-                title="Application Verification"
-                description="Finalize employee eligibility and salary confirmation for pending loan requests."
-            />
+        <>
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+                <SectionHeader
+                    title="Application Verification"
+                    description="Finalize employee eligibility and salary confirmation for pending loan requests."
+                />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {stats.map((stat, i) => (
-                    <StatCard key={i} {...stat} />
-                ))}
-            </div>
-
-            <div className="glass rounded-[32px] overflow-hidden border border-slate-800/50 shadow-xl">
-                <div className="p-6 border-b border-slate-800/50 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/10">
-                    <div className="flex flex-col md:flex-row gap-4 flex-1">
-                        <div className="relative flex-1 max-w-md">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                            <input
-                                className="input-field pl-10 py-2.5 text-sm w-full"
-                                placeholder="Search by name or APP ID..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Filter className="w-4 h-4 text-slate-500 ml-2" />
-                            <select
-                                className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                            >
-                                <option value="ALL">All Active</option>
-                                <option value={LIFECYCLE_STATUSES.SUBMITTED}>Submitted</option>
-                            </select>
-                        </div>
-                    </div>
-                    {(statusFilter !== 'ALL' || searchTerm) && (
-                        <button
-                            onClick={() => { setSearchTerm(''); setStatusFilter('ALL'); }}
-                            className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-white transition-all underline underline-offset-4"
-                        >
-                            <FilterX className="w-4 h-4" />
-                            Clear Filters
-                        </button>
-                    )}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {stats.map((stat, i) => (
+                        <StatCard key={i} {...stat} />
+                    ))}
                 </div>
 
-                {isLoading ? (
-                    <div className="p-32 flex flex-col items-center justify-center space-y-4">
-                        <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-                        <p className="text-slate-400 font-medium animate-pulse">Processing update...</p>
-                    </div>
-                ) : queue.length === 0 ? (
-                    <div className="p-32 text-center flex flex-col items-center justify-center space-y-6">
-                        <div className="w-20 h-20 rounded-[32px] bg-slate-900 flex items-center justify-center text-slate-800 border border-slate-800/50">
-                            <FilterX className="w-10 h-10" />
+                <div className="glass rounded-[32px] overflow-hidden border border-slate-800/50 shadow-xl">
+                    <div className="p-6 border-b border-slate-800/50 flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-slate-900/10">
+                        <div className="flex flex-col md:flex-row gap-4 flex-1">
+                            <div className="relative flex-1 max-w-md">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                <input
+                                    className="input-field pl-10 py-2.5 text-sm w-full"
+                                    placeholder="Search by name or APP ID..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Filter className="w-4 h-4 text-slate-500 ml-2" />
+                                <select
+                                    className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                >
+                                    <option value="ALL">All Active</option>
+                                    <option value={LIFECYCLE_STATUSES.SUBMITTED}>Submitted</option>
+                                </select>
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <h3 className="text-2xl font-display font-bold text-slate-400">No results found</h3>
-                            <p className="text-slate-600 max-w-xs mx-auto text-sm">We couldn't find any applications matching your criteria. Try adjusting your search or filters.</p>
-                        </div>
-                        <button
-                            onClick={() => { setSearchTerm(''); setStatusFilter('ALL'); }}
-                            className="px-6 py-2.5 bg-slate-800 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-700 transition-all"
-                        >
-                            Reset Dashboard
-                        </button>
+                        {(statusFilter !== 'ALL' || searchTerm) && (
+                            <button
+                                onClick={() => { setSearchTerm(''); setStatusFilter('ALL'); }}
+                                className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-white transition-all underline underline-offset-4"
+                            >
+                                <FilterX className="w-4 h-4" />
+                                Clear Filters
+                            </button>
+                        )}
                     </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead className="bg-slate-900/50 border-b border-slate-800/50 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                                <tr>
-                                    <th className="px-8 py-5">Applicant</th>
-                                    <th className="px-8 py-5">Priority</th>
-                                    <th className="px-8 py-5 text-center">Reference</th>
-                                    <th className="px-8 py-5">Requested</th>
-                                    <th className="px-8 py-5">Status</th>
-                                    <th className="px-8 py-5 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-800/50">
-                                {queue.map((app) => (
-                                    <tr key={app.id} className="hover:bg-slate-800/30 transition-all group">
-                                        <td className="px-8 py-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/10 flex items-center justify-center font-bold text-blue-400 text-lg group-hover:bg-blue-600 group-hover:text-white transition-all">
-                                                    {(app.name || 'U')[0]}
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-200 text-base">{app.name || 'Anonymous'}</p>
-                                                    <p className="text-xs text-slate-500 font-medium">{app.company}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <Badge variant={getPriority(app.amount).variant} className="px-3 py-1">
-                                                {getPriority(app.amount).label}
-                                            </Badge>
-                                        </td>
-                                        <td className="px-8 py-6 text-center">
-                                            <span className="text-xs font-mono font-bold text-slate-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
-                                                {app.id}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <div className="space-y-1">
-                                                <p className="text-sm font-bold text-slate-200">R {app.amount?.toLocaleString()}</p>
-                                                <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{app.date ? new Date(app.date).toLocaleDateString() : 'N/A'}</p>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <Badge variant={getStatusVariant(app.status)} className="px-4 py-1.5 shadow-lg shadow-black/20">
-                                                {app.status || 'Unknown'}
-                                            </Badge>
-                                        </td>
-                                        <td className="px-8 py-6 text-right">
-                                            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
-                                                <div className="flex gap-2 w-full sm:w-auto">
-                                                    <button
-                                                        onClick={() => handleVerify(app.id)}
-                                                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl lg:rounded-2xl bg-emerald-600/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all shadow-lg active:scale-95"
-                                                    >
-                                                        Approve
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleRejectClick(app.id)}
-                                                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl lg:rounded-2xl bg-red-600/10 text-red-400 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95"
-                                                    >
-                                                        Reject
-                                                    </button>
-                                                </div>
-                                                <button
-                                                    onClick={() => navigate(`/hr/verifications/${app.id}`)}
-                                                    className="p-3 bg-slate-900 border border-slate-800 text-slate-500 hover:text-blue-400 hover:bg-blue-400/10 rounded-xl lg:rounded-2xl transition-all shadow-xl active:scale-95 flex items-center justify-center"
-                                                >
-                                                    <Eye className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        </td>
+
+                    {isLoading ? (
+                        <div className="py-20 px-6 md:p-32 flex flex-col items-center justify-center space-y-4">
+                            <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+                            <p className="text-slate-400 font-medium animate-pulse text-[10px] font-black uppercase tracking-widest text-center">Processing update...</p>
+                        </div>
+                    ) : queue.length === 0 ? (
+                        <div className="py-20 px-6 md:p-32 text-center flex flex-col items-center justify-center space-y-6">
+                            <div className="w-20 h-20 rounded-[32px] bg-slate-900 flex items-center justify-center text-slate-800 border border-slate-800/50 shadow-inner">
+                                <FilterX className="w-10 h-10" />
+                            </div>
+                            <div className="space-y-3">
+                                <h3 className="text-2xl font-display font-bold text-slate-300">No matching applications</h3>
+                                <p className="text-slate-500 max-w-[280px] mx-auto text-xs leading-relaxed">We couldn't find any results for your current search or filter. Try a different term or clear filters.</p>
+                            </div>
+                            <button
+                                onClick={() => { setSearchTerm(''); setStatusFilter('ALL'); }}
+                                className="px-8 py-3 bg-slate-800 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-300 hover:bg-slate-700 hover:text-white transition-all active:scale-95"
+                            >
+                                Reset Results
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-slate-900/50 border-b border-slate-800/50 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                    <tr>
+                                        <th className="px-8 py-5">Applicant</th>
+                                        <th className="px-8 py-5">Priority</th>
+                                        <th className="px-8 py-5 text-center">Reference</th>
+                                        <th className="px-8 py-5">Requested</th>
+                                        <th className="px-8 py-5">Status</th>
+                                        <th className="px-8 py-5 text-right">Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                                </thead>
+                                <tbody className="divide-y divide-slate-800/50">
+                                    {queue.map((app) => (
+                                        <tr key={app.id} className="hover:bg-slate-800/30 transition-all group">
+                                            <td className="px-8 py-6">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/10 flex items-center justify-center font-bold text-blue-400 text-lg group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                                        {(app.name || 'U')[0]}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-slate-200 text-base">{app.name || 'Anonymous'}</p>
+                                                        <p className="text-xs text-slate-500 font-medium">{app.company}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <Badge variant={getPriority(app.amount).variant} className="px-3 py-1">
+                                                    {getPriority(app.amount).label}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-8 py-6 text-center">
+                                                <span className="text-xs font-mono font-bold text-slate-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+                                                    {app.id}
+                                                </span>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="space-y-1">
+                                                    <p className="text-sm font-bold text-slate-200">R {app.amount?.toLocaleString()}</p>
+                                                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{app.date ? new Date(app.date).toLocaleDateString() : 'N/A'}</p>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <Badge variant={getStatusVariant(app.status)} className="px-4 py-1.5 shadow-lg shadow-black/20">
+                                                    {app.status || 'Unknown'}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-8 py-6 text-right">
+                                                <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+                                                    <div className="flex gap-2 w-full sm:w-auto">
+                                                        <button
+                                                            onClick={() => handleVerify(app.id)}
+                                                            className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl lg:rounded-2xl bg-emerald-600/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all shadow-lg active:scale-95"
+                                                        >
+                                                            Approve
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleRejectClick(app.id)}
+                                                            className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl lg:rounded-2xl bg-red-600/10 text-red-400 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95"
+                                                        >
+                                                            Reject
+                                                        </button>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => navigate(`/hr/verifications/${app.id}`)}
+                                                        className="p-3 bg-slate-900 border border-slate-800 text-slate-500 hover:text-blue-400 hover:bg-blue-400/10 rounded-xl lg:rounded-2xl transition-all shadow-xl active:scale-95 flex items-center justify-center"
+                                                    >
+                                                        <Eye className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Quick Rejection Modal */}
@@ -290,7 +292,7 @@ const VerificationQueue = () => {
             </Modal>
 
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
-        </div>
+        </>
     );
 };
 

@@ -147,7 +147,7 @@ const RiskReviews = () => {
                     />
                 </div>
                 
-                <div className="flex flex-wrap gap-4 items-center">
+                <div className="flex flex-wrap gap-4 items-center w-full lg:w-auto">
                     <FilterGroup 
                         label="Risk"
                         options={['All', 'HIGH', 'MEDIUM', 'LOW']}
@@ -157,7 +157,7 @@ const RiskReviews = () => {
                     
                     <button 
                         onClick={() => setAssignedToMe(!assignedToMe)}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-bold border transition-all ${
+                        className={`flex-1 lg:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
                             assignedToMe ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20" : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200"
                         }`}
                     >
@@ -167,9 +167,10 @@ const RiskReviews = () => {
                 </div>
             </div>
 
-            {/* Applications Table */}
-            <div className="glass rounded-[40px] overflow-hidden border border-slate-800/50 shadow-2xl">
-                <div className="overflow-x-auto">
+            {/* Applications Display */}
+            <div className="glass rounded-[32px] md:rounded-[40px] overflow-hidden border border-slate-800/50 shadow-2xl">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-900/50 border-b border-slate-800/50">
@@ -269,9 +270,66 @@ const RiskReviews = () => {
                     </table>
                 </div>
 
+                {/* Mobile Card View */}
+                <div className="md:hidden divide-y divide-slate-800/40">
+                    {filteredApps.map((app) => (
+                        <div key={app.id} className="p-6 space-y-4 hover:bg-slate-800/20 transition-all">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <p className="font-bold text-slate-200">{app.name || `No Name (ID: ${app.id.split('-')[1]})`}</p>
+                                    <p className="text-[10px] text-slate-500 font-mono mt-1 font-bold">{app.id}</p>
+                                </div>
+                                <Badge variant={
+                                    app.status === STATUSES.ESCALATED ? 'danger' : 
+                                    app.status === STATUSES.ON_HOLD ? 'warning' : 'primary'
+                                }>
+                                    {app.status}
+                                </Badge>
+                            </div>
+
+                            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/50">
+                                <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-2">Primary Risk Factor</p>
+                                <p className="text-sm text-slate-400 font-medium leading-relaxed">{app.reason || 'DTI calculation requires manual verification.'}</p>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-2">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Risk Score</span>
+                                    <span className={`text-lg font-display font-black ${app.score >= 500 ? "text-blue-400" : "text-amber-400"}`}>
+                                        {app.score || 'N/A'}
+                                    </span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={() => navigate(`/credit/profile/${app.id}`)}
+                                        className="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-[10px] uppercase tracking-widest hover:bg-blue-500 transition-all"
+                                    >
+                                        Review
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveMenu(activeMenu === app.id ? null : app.id)}
+                                        className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-500"
+                                    >
+                                        <MoreVertical className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {/* Mobile Action Menu (Overlay logic simplified for mobile) */}
+                            {activeMenu === app.id && (
+                                <div className="p-2 space-y-1 bg-slate-900 border border-slate-800 rounded-2xl animate-in fade-in slide-in-from-top-2">
+                                    <MenuButton icon={ArrowUpRight} label="Escalate" onClick={() => handleAction(app.id, STATUSES.ESCALATED, 'Escalated from Risk Reviews')} />
+                                    <MenuButton icon={RotateCcw} label="Re-evaluate" onClick={() => handleReevaluate(app)} />
+                                    <MenuButton icon={XCircle} label="Reject" variant="danger" onClick={() => handleAction(app.id, STATUSES.DECLINED, 'Rejected during Risk Review')} />
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
                 {filteredApps.length === 0 && (
-                    <div className="p-24 text-center space-y-4">
-                        <FileSearch className="w-16 h-16 text-slate-800 mx-auto" />
+                    <div className="p-12 md:p-24 text-center space-y-4">
+                        <FileSearch className="w-12 h-12 md:w-16 md:h-16 text-slate-800 mx-auto" />
                         <div>
                             <h3 className="text-xl font-display font-bold text-slate-300">Clean Pipeline</h3>
                             <p className="text-slate-500 max-w-xs mx-auto mt-2 font-medium">No applications currently match your risk filtering criteria.</p>
@@ -284,19 +342,21 @@ const RiskReviews = () => {
 };
 
 const FilterGroup = ({ label, options, value, onChange }) => (
-    <div className="flex items-center gap-2 p-1 bg-slate-900/50 border border-slate-800/50 rounded-2xl">
-        <span className="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">{label}</span>
-        {options.map(opt => (
-            <button 
-                key={opt}
-                onClick={() => onChange(opt)}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${
-                    value === opt ? "bg-slate-800 text-white" : "text-slate-500 hover:text-slate-300 hover:bg-slate-800/30"
-                }`}
-            >
-                {opt}
-            </button>
-        ))}
+    <div className="flex flex-wrap items-center gap-1 sm:gap-2 p-1 bg-slate-900/50 border border-slate-800/50 rounded-2xl w-full sm:w-auto">
+        <span className="px-2 sm:px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">{label}</span>
+        <div className="flex flex-wrap gap-1">
+            {options.map(opt => (
+                <button 
+                    key={opt}
+                    onClick={() => onChange(opt)}
+                    className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-tighter transition-all ${
+                        value === opt ? "bg-slate-800 text-white" : "text-slate-500 hover:text-slate-300 hover:bg-slate-800/30"
+                    }`}
+                >
+                    {opt}
+                </button>
+            ))}
+        </div>
     </div>
 );
 

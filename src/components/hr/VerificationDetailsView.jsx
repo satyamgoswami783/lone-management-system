@@ -30,9 +30,9 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
 
   if (!application) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-8 text-center animate-in duration-700">
-        <div className="w-28 h-28 rounded-[48px] bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-700 shadow-inner">
-          <AlertCircle className="w-14 h-14" />
+      <div className="flex flex-col items-center justify-center py-10 sm:py-20 space-y-6 sm:space-y-8 text-center animate-in duration-700">
+        <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-[32px] sm:rounded-[48px] bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-700 shadow-inner">
+          <AlertCircle className="w-10 h-10 sm:w-14 sm:h-14" />
         </div>
         <div className="space-y-3 px-6">
           <h3 className="text-3xl font-display font-black text-slate-200 lowercase tracking-tighter">No Active Loan Request</h3>
@@ -84,7 +84,7 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
   return (
     <div className="space-y-12 animate-in duration-700">
       {/* Status Flow Stepper */}
-      <div className="glass p-4 sm:p-8 lg:p-10 rounded-[24px] sm:rounded-[48px] border-slate-800 bg-white shadow-sm min-w-0">
+      <div className="glass p-6 sm:p-10 rounded-[32px] sm:rounded-[48px] border-slate-800 bg-white shadow-sm min-w-0">
         <div className="overflow-x-auto overscroll-x-contain pb-2 -mx-1 px-1 sm:overflow-visible sm:mx-0 sm:px-0">
         <div className="flex items-center justify-between min-w-[min(100%,20rem)] sm:min-w-0 max-w-4xl mx-auto relative px-4 sm:px-8">
           <div className="absolute top-1/2 left-0 w-full h-[3px] bg-slate-800 -translate-y-1/2 -z-10 hidden sm:block"></div>
@@ -130,7 +130,7 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
           />
 
           {/* Documents Section */}
-          <div className="glass p-10 rounded-[48px] border-slate-800 space-y-8 bg-white shadow-sm">
+          <div className="glass p-6 sm:p-10 rounded-[32px] sm:rounded-[48px] border-slate-800 space-y-8 bg-white shadow-sm">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 border border-blue-100">
                 <FileText className="w-6 h-6" />
@@ -177,7 +177,7 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
             ]}
           />
 
-          <div className="glass p-10 rounded-[48px] border-slate-800 space-y-10 bg-white border-l-8 border-l-amber-500/30 shadow-sm relative overflow-hidden">
+          <div className="glass p-6 sm:p-10 rounded-[32px] sm:rounded-[48px] border-slate-800 space-y-10 bg-white border-l-8 border-l-amber-500/30 shadow-sm relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-3xl p-1"></div>
             <div className="flex items-center justify-between relative z-10">
               <div className="flex items-center gap-4">
@@ -240,10 +240,10 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
       {/* Approval Confirmation Modal */}
       {showApproveModal && (
         <div className="fixed inset-0 z-[1000] overflow-y-auto overscroll-contain animate-in duration-300">
-          <div className="fixed inset-0 bg-slate-200/40 backdrop-blur-xl" aria-hidden />
-          <div className="relative z-10 flex min-h-full items-center justify-center p-4 sm:p-6 pointer-events-none">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl" aria-hidden />
+          <div className="relative z-10 flex min-h-[100dvh] items-center justify-center p-4 sm:p-6 pointer-events-none">
             <div
-              className="glass w-full max-w-lg max-h-[min(90dvh,90vh)] flex flex-col overflow-hidden rounded-[32px] sm:rounded-[60px] border-slate-800 shadow-2xl shadow-blue-500/10 my-auto animate-in zoom-in-95 duration-500 pointer-events-auto"
+              className="glass w-full max-w-lg max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden rounded-[40px] border-slate-800 shadow-2xl shadow-blue-500/10 animate-in zoom-in-95 duration-500 pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="overflow-y-auto overflow-x-hidden p-6 sm:p-10 space-y-6 sm:space-y-10 custom-scrollbar">
@@ -287,10 +287,10 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
       {/* Rejection Modal */}
       {showRejectModal && (
         <div className="fixed inset-0 z-[1000] overflow-y-auto overscroll-contain animate-in duration-300">
-          <div className="fixed inset-0 bg-slate-200/40 backdrop-blur-xl" aria-hidden />
-          <div className="relative z-10 flex min-h-full items-center justify-center p-4 sm:p-6 pointer-events-none">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl" aria-hidden />
+          <div className="relative z-10 flex min-h-[100dvh] items-center justify-center p-4 sm:p-6 pointer-events-none">
             <div
-              className="glass w-full max-w-xl max-h-[min(90dvh,90vh)] flex flex-col overflow-hidden rounded-[32px] sm:rounded-[60px] border-slate-800 shadow-2xl shadow-red-500/10 my-auto animate-in zoom-in-95 duration-500 pointer-events-auto"
+              className="glass w-full max-w-xl max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden rounded-[40px] border-slate-800 shadow-2xl shadow-red-500/10 animate-in zoom-in-95 duration-500 pointer-events-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="overflow-y-auto overflow-x-hidden p-6 sm:p-10 space-y-6 sm:space-y-10 custom-scrollbar">
@@ -371,7 +371,7 @@ const DetailCard = ({ title, icon: Icon, items, variant = 'slate' }) => {
   };
 
   return (
-    <div className="glass p-10 rounded-[48px] border-slate-800 space-y-8 hover:shadow-xl transition-all duration-500 bg-white group overflow-hidden relative shadow-sm">
+    <div className="glass p-6 sm:p-10 rounded-[32px] sm:rounded-[48px] border-slate-800 space-y-8 hover:shadow-xl transition-all duration-500 bg-white group overflow-hidden relative shadow-sm">
       <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 blur-3xl rounded-full translate-x-12 -translate-y-12 transition-all group-hover:bg-blue-600/10"></div>
       <div className="flex items-center gap-4 relative z-10">
         <div className={cn("p-3 rounded-2xl border transition-all duration-500 group-hover:scale-110", iconColors[variant])}>

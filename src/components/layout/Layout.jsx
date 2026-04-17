@@ -33,7 +33,7 @@ const Layout = ({ children }) => {
   }
 
   return (
-    <div className="flex min-h-screen min-h-dvh bg-white text-slate-200 overflow-x-hidden">
+    <div className="flex min-h-screen min-h-dvh bg-white text-white overflow-x-hidden">
       <Sidebar 
         isOpen={isSidebarOpen} 
         toggle={() => setIsSidebarOpen(!isSidebarOpen)} 
@@ -41,7 +41,7 @@ const Layout = ({ children }) => {
         closeMobile={() => setIsSidebarOpen(false)}
       />
       
-      <main className="flex-1 flex flex-col min-w-0 h-screen min-h-0 overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 h-screen h-[100dvh] h-[100svh] min-h-0 overflow-hidden">
         {/* Header */}
         <header className="h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-800 sticky top-0 z-30 flex-shrink-0">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
@@ -82,7 +82,7 @@ const Layout = ({ children }) => {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 min-h-0 p-4 sm:p-6 lg:p-10 xl:p-12 overflow-y-auto overflow-x-hidden no-scrollbar">
+        <div className="flex-1 min-h-0 p-4 sm:p-6 lg:p-10 xl:p-12 pb-8 sm:pb-12 overflow-y-auto overflow-x-hidden no-scrollbar scroll-smooth">
           <div className="max-w-[1600px] mx-auto w-full min-w-0">
             {children || <Outlet />}
           </div>

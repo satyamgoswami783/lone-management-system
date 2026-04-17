@@ -14,7 +14,14 @@ import {
     ChevronRight
 } from 'lucide-react';
 import { SectionHeader, Badge } from '../../components/ui/Shared';
-import { useLoans } from '../../context/LoanContext';
+import { useLoans, STATUSES } from '../../context/LoanContext';
+import { useAuth } from '../../context/AuthContext';
+import LetterPreviewModal from '../../components/shared/LetterPreviewModal';
+import { 
+    getLoanConfirmationLetter, 
+    getSettlementLetter, 
+    getPaidUpLetter 
+} from '../../utils/letterTemplates';
 
 const ApplicationFullView = () => {
     const { id } = useParams();
@@ -22,6 +29,15 @@ const ApplicationFullView = () => {
     const { applications } = useLoans();
 
     const application = applications.find(app => app.id === id);
+    const { user: currentUser } = useAuth();
+    
+    // Letter modal state
+    const [letterModal, setLetterModal] = useState({
+        isOpen: false,
+        type: '',
+        content: '',
+        title: ''
+    });
 
     if (!application) {
         return (
@@ -60,12 +76,56 @@ const ApplicationFullView = () => {
                         <Printer className="w-5 h-5" />
                         Print
                     </button>
-                    <button className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-blue-600 text-white font-bold hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20">
-                        <Download className="w-5 h-5" />
-                        Download PDF
-                    </button>
+                    
+                    {/* Letter Generation Dropdown-like UI */}
+                    <div className="flex items-center gap-2 p-1 bg-slate-950 border border-slate-800 rounded-2xl">
+                        {(application.status === STATUSES.ACTIVE || application.status === STATUSES.APPROVED) && (
+                            <LetterActionButton 
+                                label="Confirmation" 
+                                onClick={() => setLetterModal({
+                                    isOpen: true,
+                                    type: 'confirmation',
+                                    title: 'Loan Confirmation Letter',
+                                    content: getLoanConfirmationLetter(application, currentUser)
+                                })}
+                            />
+                        )}
+                        {(application.status === STATUSES.ACTIVE || application.status === STATUSES.DISBURSED) && (
+                            <LetterActionButton 
+                                label="Settlement" 
+                                onClick={() => setLetterModal({
+                                    isOpen: true,
+                                    type: 'settlement',
+                                    title: 'Settlement Quotation',
+                                    content: getSettlementLetter(application, currentUser, (application.amount || 0) * 1.1)
+                                })}
+                            />
+                        )}
+                        {application.status === STATUSES.PAID && (
+                            <LetterActionButton 
+                                label="Paid-up" 
+                                variant="success"
+                                onClick={() => setLetterModal({
+                                    isOpen: true,
+                                    type: 'paidup',
+                                    title: 'Closure Certificate',
+                                    content: getPaidUpLetter(application, currentUser)
+                                })}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
+
+            {/* Letter Preview Modal */}
+            <LetterPreviewModal 
+                isOpen={letterModal.isOpen}
+                onClose={() => setLetterModal(prev => ({ ...prev, isOpen: false }))}
+                htmlContent={letterModal.content}
+                loanId={application.id}
+                recipientEmail={application.email}
+                title={letterModal.title}
+            />
 
             {/* Print Header (Only visible on print) */}
             <div className="hidden print:block mb-10 border-b-4 border-slate-900 pb-8">
@@ -212,6 +272,19 @@ const MetricBox = ({ label, value, color }) => (
         <p className="text-[10px] text-slate-600 font-bold uppercase">{label}</p>
         <p className={`text-lg transition-all ${color}`}>{value}</p>
     </div>
+);
+
+const LetterActionButton = ({ label, onClick, variant = 'primary' }) => (
+    <button 
+        onClick={onClick}
+        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all ${
+            variant === 'success' 
+            ? "hover:bg-emerald-600/10 text-emerald-500" 
+            : "hover:bg-blue-600/10 text-blue-400"
+        }`}
+    >
+        {label}
+    </button>
 );
 
 export default ApplicationFullView;

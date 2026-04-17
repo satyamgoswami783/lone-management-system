@@ -18,6 +18,7 @@ import { useLoans } from '../../context/LoanContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import DocumentPreviewModal from '../../components/ui/DocumentPreviewModal';
+import Modal from '../../components/ui/Modal';
 import { buildLetterPayload, LETTER_TYPES } from '../../features/letters/generator';
 
 const DocumentsCenter = () => {
@@ -101,7 +102,8 @@ const DocumentsCenter = () => {
     };
 
     return (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+        <>
+            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
             <SectionHeader
                 title="Documents Center"
@@ -259,64 +261,131 @@ const DocumentsCenter = () => {
                 </div>
             </div>
 
-            {/* Expansive Full Form View (Animated) */}
-            {viewingApp && userApp && (
-                <div className="glass p-10 rounded-[40px] border-blue-500/20 animate-in zoom-in-95 duration-500 scroll-mt-10">
-                    <div className="flex justify-between items-start mb-10 border-b border-slate-800 pb-8">
-                        <div className="space-y-2">
-                            <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center font-bold text-2xl mb-4">L</div>
-                            <h3 className="text-3xl font-display font-bold">Loan Application Summary</h3>
-                            <p className="text-slate-500 font-mono uppercase tracking-widest text-xs">Reference: {userApp.id}</p>
-                        </div>
-                        <button onClick={handlePrint} className="flex items-center gap-2 px-6 py-3 bg-slate-900 border border-slate-800 rounded-2xl text-sm font-bold text-slate-300 hover:text-white transition-all">
-                            <Printer className="w-4 h-4" />
-                            Print Copy
-                        </button>
-                    </div>
+            </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                        <div className="space-y-4">
-                            <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">Employee Info</h4>
+            {/* Application Full Form Modal */}
+            <Modal
+                isOpen={viewingApp}
+                onClose={() => setViewingApp(false)}
+                title="Loan Application Details"
+                maxWidth="max-w-6xl"
+            >
+                {userApp && (
+                    <div className="space-y-12 py-4 pb-20">
+                        <div className="flex flex-col md:flex-row justify-between items-start gap-8 border-b border-slate-800/50 pb-8">
                             <div className="space-y-3">
-                                <FormDetail label="Full Name" value={userApp.name} />
-                                <FormDetail label="ID Number" value={userApp.idNumber || 'N/A'} />
-                                <FormDetail label="Email Address" value={userApp.email} />
+                                <div className="w-16 h-16 rounded-[24px] bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-2xl shadow-blue-600/20">
+                                    <FileText className="w-8 h-8 text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-3xl font-display font-bold text-slate-100 italic">Form Summary</h3>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <Badge variant="primary">{userApp.status}</Badge>
+                                        <span className="text-slate-600 text-[10px] font-black uppercase tracking-widest leading-none">•</span>
+                                        <p className="text-slate-500 font-mono font-bold text-[10px] uppercase tracking-widest">REF: {userApp.id}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4 sm:gap-8 bg-slate-950/40 p-6 rounded-[32px] border border-slate-800/50 w-full md:w-auto">
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Submission Date</p>
+                                    <p className="text-sm font-bold text-slate-200">{new Date(userApp.date).toLocaleDateString()}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Requested Principal</p>
+                                    <p className="text-sm font-black text-blue-400">R {userApp.amount?.toLocaleString()}</p>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">Employment Info</h4>
-                            <div className="space-y-3">
-                                <FormDetail label="Employer" value={userApp.company} />
-                                <FormDetail label="Gross Salary" value={`R ${userApp.salary?.toLocaleString()}`} />
-                                <FormDetail label="Pay Day" value="Monthly - 25th" />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                            <section className="space-y-6">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
+                                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Personal Assets</h4>
+                                </div>
+                                <div className="space-y-5 bg-slate-950/20 p-6 rounded-3xl border border-slate-800/30">
+                                    <FormDetail label="Employee Full Name" value={userApp.name} />
+                                    <FormDetail label="National ID / Passport" value={userApp.idNumber || 'LMS-940251-X'} />
+                                    <FormDetail label="Primary Email" value={userApp.email} />
+                                    <FormDetail label="Contact Number" value={userApp.phone || '+27 71 000 0000'} />
+                                </div>
+                            </section>
+
+                            <section className="space-y-6">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
+                                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Professional Data</h4>
+                                </div>
+                                <div className="space-y-5 bg-slate-950/20 p-6 rounded-3xl border border-slate-800/30">
+                                    <FormDetail label="Registered Employer" value={userApp.company} />
+                                    <FormDetail label="Net Monthly Salary" value={`R ${userApp.salary?.toLocaleString()}`} />
+                                    <FormDetail label="Employment Duration" value="3 Years, 2 Months" />
+                                    <FormDetail label="Department" value={userApp.department || 'Operations'} />
+                                </div>
+                            </section>
+
+                            <section className="space-y-6">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
+                                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Risk Analysis</h4>
+                                </div>
+                                <div className="space-y-5 bg-slate-950/20 p-6 rounded-3xl border border-slate-800/30">
+                                    <FormDetail label="Requested Loan Amount" value={`R ${userApp.amount?.toLocaleString()}`} />
+                                    <FormDetail label="Estimated Installment" value={`R ${(userApp.amount / 12 * 1.15).toFixed(2)}`} />
+                                    <FormDetail label="Repayment Strategy" value="Payroll Deduction" />
+                                    <div className="pt-2 border-t border-slate-800/50">
+                                        <p className="text-[9px] font-black text-slate-600 uppercase mb-2">Internal Risk Profile</p>
+                                        <Badge variant="success">Low Volatility</Badge>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+
+                        <div className="p-8 bg-blue-600/5 rounded-[32px] border border-blue-600/10 flex flex-col sm:flex-row items-center gap-6 justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 text-blue-500">
+                                     <ShieldCheck className="w-10 h-10" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-slate-200 italic">Legal Acknowledgment</p>
+                                    <p className="text-xs text-slate-500 leading-relaxed max-w-lg">I hereby confirm that all provided information is accurate and verified by the Corporate Compliance Engine.</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-5 py-2.5 rounded-2xl text-[10px] font-mono font-bold text-blue-400 italic">
+                                SIGNED: {new Date(userApp.date).toLocaleDateString()}
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">Loan Request</h4>
-                            <div className="space-y-3">
-                                <FormDetail label="Principle Amount" value={`R ${userApp.amount?.toLocaleString()}`} />
-                                <FormDetail label="Loan Period" value="12 Months" />
-                                <FormDetail label="Installment (Est)" value={`R ${(userApp.amount / 10).toLocaleString()}`} />
+                        {/* Footer Buttons moved inside Scroll Area */}
+                        <div className="mt-20 pt-8 border-t border-slate-800/50 flex flex-col sm:flex-row gap-6 justify-between items-center bg-slate-900/40 p-8 rounded-[40px] border border-slate-800/30">
+                            <div className="flex items-center gap-4">
+                                <ShieldCheck className="w-8 h-8 text-emerald-500" />
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-100 uppercase tracking-widest leading-tight">Digital Audit Hash</p>
+                                    <p className="text-[10px] text-slate-500 font-mono truncate max-w-[200px]">{userApp?.id}-SECURE-VERIFIED</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                                <button 
+                                    onClick={handlePrint}
+                                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-800 rounded-2xl text-[10px] sm:text-xs font-bold text-slate-300 hover:text-white transition-all border border-slate-700 active:scale-95"
+                                >
+                                    <Printer className="w-4 h-4" />
+                                    Export Analysis
+                                </button>
+                                <button 
+                                    onClick={() => setViewingApp(false)}
+                                    className="w-full sm:w-auto px-10 py-3.5 bg-blue-600 rounded-2xl text-white font-bold hover:bg-blue-500 shadow-xl shadow-blue-600/20 text-[10px] sm:text-xs uppercase active:scale-95"
+                                >
+                                    Close View
+                                </button>
                             </div>
                         </div>
                     </div>
-
-                    <div className="mt-12 pt-12 border-t border-slate-800/50 flex flex-col md:flex-row gap-6 justify-between items-center bg-slate-900/20 p-8 rounded-[32px]">
-                        <div className="flex items-center gap-4">
-                            <ShieldCheck className="w-8 h-8 text-emerald-500" />
-                            <div>
-                                <p className="text-sm font-bold text-slate-200">Electronic Signature Verified</p>
-                                <p className="text-xs text-slate-500">Digitally signed on {new Date(userApp.date).toLocaleString()}</p>
-                            </div>
-                        </div>
-                        <div className="flex gap-3">
-                            <button className="btn-primary px-8">Download PDF Report</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                )}
+            </Modal>
 
             <DocumentPreviewModal
                 isOpen={!!previewTarget}
@@ -329,7 +398,7 @@ const DocumentsCenter = () => {
                 onDownloadPdf={handleDownloadPdf}
                 onSendEmail={handleSendEmail}
             />
-        </div>
+        </>
     );
 };
 

@@ -72,15 +72,16 @@ const EmployeeDashboard = () => {
             </button>
           </div>
 
-          <div className="glass rounded-3xl overflow-hidden border border-slate-800/50">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left min-w-[600px] lg:min-w-0">
+          <div className="glass rounded-[32px] overflow-hidden border border-slate-800/50 shadow-xl">
+            {/* Desktop View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left">
                 <thead>
                   <tr className="bg-slate-900/50 border-b border-slate-800/50">
-                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Reference</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Reference</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Date</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Amount</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/50">
@@ -89,10 +90,10 @@ const EmployeeDashboard = () => {
                     { ref: 'LMS-8842', date: '25 Mar 2026', amount: 'R 500.00', status: 'Paid', sVar: 'success' },
                     { ref: 'LMS-1029', date: '10 Mar 2026', amount: 'R 4,500.00', status: 'Disbursed', sVar: 'primary' },
                   ].map((row, i) => (
-                    <tr key={i} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-6 py-4 font-medium text-slate-300">{row.ref}</td>
+                    <tr key={i} className="hover:bg-slate-800/30 transition-colors cursor-pointer group">
+                      <td className="px-6 py-4 font-mono text-xs font-bold text-slate-400 group-hover:text-blue-400 transition-colors uppercase">{row.ref}</td>
                       <td className="px-6 py-4 text-sm text-slate-400">{row.date}</td>
-                      <td className="px-6 py-4 text-sm font-semibold text-slate-200">{row.amount}</td>
+                      <td className="px-6 py-4 text-sm font-black text-slate-200">{row.amount}</td>
                       <td className="px-6 py-4">
                         <Badge variant={row.sVar}>{row.status}</Badge>
                       </td>
@@ -100,6 +101,32 @@ const EmployeeDashboard = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile View */}
+            <div className="md:hidden divide-y divide-slate-800/40">
+              {[
+                  { ref: 'LMS-9021', date: '12 Apr 2026', amount: 'R 500.00', status: 'Paid', sVar: 'success' },
+                  { ref: 'LMS-8842', date: '25 Mar 2026', amount: 'R 500.00', status: 'Paid', sVar: 'success' },
+                  { ref: 'LMS-1029', date: '10 Mar 2026', amount: 'R 4,500.00', status: 'Disbursed', sVar: 'primary' },
+              ].map((row, i) => (
+                  <div key={i} className="p-6 space-y-4 hover:bg-slate-800/20 active:bg-slate-800/40 transition-colors">
+                      <div className="flex justify-between items-start">
+                          <div>
+                              <p className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-tight mb-1">{row.ref}</p>
+                              <p className="text-xs font-bold text-slate-500 flex items-center gap-1.5 uppercase">
+                                  <Calendar className="w-3 h-3" />
+                                  {row.date}
+                              </p>
+                          </div>
+                          <Badge variant={row.sVar}>{row.status}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between pt-2">
+                          <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Transaction Amount</p>
+                          <p className="text-lg font-black text-white">{row.amount}</p>
+                      </div>
+                  </div>
+              ))}
             </div>
           </div>
         </div>

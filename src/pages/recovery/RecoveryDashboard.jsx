@@ -142,7 +142,8 @@ const RecoveryDashboard = () => {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <>
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
             <SectionHeader
                 title={isManager ? "Administrative Recovery Control" : "Recovery Performance Dashboard"}
@@ -210,7 +211,7 @@ const RecoveryDashboard = () => {
                                     <th className="px-8 py-5 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-800/40 font-medium hidden md:table-row-group">
+                            <tbody className="divide-y divide-slate-800/40 font-medium">
                                 {filteredPriorityCases.map((row) => (
                                     <tr key={row.id} className="hover:bg-slate-800/30 transition-colors group cursor-pointer" onClick={() => navigate(`/recovery/case/${row.id}`)}>
                                         <td className="px-8 py-6">
@@ -267,48 +268,7 @@ const RecoveryDashboard = () => {
                             </tbody>
                         </table>
 
-                        {/* Mobile Priority Cards */}
-                        <div className="md:hidden p-6 space-y-6">
-                            {filteredPriorityCases.map((row) => (
-                                <div key={row.id} className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800/50 space-y-4 shadow-lg group active:bg-slate-800/50 transition-all" onClick={() => navigate(`/recovery/case/${row.id}`)}>
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <h4 className="font-bold text-slate-200">{row.name}</h4>
-                                            <p className="text-[10px] text-slate-500 font-mono mt-0.5 uppercase">{row.id}</p>
-                                        </div>
-                                        <Badge variant={row.recoveryStatus === RECOVERY_STATUSES.PTP_FAILED ? 'danger' : 'warning'}>
-                                            {row.recoveryStatus || 'Arrears'}
-                                        </Badge>
-                                    </div>
-                                    <Badge variant="neutral">
-                                        {row.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}
-                                    </Badge>
-                                    <div className="flex justify-between items-end">
-                                        <div>
-                                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Total Arrears</p>
-                                            <p className="text-lg font-display font-bold text-red-500">
-                                                R {row.installments?.filter(i => i.status !== 'PAID' && new Date(i.dueDate) < new Date())
-                                                    .reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0).toLocaleString()}
-                                            </p>
-                                        </div>
-                                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                                            <button 
-                                                onClick={(e) => openAction(e, row, 'interaction')}
-                                                className="p-3 rounded-2xl bg-slate-800 text-blue-400"
-                                            >
-                                                <Phone className="w-4 h-4" />
-                                            </button>
-                                            <button 
-                                                onClick={(e) => openAction(e, row, 'payment')}
-                                                className="p-3 rounded-2xl bg-slate-800 text-emerald-400"
-                                            >
-                                                <DollarSign className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+
 
                         {filteredPriorityCases.length === 0 && (
                             <div className="p-32 text-center flex flex-col items-center justify-center space-y-4">
@@ -330,116 +290,118 @@ const RecoveryDashboard = () => {
                 </div>
             </div>
 
-            {/* Modals for Quick Actions */}
-            {showPaymentModal && activeActionCase && (
-                <Modal
-                    isOpen={showPaymentModal}
-                    title={`Record Payment: ${activeActionCase.name}`} 
-                    onClose={() => setShowPaymentModal(false)}
-                >
-                    <form 
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            recordRecoveryPayment(activeActionCase.id, parseFloat(paymentForm.amount), 'Cash', paymentForm.ref);
-                            setToast({ message: "Repayment recorded successfully", type: 'success' });
-                            setShowPaymentModal(false);
-                            setPaymentForm({ amount: '', ref: '' });
-                        }} 
-                        className="space-y-6"
-                    >
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Amount (R)</label>
-                            <input 
-                                required
-                                type="number"
-                                className="input-field py-4 text-xl font-display font-bold text-emerald-400"
-                                value={paymentForm.amount}
-                                onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-                                placeholder="0.00"
-                            />
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Reference / Receipt #</label>
-                            <input 
-                                required
-                                className="input-field"
-                                value={paymentForm.ref}
-                                onChange={(e) => setPaymentForm({ ...paymentForm, ref: e.target.value })}
-                                placeholder="e.g. RCP-12345"
-                            />
-                        </div>
-                        <button className="w-full py-5 rounded-3xl bg-emerald-600 text-white font-bold text-sm uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-600/20">
-                            Confirm Repayment
-                        </button>
-                    </form>
-                </Modal>
-            )}
-
-            {showInteractionModal && activeActionCase && (
-                <Modal
-                    isOpen={showInteractionModal}
-                    title={`Log Interaction: ${activeActionCase.name}`} 
-                    onClose={() => setShowInteractionModal(false)}
-                >
-                    <form 
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            logRecoveryInteraction(activeActionCase.id, {
-                                ...interactionForm,
-                                agent: user?.name,
-                                date: new Date().toISOString()
-                            });
-                            setToast({ message: "Interaction logged successfully", type: 'success' });
-                            setShowInteractionModal(false);
-                            setInteractionForm({ type: 'Call', outcome: 'Answered', notes: '' });
-                        }} 
-                        className="space-y-6"
-                    >
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Method</label>
-                                <select 
-                                    className="input-field"
-                                    value={interactionForm.type}
-                                    onChange={(e) => setInteractionForm({ ...interactionForm, type: e.target.value })}
-                                >
-                                    <option>Call</option>
-                                    <option>Message</option>
-                                    <option>Visit</option>
-                                </select>
-                            </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Outcome</label>
-                                <select 
-                                    className="input-field"
-                                    value={interactionForm.outcome}
-                                    onChange={(e) => setInteractionForm({ ...interactionForm, outcome: e.target.value })}
-                                >
-                                    <option>Answered</option>
-                                    <option>No Answer</option>
-                                    <option>PTP Committed</option>
-                                    <option>Refusal</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Notes</label>
-                            <textarea 
-                                required
-                                className="input-field min-h-[120px]"
-                                value={interactionForm.notes}
-                                onChange={(e) => setInteractionForm({ ...interactionForm, notes: e.target.value })}
-                                placeholder="Describe the outcome of the interaction..."
-                            />
-                        </div>
-                        <button className="w-full py-5 rounded-3xl bg-blue-600 text-white font-bold text-sm uppercase tracking-widest hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20">
-                            Record Interaction
-                        </button>
-                    </form>
-                </Modal>
-            )}
         </div>
-    );
+
+        {/* Modals for Quick Actions */}
+        {showPaymentModal && activeActionCase && (
+            <Modal
+                isOpen={showPaymentModal}
+                title={`Record Payment: ${activeActionCase.name}`} 
+                onClose={() => setShowPaymentModal(false)}
+            >
+                <form 
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        recordRecoveryPayment(activeActionCase.id, parseFloat(paymentForm.amount), 'Cash', paymentForm.ref);
+                        setToast({ message: "Repayment recorded successfully", type: 'success' });
+                        setShowPaymentModal(false);
+                        setPaymentForm({ amount: '', ref: '' });
+                    }} 
+                    className="space-y-6"
+                >
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Amount (R)</label>
+                        <input 
+                            required
+                            type="number"
+                            className="input-field py-4 text-xl font-display font-bold text-emerald-400"
+                            value={paymentForm.amount}
+                            onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+                            placeholder="0.00"
+                        />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Reference / Receipt #</label>
+                        <input 
+                            required
+                            className="input-field"
+                            value={paymentForm.ref}
+                            onChange={(e) => setPaymentForm({ ...paymentForm, ref: e.target.value })}
+                            placeholder="e.g. RCP-12345"
+                        />
+                    </div>
+                    <button className="w-full py-5 rounded-3xl bg-emerald-600 text-white font-bold text-sm uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-600/20">
+                        Confirm Repayment
+                    </button>
+                </form>
+            </Modal>
+        )}
+
+        {showInteractionModal && activeActionCase && (
+            <Modal
+                isOpen={showInteractionModal}
+                title={`Log Interaction: ${activeActionCase.name}`} 
+                onClose={() => setShowInteractionModal(false)}
+            >
+                <form 
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        logRecoveryInteraction(activeActionCase.id, {
+                            ...interactionForm,
+                            agent: user?.name,
+                            date: new Date().toISOString()
+                        });
+                        setToast({ message: "Interaction logged successfully", type: 'success' });
+                        setShowInteractionModal(false);
+                        setInteractionForm({ type: 'Call', outcome: 'Answered', notes: '' });
+                    }} 
+                    className="space-y-6"
+                >
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Method</label>
+                            <select 
+                                className="input-field"
+                                value={interactionForm.type}
+                                onChange={(e) => setInteractionForm({ ...interactionForm, type: e.target.value })}
+                            >
+                                <option>Call</option>
+                                <option>Message</option>
+                                <option>Visit</option>
+                            </select>
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Outcome</label>
+                            <select 
+                                className="input-field"
+                                value={interactionForm.outcome}
+                                onChange={(e) => setInteractionForm({ ...interactionForm, outcome: e.target.value })}
+                            >
+                                <option>Answered</option>
+                                <option>No Answer</option>
+                                <option>PTP Committed</option>
+                                <option>Refusal</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Notes</label>
+                        <textarea 
+                            required
+                            className="input-field min-h-[120px]"
+                            value={interactionForm.notes}
+                            onChange={(e) => setInteractionForm({ ...interactionForm, notes: e.target.value })}
+                            placeholder="Describe the outcome of the interaction..."
+                        />
+                    </div>
+                    <button className="w-full py-5 rounded-3xl bg-blue-600 text-white font-bold text-sm uppercase tracking-widest hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20">
+                        Record Interaction
+                    </button>
+                </form>
+            </Modal>
+        )}
+    </>
+);
 };
 
 const AgingBar = ({ label, count, color, total, onClick }) => {
