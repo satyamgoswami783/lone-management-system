@@ -33,6 +33,200 @@ export const RECOVERY_STATUSES = {
   RECOVERED: 'Recovered',
 };
 
+export const EVENT_TYPES = {
+  APPLICATION_SUBMITTED: 'APPLICATION_SUBMITTED',
+  STATUS_CHANGED: 'STATUS_CHANGED',
+  DISBURSED: 'DISBURSED',
+  PAID: 'PAID',
+  FAILED: 'FAILED',
+  ASSIGNMENT: 'ASSIGNMENT',
+  RECOVERY_INTERACTION: 'RECOVERY_INTERACTION',
+  PTP_CREATED: 'PTP_CREATED',
+  PAYMENT_RECORDED: 'PAYMENT_RECORDED',
+};
+
+export const LIFECYCLE_STATUSES = {
+  DRAFT: 'DRAFT',
+  SUBMITTED: 'SUBMITTED',
+  HR_VERIFIED: 'HR_VERIFIED',
+  CREDIT_APPROVED: 'CREDIT_APPROVED',
+  ADMIN_APPROVED: 'ADMIN_APPROVED',
+  DISBURSED: 'DISBURSED',
+  ACTIVE: 'ACTIVE',
+  IN_ARREARS: 'IN_ARREARS',
+  RECOVERY: 'RECOVERY',
+  CLOSED: 'CLOSED',
+  REJECTED: 'REJECTED',
+};
+
+export const LIFECYCLE_ACTIONS = {
+  SUBMIT: 'SUBMIT',
+  HR_VERIFY: 'HR_VERIFY',
+  HR_REJECT: 'HR_REJECT',
+  CREDIT_APPROVE: 'CREDIT_APPROVE',
+  CREDIT_REJECT: 'CREDIT_REJECT',
+  CREDIT_REQUEST_INFO: 'CREDIT_REQUEST_INFO',
+  ADMIN_APPROVE: 'ADMIN_APPROVE',
+  ADMIN_REJECT: 'ADMIN_REJECT',
+  DISBURSE: 'DISBURSE',
+  ACTIVATE: 'ACTIVATE',
+  MARK_IN_ARREARS: 'MARK_IN_ARREARS',
+  START_RECOVERY: 'START_RECOVERY',
+  CATCH_UP: 'CATCH_UP',
+  SETTLE: 'SETTLE',
+  REOPEN: 'REOPEN',
+};
+
+const LEGACY_STATUS_TO_LIFECYCLE = {
+  [STATUSES.NEW]: LIFECYCLE_STATUSES.DRAFT,
+  [STATUSES.SUBMITTED]: LIFECYCLE_STATUSES.SUBMITTED,
+  [STATUSES.HR_PENDING]: LIFECYCLE_STATUSES.SUBMITTED,
+  [STATUSES.HR_APPROVED]: LIFECYCLE_STATUSES.HR_VERIFIED,
+  [STATUSES.CREDIT_PENDING]: LIFECYCLE_STATUSES.HR_VERIFIED,
+  [STATUSES.UNDER_REVIEW]: LIFECYCLE_STATUSES.HR_VERIFIED,
+  [STATUSES.ON_HOLD]: LIFECYCLE_STATUSES.HR_VERIFIED,
+  [STATUSES.NEED_MORE_INFO]: LIFECYCLE_STATUSES.SUBMITTED,
+  [STATUSES.ADMIN_APPROVAL]: LIFECYCLE_STATUSES.CREDIT_APPROVED,
+  [STATUSES.APPROVED]: LIFECYCLE_STATUSES.ADMIN_APPROVED,
+  [STATUSES.DISBURSED]: LIFECYCLE_STATUSES.DISBURSED,
+  [STATUSES.ACTIVE]: LIFECYCLE_STATUSES.ACTIVE,
+  [STATUSES.PAID]: LIFECYCLE_STATUSES.CLOSED,
+  [STATUSES.REJECTED]: LIFECYCLE_STATUSES.REJECTED,
+  [STATUSES.DECLINED]: LIFECYCLE_STATUSES.REJECTED,
+};
+
+const ACTIVE_RECOVERY_STATES = new Set([
+  RECOVERY_STATUSES.CONTACTED,
+  RECOVERY_STATUSES.PTP,
+  RECOVERY_STATUSES.PTP_FAILED,
+  RECOVERY_STATUSES.LEGAL,
+  RECOVERY_STATUSES.SUSPENDED,
+]);
+
+const LIFECYCLE_TRANSITIONS = {
+  [LIFECYCLE_STATUSES.DRAFT]: [LIFECYCLE_ACTIONS.SUBMIT],
+  [LIFECYCLE_STATUSES.SUBMITTED]: [LIFECYCLE_ACTIONS.HR_VERIFY, LIFECYCLE_ACTIONS.HR_REJECT],
+  [LIFECYCLE_STATUSES.HR_VERIFIED]: [
+    LIFECYCLE_ACTIONS.CREDIT_APPROVE,
+    LIFECYCLE_ACTIONS.CREDIT_REJECT,
+    LIFECYCLE_ACTIONS.CREDIT_REQUEST_INFO,
+  ],
+  [LIFECYCLE_STATUSES.CREDIT_APPROVED]: [LIFECYCLE_ACTIONS.ADMIN_APPROVE, LIFECYCLE_ACTIONS.ADMIN_REJECT],
+  [LIFECYCLE_STATUSES.ADMIN_APPROVED]: [LIFECYCLE_ACTIONS.DISBURSE],
+  [LIFECYCLE_STATUSES.DISBURSED]: [LIFECYCLE_ACTIONS.ACTIVATE],
+  [LIFECYCLE_STATUSES.ACTIVE]: [LIFECYCLE_ACTIONS.MARK_IN_ARREARS],
+  [LIFECYCLE_STATUSES.IN_ARREARS]: [LIFECYCLE_ACTIONS.START_RECOVERY, LIFECYCLE_ACTIONS.CATCH_UP],
+  [LIFECYCLE_STATUSES.RECOVERY]: [LIFECYCLE_ACTIONS.CATCH_UP, LIFECYCLE_ACTIONS.SETTLE],
+  [LIFECYCLE_STATUSES.CLOSED]: [LIFECYCLE_ACTIONS.REOPEN],
+  [LIFECYCLE_STATUSES.REJECTED]: [LIFECYCLE_ACTIONS.REOPEN],
+};
+
+const ACTION_TO_TARGET_STATUS = {
+  [LIFECYCLE_ACTIONS.SUBMIT]: LIFECYCLE_STATUSES.SUBMITTED,
+  [LIFECYCLE_ACTIONS.HR_VERIFY]: LIFECYCLE_STATUSES.HR_VERIFIED,
+  [LIFECYCLE_ACTIONS.HR_REJECT]: LIFECYCLE_STATUSES.REJECTED,
+  [LIFECYCLE_ACTIONS.CREDIT_APPROVE]: LIFECYCLE_STATUSES.CREDIT_APPROVED,
+  [LIFECYCLE_ACTIONS.CREDIT_REJECT]: LIFECYCLE_STATUSES.REJECTED,
+  [LIFECYCLE_ACTIONS.CREDIT_REQUEST_INFO]: LIFECYCLE_STATUSES.SUBMITTED,
+  [LIFECYCLE_ACTIONS.ADMIN_APPROVE]: LIFECYCLE_STATUSES.ADMIN_APPROVED,
+  [LIFECYCLE_ACTIONS.ADMIN_REJECT]: LIFECYCLE_STATUSES.REJECTED,
+  [LIFECYCLE_ACTIONS.DISBURSE]: LIFECYCLE_STATUSES.DISBURSED,
+  [LIFECYCLE_ACTIONS.ACTIVATE]: LIFECYCLE_STATUSES.ACTIVE,
+  [LIFECYCLE_ACTIONS.MARK_IN_ARREARS]: LIFECYCLE_STATUSES.IN_ARREARS,
+  [LIFECYCLE_ACTIONS.START_RECOVERY]: LIFECYCLE_STATUSES.RECOVERY,
+  [LIFECYCLE_ACTIONS.CATCH_UP]: LIFECYCLE_STATUSES.ACTIVE,
+  [LIFECYCLE_ACTIONS.SETTLE]: LIFECYCLE_STATUSES.CLOSED,
+  [LIFECYCLE_ACTIONS.REOPEN]: LIFECYCLE_STATUSES.SUBMITTED,
+};
+
+const LIFECYCLE_TO_LEGACY_STATUS = {
+  [LIFECYCLE_STATUSES.DRAFT]: STATUSES.NEW,
+  [LIFECYCLE_STATUSES.SUBMITTED]: STATUSES.HR_PENDING,
+  [LIFECYCLE_STATUSES.HR_VERIFIED]: STATUSES.HR_APPROVED,
+  [LIFECYCLE_STATUSES.CREDIT_APPROVED]: STATUSES.ADMIN_APPROVAL,
+  [LIFECYCLE_STATUSES.ADMIN_APPROVED]: STATUSES.APPROVED,
+  [LIFECYCLE_STATUSES.DISBURSED]: STATUSES.DISBURSED,
+  [LIFECYCLE_STATUSES.ACTIVE]: STATUSES.ACTIVE,
+  [LIFECYCLE_STATUSES.IN_ARREARS]: STATUSES.ACTIVE,
+  [LIFECYCLE_STATUSES.RECOVERY]: STATUSES.ACTIVE,
+  [LIFECYCLE_STATUSES.CLOSED]: STATUSES.PAID,
+  [LIFECYCLE_STATUSES.REJECTED]: STATUSES.REJECTED,
+};
+
+const mapLegacyToLifecycle = (legacyStatus) => LEGACY_STATUS_TO_LIFECYCLE[legacyStatus] || LIFECYCLE_STATUSES.SUBMITTED;
+const mapLifecycleToLegacy = (lifecycleStatus) => LIFECYCLE_TO_LEGACY_STATUS[lifecycleStatus] || STATUSES.SUBMITTED;
+
+const calculateOutstandingAmount = (app) =>
+  (app.installments || []).reduce((sum, inst) => sum + Math.max(0, (inst.amount || 0) - (inst.paidAmount || 0)), 0);
+
+const getUnpaidInstallments = (app) =>
+  (app.installments || []).filter((inst) => (inst.amount || 0) - (inst.paidAmount || 0) > 0);
+
+const getNextDueDate = (app) => {
+  if (app.nextDueDate) return app.nextDueDate;
+  const unpaid = getUnpaidInstallments(app);
+  if (unpaid.length === 0) return null;
+  const earliest = unpaid.reduce((acc, inst) => (new Date(inst.dueDate) < new Date(acc.dueDate) ? inst : acc));
+  return earliest.dueDate;
+};
+
+const hasOverdueInstallment = (app, now = new Date()) =>
+  getUnpaidInstallments(app).some((inst) => new Date(inst.dueDate) < now);
+
+const deriveLifecycleStatus = (app) => {
+  let lifecycleStatus = app.lifecycleStatus || mapLegacyToLifecycle(app.status);
+  const recoveryStatus = app.recoveryStatus;
+  const outstandingAmount =
+    app.outstandingAmount !== undefined && app.outstandingAmount !== null
+      ? Number(app.outstandingAmount)
+      : calculateOutstandingAmount(app);
+  const nextDueDate = getNextDueDate(app);
+  const isOverdueByDate = Boolean(nextDueDate && new Date(nextDueDate) < new Date());
+  const hasOverdue = hasOverdueInstallment(app);
+
+  if (recoveryStatus === RECOVERY_STATUSES.RECOVERED || (outstandingAmount === 0 && app.status === STATUSES.PAID)) {
+    lifecycleStatus = LIFECYCLE_STATUSES.CLOSED;
+  } else if ((isOverdueByDate || hasOverdue) && lifecycleStatus === LIFECYCLE_STATUSES.ACTIVE) {
+    lifecycleStatus = LIFECYCLE_STATUSES.IN_ARREARS;
+  } else if (recoveryStatus === RECOVERY_STATUSES.IN_ARREARS) {
+    lifecycleStatus = LIFECYCLE_STATUSES.IN_ARREARS;
+  } else if (ACTIVE_RECOVERY_STATES.has(recoveryStatus)) {
+    lifecycleStatus = LIFECYCLE_STATUSES.RECOVERY;
+  }
+
+  return lifecycleStatus;
+};
+
+const normalizeApplication = (app) => {
+  const outstandingAmount =
+    app.outstandingAmount !== undefined && app.outstandingAmount !== null
+      ? Number(app.outstandingAmount)
+      : calculateOutstandingAmount(app);
+  const nextDueDate = getNextDueDate(app);
+  const isOverdue = Boolean(nextDueDate && new Date(nextDueDate) < new Date()) || hasOverdueInstallment(app);
+  const normalizedRecoveryStatus = (() => {
+    if (outstandingAmount <= 0) return RECOVERY_STATUSES.RECOVERED;
+    if (isOverdue && (!app.recoveryStatus || app.recoveryStatus === RECOVERY_STATUSES.HEALTHY)) {
+      return RECOVERY_STATUSES.IN_ARREARS;
+    }
+    if (!isOverdue && app.recoveryStatus === RECOVERY_STATUSES.IN_ARREARS) {
+      return RECOVERY_STATUSES.HEALTHY;
+    }
+    return app.recoveryStatus;
+  })();
+
+  return {
+    ...app,
+    outstandingAmount,
+    nextDueDate,
+    recoveryStatus: normalizedRecoveryStatus,
+    lifecycleStatus: deriveLifecycleStatus({ ...app, outstandingAmount, nextDueDate, recoveryStatus: normalizedRecoveryStatus }),
+  };
+};
+
+export const isLifecycleTransitionAllowed = (fromStatus, action) =>
+  (LIFECYCLE_TRANSITIONS[fromStatus] || []).includes(action);
+
 
 export const WORKFLOW_SEQUENCE = [
   STATUSES.SUBMITTED,
@@ -160,7 +354,7 @@ export const LoanProvider = ({ children }) => {
           }
       });
 
-      setApplications(finalApps);
+      setApplications(finalApps.map(normalizeApplication));
     } else {
       // Seed initial data (Merged version)
       const sampleData = [
@@ -385,8 +579,9 @@ export const LoanProvider = ({ children }) => {
             ]
         }
       ];
-      setApplications(sampleData);
-      localStorage.setItem('lms_applications', JSON.stringify(sampleData));
+      const normalizedSamples = sampleData.map(normalizeApplication);
+      setApplications(normalizedSamples);
+      localStorage.setItem('lms_applications', JSON.stringify(normalizedSamples));
     }
 
     if (storedLogs) {
@@ -396,7 +591,7 @@ export const LoanProvider = ({ children }) => {
     // Cross-Tab Synchronization
     const handleStorageChange = (e) => {
       if (e.key === 'lms_applications') {
-        setApplications(JSON.parse(e.newValue));
+        setApplications(JSON.parse(e.newValue || '[]').map(normalizeApplication));
       }
       if (e.key === 'lms_audit_logs') {
         setAuditLogs(JSON.parse(e.newValue));
@@ -408,8 +603,9 @@ export const LoanProvider = ({ children }) => {
   }, []);
 
   const saveApplications = (newApps) => {
-    setApplications(newApps);
-    localStorage.setItem('lms_applications', JSON.stringify(newApps));
+    const normalizedApps = newApps.map(normalizeApplication);
+    setApplications(normalizedApps);
+    localStorage.setItem('lms_applications', JSON.stringify(normalizedApps));
   };
 
   const logAction = (action) => {
@@ -428,12 +624,17 @@ export const LoanProvider = ({ children }) => {
     setApplications(prev => {
       const updated = prev.map(app => {
         if (app.id === id) {
-          if (app.status !== STATUSES.APPROVED) throw new Error('Loan must be APPROVED before disbursement.');
+          if (app.lifecycleStatus !== LIFECYCLE_STATUSES.ADMIN_APPROVED) {
+            throw new Error('Loan must be ADMIN_APPROVED before disbursement.');
+          }
           return { 
             ...app, 
             status: STATUSES.ACTIVE,
+            lifecycleStatus: LIFECYCLE_STATUSES.ACTIVE,
             disbursedAt,
             transactionId,
+            outstandingAmount: app.outstandingAmount ?? calculateOutstandingAmount(app),
+            nextDueDate: getNextDueDate(app),
             auditHistory: [...(app.auditHistory || []), { status: STATUSES.ACTIVE, date: disbursedAt, user: userName, note: `Funds Disbursed: ${transactionId}` }]
           };
         }
@@ -443,7 +644,14 @@ export const LoanProvider = ({ children }) => {
       return updated;
     });
     
-    logAction({ type: 'DISBURSED', appId: id, user: userName, status: STATUSES.ACTIVE, transactionId });
+    logAction({
+      type: EVENT_TYPES.DISBURSED,
+      appId: id,
+      user: userName,
+      status: STATUSES.ACTIVE,
+      lifecycleStatus: LIFECYCLE_STATUSES.ACTIVE,
+      transactionId,
+    });
   };
 
   const batchMarkAsPaid = (appIds, userName = 'Payroll System') => {
@@ -462,6 +670,8 @@ export const LoanProvider = ({ children }) => {
           return { 
             ...app, 
             status: STATUSES.PAID,
+            lifecycleStatus: LIFECYCLE_STATUSES.CLOSED,
+            outstandingAmount: 0,
             paidAt,
             auditHistory: [...(app.auditHistory || []), { status: STATUSES.PAID, date: paidAt, user: userName, note: 'Repayment Received' }]
           };
@@ -473,11 +683,11 @@ export const LoanProvider = ({ children }) => {
     });
 
     results.success.forEach(id => {
-      logAction({ type: 'PAID', appId: id, user: userName, status: STATUSES.PAID });
+      logAction({ type: EVENT_TYPES.PAID, appId: id, user: userName, status: STATUSES.PAID });
     });
     
     results.failed.forEach(f => {
-      logAction({ type: 'FAILED', appId: f.id, user: userName, status: STATUSES.ACTIVE, note: f.reason });
+      logAction({ type: EVENT_TYPES.FAILED, appId: f.id, user: userName, status: STATUSES.ACTIVE, note: f.reason });
     });
 
     return results;
@@ -507,12 +717,19 @@ export const LoanProvider = ({ children }) => {
       ...app,
       id: `APP-00${applications.length + 1}`,
       status: STATUSES.HR_PENDING,
+      lifecycleStatus: LIFECYCLE_STATUSES.SUBMITTED,
       date: new Date().toISOString(),
       auditHistory: [{ status: STATUSES.SUBMITTED, date: new Date().toISOString(), user: 'Employee' }]
     };
 
     saveApplications([newApp, ...applications]);
-    logAction({ type: 'CREATE', appId: newApp.id, user: 'Employee', status: newApp.status });
+    logAction({
+      type: EVENT_TYPES.APPLICATION_SUBMITTED,
+      appId: newApp.id,
+      user: 'Employee',
+      status: newApp.status,
+      lifecycleStatus: newApp.lifecycleStatus,
+    });
     return newApp;
   };
 
@@ -535,7 +752,52 @@ export const LoanProvider = ({ children }) => {
     });
     
     saveApplications(updatedApps);
-    logAction({ type: 'STATUS_UPDATE', appId: id, user: userName, status: newStatus, notes });
+    logAction({ type: EVENT_TYPES.STATUS_CHANGED, appId: id, user: userName, status: newStatus, notes });
+  };
+
+  const transitionLoanLifecycle = (id, action, userName = 'System', notes = '') => {
+    const currentApp = applications.find((app) => app.id === id);
+    if (!currentApp) {
+      throw new Error('Application not found.');
+    }
+
+    const currentLifecycle = deriveLifecycleStatus(currentApp);
+    if (!isLifecycleTransitionAllowed(currentLifecycle, action)) {
+      throw new Error(`Invalid transition: ${currentLifecycle} -> ${action}`);
+    }
+
+    const targetLifecycle = ACTION_TO_TARGET_STATUS[action];
+    const targetStatus = mapLifecycleToLegacy(targetLifecycle);
+    const updatedApps = applications.map((app) => {
+      if (app.id !== id) return app;
+      return {
+        ...app,
+        status: targetStatus,
+        lifecycleStatus: targetLifecycle,
+        auditHistory: [
+          ...(app.auditHistory || []),
+          {
+            status: targetStatus,
+            lifecycleStatus: targetLifecycle,
+            action,
+            date: new Date().toISOString(),
+            user: userName,
+            notes,
+          },
+        ],
+      };
+    });
+
+    saveApplications(updatedApps);
+    logAction({
+      type: EVENT_TYPES.STATUS_CHANGED,
+      appId: id,
+      user: userName,
+      action,
+      status: targetStatus,
+      lifecycleStatus: targetLifecycle,
+      notes,
+    });
   };
 
   const assignApplication = (id, officerName) => {
@@ -554,7 +816,7 @@ export const LoanProvider = ({ children }) => {
         return app;
     });
     saveApplications(updatedApps);
-    logAction({ type: 'ASSIGNMENT', appId: id, user: officerName, status: STATUSES.UNDER_REVIEW });
+    logAction({ type: EVENT_TYPES.ASSIGNMENT, appId: id, user: officerName, status: STATUSES.UNDER_REVIEW });
   };
 
   const penaltyInterestRate = 0.02; // 2% monthly penalty
@@ -579,6 +841,13 @@ export const LoanProvider = ({ children }) => {
       return app;
     });
     saveApplications(updatedApps);
+    logAction({
+      type: EVENT_TYPES.ASSIGNMENT,
+      appId: id,
+      user: 'Manager',
+      assignedAgent: agentName,
+      notes: `Assigned recovery case to ${agentName}`,
+    });
   };
 
   const bulkAssignAgents = (ids, agentName) => {
@@ -596,6 +865,15 @@ export const LoanProvider = ({ children }) => {
       return app;
     });
     saveApplications(updatedApps);
+    ids.forEach((appId) => {
+      logAction({
+        type: EVENT_TYPES.ASSIGNMENT,
+        appId,
+        user: 'Manager',
+        assignedAgent: agentName,
+        notes: `Bulk assigned recovery case to ${agentName}`,
+      });
+    });
   };
 
   const recordRecoveryPayment = (id, amount, method = 'Bank Transfer', reference = '') => {
@@ -624,16 +902,41 @@ export const LoanProvider = ({ children }) => {
           };
         }) || [];
 
-        const totalOutstanding = newInstallments.reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0);
+        const totalOutstanding = newInstallments.reduce((acc, curr) => acc + Math.max(0, curr.amount - curr.paidAmount), 0);
         const isFullyPaid = totalOutstanding <= 0;
+        const overdueAfterPayment = newInstallments.some(
+          (inst) => (inst.amount - inst.paidAmount) > 0 && new Date(inst.dueDate) < new Date()
+        );
+        const nextDueDate = (() => {
+          const unpaid = newInstallments.filter((inst) => (inst.amount - inst.paidAmount) > 0);
+          if (unpaid.length === 0) return null;
+          const earliest = unpaid.reduce((acc, inst) => (new Date(inst.dueDate) < new Date(acc.dueDate) ? inst : acc));
+          return earliest.dueDate;
+        })();
         const now = new Date().toISOString();
+        const hasActiveRecovery =
+          app.recoveryStatus &&
+          app.recoveryStatus !== RECOVERY_STATUSES.HEALTHY &&
+          app.recoveryStatus !== RECOVERY_STATUSES.RECOVERED &&
+          app.recoveryStatus !== RECOVERY_STATUSES.IN_ARREARS;
 
         return {
           ...app,
           installments: newInstallments,
           lastActionDate: now,
-          status: isFullyPaid ? STATUSES.PAID : app.status,
-          recoveryStatus: isFullyPaid ? RECOVERY_STATUSES.RECOVERED : (app.recoveryStatus === RECOVERY_STATUSES.HEALTHY ? RECOVERY_STATUSES.IN_ARREARS : app.recoveryStatus),
+          status: isFullyPaid ? STATUSES.PAID : STATUSES.ACTIVE,
+          lifecycleStatus: isFullyPaid
+            ? LIFECYCLE_STATUSES.CLOSED
+            : overdueAfterPayment
+              ? (hasActiveRecovery ? LIFECYCLE_STATUSES.RECOVERY : LIFECYCLE_STATUSES.IN_ARREARS)
+              : LIFECYCLE_STATUSES.ACTIVE,
+          recoveryStatus: isFullyPaid
+            ? RECOVERY_STATUSES.RECOVERED
+            : overdueAfterPayment
+              ? (hasActiveRecovery ? app.recoveryStatus : RECOVERY_STATUSES.IN_ARREARS)
+              : RECOVERY_STATUSES.HEALTHY,
+          outstandingAmount: totalOutstanding,
+          nextDueDate,
           auditHistory: [
             ...(app.auditHistory || []),
             { 
@@ -649,6 +952,21 @@ export const LoanProvider = ({ children }) => {
     });
 
     saveApplications(updatedApps);
+    const updatedApp = updatedApps.find((app) => app.id === id);
+    if (updatedApp) {
+      logAction({
+        type: EVENT_TYPES.PAYMENT_RECORDED,
+        appId: id,
+        user: 'Recovery Agent',
+        status: updatedApp.status,
+        lifecycleStatus: updatedApp.lifecycleStatus,
+        recoveryStatus: updatedApp.recoveryStatus,
+        amount,
+        method,
+        reference,
+        outstandingAmount: updatedApp.outstandingAmount,
+      });
+    }
   };
 
   const logRecoveryInteraction = (id, interaction) => {
@@ -664,14 +982,31 @@ export const LoanProvider = ({ children }) => {
 
         return {
           ...app,
+          status: STATUSES.ACTIVE,
+          lifecycleStatus: LIFECYCLE_STATUSES.RECOVERY,
           lastActionDate: now,
           recoveryStatus: newStatus,
+          nextDueDate: getNextDueDate(app),
           interactionLogs: [{ ...interaction, id: Date.now(), date: now }, ...(app.interactionLogs || [])]
         };
       }
       return app;
     });
     saveApplications(updatedApps);
+    const updatedApp = updatedApps.find((app) => app.id === id);
+    if (updatedApp) {
+      logAction({
+        type: EVENT_TYPES.RECOVERY_INTERACTION,
+        appId: id,
+        user: interaction.agent || 'Recovery Agent',
+        status: updatedApp.status,
+        lifecycleStatus: updatedApp.lifecycleStatus,
+        recoveryStatus: updatedApp.recoveryStatus,
+        interactionType: interaction.type,
+        outcome: interaction.outcome,
+        notes: interaction.notes,
+      });
+    }
   };
 
   const updatePTP = (id, ptpData) => {
@@ -680,14 +1015,30 @@ export const LoanProvider = ({ children }) => {
         const now = new Date().toISOString();
         return {
           ...app,
+          status: STATUSES.ACTIVE,
+          lifecycleStatus: LIFECYCLE_STATUSES.RECOVERY,
           lastActionDate: now,
           recoveryStatus: RECOVERY_STATUSES.PTP,
+          nextDueDate: getNextDueDate(app),
           ptpHistory: [{ ...ptpData, id: Date.now(), createdDate: now, status: 'ACTIVE' }, ...(app.ptpHistory || [])]
         };
       }
       return app;
     });
     saveApplications(updatedApps);
+    const updatedApp = updatedApps.find((app) => app.id === id);
+    if (updatedApp) {
+      logAction({
+        type: EVENT_TYPES.PTP_CREATED,
+        appId: id,
+        user: 'Recovery Agent',
+        status: updatedApp.status,
+        lifecycleStatus: updatedApp.lifecycleStatus,
+        recoveryStatus: updatedApp.recoveryStatus,
+        amount: Number(ptpData.amount),
+        promiseDate: ptpData.date,
+      });
+    }
   };
 
   // --- MANAGEMENT AGGREGATION UTILITIES ---
@@ -744,7 +1095,7 @@ export const LoanProvider = ({ children }) => {
 
   const getAnalyticsData = () => {
     // Default Rate = FAILED audit logs / Total active
-    const failedCount = auditLogs.filter(l => l.type === 'FAILED').length;
+    const failedCount = auditLogs.filter(l => l.type === EVENT_TYPES.FAILED).length;
     const activeCount = applications.filter(app => app.status === STATUSES.ACTIVE).length;
     const defaultRate = activeCount > 0 ? (failedCount / activeCount) * 100 : 0;
 
@@ -784,6 +1135,7 @@ export const LoanProvider = ({ children }) => {
       applications, 
       addApplication, 
       updateStatus, 
+      transitionLoanLifecycle,
       disburseLoan,
       batchMarkAsPaid,
       assignApplication,

@@ -12,20 +12,22 @@ import {
     Download
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useLoans, STATUSES, WORKFLOW_SEQUENCE } from '../../context/LoanContext';
+import { useLoans, STATUSES, LIFECYCLE_STATUSES, LIFECYCLE_ACTIONS } from '../../context/LoanContext';
 import { SectionHeader, Badge } from '../../components/ui/Shared';
 
 const ApplicationsPipeline = () => {
-    const { applications, updateStatus } = useLoans();
+    const { applications, transitionLoanLifecycle } = useLoans();
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
 
 
-    const filteredApps = applications.filter(app =>
-        app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.status.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredApps = applications.filter(app => {
+        const isAdminQueue = app.lifecycleStatus === LIFECYCLE_STATUSES.CREDIT_APPROVED;
+        if (!isAdminQueue) return false;
+        return app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            app.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            app.status.toLowerCase().includes(searchTerm.toLowerCase());
+    });
 
     const getStatusVariant = (status) => {
         switch (status) {
@@ -41,23 +43,17 @@ const ApplicationsPipeline = () => {
         }
     };
 
-    const handleApprove = (id, currentStatus) => {
-        const nextIndex = WORKFLOW_SEQUENCE.indexOf(currentStatus) + 1;
-        if (nextIndex < WORKFLOW_SEQUENCE.length) {
-            updateStatus(id, WORKFLOW_SEQUENCE[nextIndex], 'System Admin');
-        }
+    const handleApprove = (id) => {
+        transitionLoanLifecycle(id, LIFECYCLE_ACTIONS.ADMIN_APPROVE, 'System Admin', 'Final admin approval');
     };
 
-    const handleSendBack = (id, currentStatus) => {
-        const prevIndex = WORKFLOW_SEQUENCE.indexOf(currentStatus) - 1;
-        if (prevIndex >= 0) {
-            updateStatus(id, WORKFLOW_SEQUENCE[prevIndex], 'System Admin');
-        }
+    const handleSendBack = (id) => {
+        transitionLoanLifecycle(id, LIFECYCLE_ACTIONS.REOPEN, 'System Admin', 'Returned for rework');
     };
 
 
     const handleReject = (id) => {
-        updateStatus(id, STATUSES.REJECTED, 'System Admin');
+        transitionLoanLifecycle(id, LIFECYCLE_ACTIONS.ADMIN_REJECT, 'System Admin', 'Rejected at admin approval');
     };
 
 
@@ -134,7 +130,7 @@ const ApplicationsPipeline = () => {
                                             {app.status !== STATUSES.PAID && app.status !== STATUSES.REJECTED && (
                                                 <div className="flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-2xl border border-slate-800">
                                                     <button
-                                                        onClick={(e) => { e.stopPropagation(); handleApprove(app.id, app.status); }}
+                                                        onClick={(e) => { e.stopPropagation(); handleApprove(app.id); }}
                                                         className="p-2 text-emerald-500 hover:bg-emerald-500/20 rounded-xl transition-all hover:scale-110 active:scale-90"
                                                         title="Approve (Next Stage)"
                                                     >
@@ -147,11 +143,11 @@ const ApplicationsPipeline = () => {
                                                     >
                                                         <XCircle className="w-5 h-5" />
                                                     </button>
-                                                    {WORKFLOW_SEQUENCE.indexOf(app.status) > 0 && (
+                                                    {(
                                                         <button
-                                                            onClick={(e) => { e.stopPropagation(); handleSendBack(app.id, app.status); }}
+                                                            onClick={(e) => { e.stopPropagation(); handleSendBack(app.id); }}
                                                             className="p-2 text-orange-500 hover:bg-orange-500/20 rounded-xl transition-all hover:scale-110 active:scale-90"
-                                                            title="Send Back (Prev Stage)"
+                                                            title="Send Back"
                                                         >
                                                             <RotateCcw className="w-5 h-5" />
                                                         </button>

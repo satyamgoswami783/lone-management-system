@@ -17,7 +17,7 @@ import {
   Zap,
   Loader2
 } from 'lucide-react';
-import { useLoans, STATUSES } from '../../context/LoanContext';
+import { useLoans, STATUSES, LIFECYCLE_STATUSES, LIFECYCLE_ACTIONS } from '../../context/LoanContext';
 import Modal from '../../components/ui/Modal';
 
 const STATUS_CONFIG = {
@@ -33,7 +33,7 @@ const RISK_CONFIG = {
 };
 
 const CreditQueue = () => {
-  const { applications, updateStatus } = useLoans();
+  const { applications, transitionLoanLifecycle } = useLoans();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedApp, setSelectedApp] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
@@ -42,10 +42,10 @@ const CreditQueue = () => {
   const [notes, setNotes] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Filter applications for the Credit Queue (Pending Credit or Under Review)
+  // Filter applications for the Credit Queue (HR verified only)
   const filteredApps = useMemo(() => {
     return applications.filter(app => {
-      const isCreditModule = [STATUSES.CREDIT_PENDING, STATUSES.UNDER_REVIEW, STATUSES.HR_APPROVED].includes(app.status);
+      const isCreditModule = app.lifecycleStatus === LIFECYCLE_STATUSES.HR_VERIFIED;
       const matchesSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           app.id.toLowerCase().includes(searchTerm.toLowerCase());
       return isCreditModule && matchesSearch;
@@ -67,8 +67,8 @@ const CreditQueue = () => {
     // Simulate API delay for polish
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    const newStatus = decision === 'APPROVE' ? STATUSES.APPROVED : STATUSES.REJECTED;
-    updateStatus(selectedApp.id, newStatus, 'Credit Officer', `Credit Decision: ${decision}${notes ? ' - ' + notes : ''}`);
+    const action = decision === 'APPROVE' ? LIFECYCLE_ACTIONS.CREDIT_APPROVE : LIFECYCLE_ACTIONS.CREDIT_REJECT;
+    transitionLoanLifecycle(selectedApp.id, action, 'Credit Officer', `Credit Decision: ${decision}${notes ? ' - ' + notes : ''}`);
     
     setIsProcessing(false);
     setShowConfirm(false);

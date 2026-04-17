@@ -16,7 +16,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { Badge, Toast } from '../ui/Shared';
-import { STATUSES } from '../../context/LoanContext';
+import { STATUSES, LIFECYCLE_STATUSES } from '../../context/LoanContext';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import DocumentPreviewModal from '../ui/DocumentPreviewModal';
@@ -44,9 +44,8 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
     );
   }
 
-  const isProcessed = application.status === STATUSES.HR_APPROVED ||
-    application.status === STATUSES.HR_REJECTED ||
-    application.status === STATUSES.CREDIT_PENDING;
+  const isProcessed = application.lifecycleStatus === LIFECYCLE_STATUSES.HR_VERIFIED ||
+    application.lifecycleStatus === LIFECYCLE_STATUSES.REJECTED;
 
   const handleApprove = () => {
     onApprove();

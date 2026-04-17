@@ -1,28 +1,21 @@
 import React, { useMemo } from 'react';
 import { 
   Users, 
-  Receipt, 
-  AlertTriangle, 
   History,
   TrendingDown,
-  Activity,
   DollarSign,
   PieChart,
   ArrowRight,
-  ChevronRight,
   ShieldCheck,
   Calendar,
   Search,
-  Filter,
   Phone,
-  MessageSquare,
   User
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useLoans, RECOVERY_STATUSES } from '../../context/LoanContext';
+import { useLoans, RECOVERY_STATUSES, LIFECYCLE_STATUSES } from '../../context/LoanContext';
 import { useAuth, ROLES } from '../../context/AuthContext';
 import { StatCard, SectionHeader, Badge, Modal, Toast } from '../../components/ui/Shared';
-import { CreditCard, Ban as Banknote } from 'lucide-react';
 
 const RecoveryDashboard = () => {
     const navigate = useNavigate();
@@ -33,14 +26,19 @@ const RecoveryDashboard = () => {
 
     // Derived recovery data with role-based filtering
     const recoveryData = useMemo(() => {
-        const allCases = (applications || []).filter(app => 
-            app.status === 'Disbursed' && 
-            (app.installments?.some(i => i.status !== 'PAID' && new Date(i.dueDate) < new Date()) || 
-             app.recoveryStatus)
-        );
+        const allCases = (applications || []).filter(app => {
+            const lifecycleMatch =
+                app.lifecycleStatus === LIFECYCLE_STATUSES.IN_ARREARS ||
+                app.lifecycleStatus === LIFECYCLE_STATUSES.RECOVERY;
+            const hasOverdueInstallments = app.installments?.some(
+                i => i.status !== 'PAID' && new Date(i.dueDate) < new Date()
+            );
+            return lifecycleMatch || hasOverdueInstallments;
+        });
 
-        // Filter based on role
-        const cases = isManager ? allCases : allCases.filter(c => c.assignedAgent === user?.name);
+        // Filter based on role; fallback to demo visibility if no assignments exist.
+        const assignedCases = allCases.filter(c => c.assignedAgent === user?.name);
+        const cases = isManager ? allCases : (assignedCases.length > 0 ? assignedCases : allCases);
 
         const totalOutstanding = cases.reduce((acc, curr) => {
             const out = curr.installments?.reduce((sum, inst) => sum + (inst.amount - inst.paidAmount), 0) || 0;
@@ -74,8 +72,17 @@ const RecoveryDashboard = () => {
             }).length,
         };
 
-        return { cases, totalOutstanding, totalArrears, agingBuckets, allCasesCount: allCases.length };
+        return {
+            cases,
+            totalOutstanding,
+            totalArrears,
+            agingBuckets,
+            allCasesCount: allCases.length,
+            usedFallback: !isManager && assignedCases.length === 0 && allCases.length > 0
+        };
     }, [applications, user, role, isManager]);
+
+    const isDemoFallback = recoveryData.usedFallback;
 
     const [search, setSearch] = React.useState('');
     const [toast, setToast] = React.useState(null);
@@ -134,12 +141,6 @@ const RecoveryDashboard = () => {
         if (type === 'interaction') setShowInteractionModal(true);
     };
 
-    const handleQuickPayment = (e) => {
-        e.preventDefault();
-        const { recordRecoveryPayment } = require('../../context/LoanContext'); // This is a hack, useLoans already has it
-        // Better: use destructuring in useLoans call above
-    };
-
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
@@ -147,6 +148,11 @@ const RecoveryDashboard = () => {
                 title={isManager ? "Administrative Recovery Control" : "Recovery Performance Dashboard"}
                 description={isManager ? "Corporate-level oversight of global delinquency metrics and agent productivity." : `Welcome back, ${user?.name}. Manage your assigned accounts and track your performance.`}
             />
+            {isDemoFallback && (
+                <div className="glass p-4 rounded-2xl border border-blue-500/20 bg-blue-500/5 text-blue-400 text-sm font-medium">
+                    Demo visibility enabled: showing portfolio recovery cases because no cases are currently assigned to your profile.
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {stats.map((stat, i) => (
@@ -212,17 +218,20 @@ const RecoveryDashboard = () => {
                                             <div className="text-[10px] text-slate-500 font-mono font-bold mt-1 uppercase tracking-tighter">Ref: {row.id}</div>
                                         </td>
                                         <td className="px-8 py-6 text-center">
-                                            <p className="text-sm font-bold text-red-500">
+                                            <p className="text-sm font-bold text-red-500 whitespace-nowrap">
                                                 R {row.installments?.filter(i => i.status !== 'PAID' && new Date(i.dueDate) < new Date())
                                                     .reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0).toLocaleString()}
                                             </p>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <div className="space-y-2">
+                                            <div className="flex flex-wrap items-center gap-2 max-w-[14rem]">
                                                 <Badge variant={row.recoveryStatus === RECOVERY_STATUSES.PTP_FAILED ? 'danger' : row.recoveryStatus === RECOVERY_STATUSES.PTP ? 'primary' : 'warning'}>
                                                     {row.recoveryStatus || 'In Arrears'}
                                                 </Badge>
-                                                <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                                                <Badge variant="neutral">
+                                                    {row.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}
+                                                </Badge>
+                                                <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest w-full pt-1">
                                                     <User className="w-3 h-3" />
                                                     {row.assignedAgent || 'Unassigned'}
                                                 </div>
@@ -271,6 +280,9 @@ const RecoveryDashboard = () => {
                                             {row.recoveryStatus || 'Arrears'}
                                         </Badge>
                                     </div>
+                                    <Badge variant="neutral">
+                                        {row.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}
+                                    </Badge>
                                     <div className="flex justify-between items-end">
                                         <div>
                                             <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Total Arrears</p>
@@ -320,7 +332,8 @@ const RecoveryDashboard = () => {
 
             {/* Modals for Quick Actions */}
             {showPaymentModal && activeActionCase && (
-                <Modal 
+                <Modal
+                    isOpen={showPaymentModal}
                     title={`Record Payment: ${activeActionCase.name}`} 
                     onClose={() => setShowPaymentModal(false)}
                 >
@@ -363,7 +376,8 @@ const RecoveryDashboard = () => {
             )}
 
             {showInteractionModal && activeActionCase && (
-                <Modal 
+                <Modal
+                    isOpen={showInteractionModal}
                     title={`Log Interaction: ${activeActionCase.name}`} 
                     onClose={() => setShowInteractionModal(false)}
                 >

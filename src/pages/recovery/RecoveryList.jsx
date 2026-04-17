@@ -19,18 +19,20 @@ import {
   Plus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useLoans, RECOVERY_STATUSES } from '../../context/LoanContext';
+import { useLoans, RECOVERY_STATUSES, LIFECYCLE_STATUSES } from '../../context/LoanContext';
 import { useAuth, ROLES } from '../../context/AuthContext';
 import { SectionHeader, Badge, StatCard, Toast, Modal } from '../../components/ui/Shared';
 import { useLocation } from 'react-router-dom';
 import { Phone, DollarSign as Money, CalendarRange, MessageSquare, History } from 'lucide-react';
 
 const RecoveryList = () => {
+    const navigate = useNavigate();
     const location = useLocation();
     const { applications, bulkAssignAgents, recordRecoveryPayment, logRecoveryInteraction, updatePTP } = useLoans();
     const { user, role } = useAuth();
     const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
+    const [dpdFilter, setDpdFilter] = useState('all');
     const [selectedCases, setSelectedCases] = useState([]);
     const [toast, setToast] = useState(null);
     const [showBulkAssign, setShowBulkAssign] = useState(false);
@@ -51,9 +53,9 @@ const RecoveryList = () => {
         if (location.state?.filter) {
             const f = location.state.filter;
             if (f === 'Arrears') setFilterStatus('In Arrears');
-            else if (f === 'low') setSearch('DPD 1-30'); // This is a bit loose, better to have a dpd filter
-            else if (f === 'mid') setSearch('DPD 31-60');
-            else if (f === 'high') setSearch('DPD 60+');
+            else if (f === 'low') setDpdFilter('low');
+            else if (f === 'mid') setDpdFilter('mid');
+            else if (f === 'high') setDpdFilter('high');
         }
     }, [location.state]);
 
@@ -61,23 +63,24 @@ const RecoveryList = () => {
 
     // Filter applications based on permissions and recovery status
     const recoveryCases = useMemo(() => {
-        return (applications || []).filter(app => {
+        const allRecoveryCases = (applications || []).filter(app => {
             // Role-based visibility: Recovery agents only see their assigned cases
             const isAssignedToMe = app.assignedAgent === user?.name;
             const isManager = role === ROLES.ADMIN || role === ROLES.MANAGEMENT;
-            
-            if (!isManager && !isAssignedToMe) return false;
 
-            // Core Recovery Filter: Disbursed and has arrears or in recovery lifecycle
+            // Core Recovery Filter: Only lifecycle arrears/recovery cases
             const hasArrears = app.installments?.some(i => i.status !== 'PAID' && new Date(i.dueDate) < new Date());
             const isInRecovery = app.recoveryStatus && 
                                app.recoveryStatus !== RECOVERY_STATUSES.RECOVERED && 
                                app.recoveryStatus !== RECOVERY_STATUSES.HEALTHY;
-            
-            return (app.status === 'Disbursed' && (hasArrears || isInRecovery)) || 
-                   (app.recoveryStatus && 
-                    app.recoveryStatus !== RECOVERY_STATUSES.RECOVERED && 
-                    app.recoveryStatus !== RECOVERY_STATUSES.HEALTHY);
+
+            const isRecoveryLifecycle =
+                app.lifecycleStatus === LIFECYCLE_STATUSES.IN_ARREARS ||
+                app.lifecycleStatus === LIFECYCLE_STATUSES.RECOVERY;
+
+            if (!(isRecoveryLifecycle || (hasArrears && isInRecovery))) return false;
+            if (isManager) return true;
+            return isAssignedToMe;
         }).map(app => {
             const overdueInstallments = app.installments?.filter(i => 
                 i.status !== 'PAID' && new Date(i.dueDate) < new Date()
@@ -94,16 +97,52 @@ const RecoveryList = () => {
 
             return { ...app, overdueAmount, outstanding, dpd };
         });
+        
+        const isManager = role === ROLES.ADMIN || role === ROLES.MANAGEMENT;
+        if (isManager || allRecoveryCases.length > 0) return allRecoveryCases;
+
+        // Demo fallback: if recovery agent has no assignments, still expose recoverable portfolio cases
+        const demoCases = (applications || []).filter(app => {
+            const hasArrears = app.installments?.some(i => i.status !== 'PAID' && new Date(i.dueDate) < new Date());
+            const isRecoveryLifecycle =
+                app.lifecycleStatus === LIFECYCLE_STATUSES.IN_ARREARS ||
+                app.lifecycleStatus === LIFECYCLE_STATUSES.RECOVERY;
+            return isRecoveryLifecycle || hasArrears;
+        }).map(app => {
+            const overdueInstallments = app.installments?.filter(i => 
+                i.status !== 'PAID' && new Date(i.dueDate) < new Date()
+            ) || [];
+            const overdueAmount = overdueInstallments.reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0);
+            const outstanding = app.installments?.reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0) || 0;
+            let dpd = 0;
+            if (overdueInstallments.length > 0) {
+                const earliest = new Date(Math.min(...overdueInstallments.map(i => new Date(i.dueDate))));
+                dpd = Math.floor((new Date() - earliest) / (1000 * 60 * 60 * 24));
+            }
+            return { ...app, overdueAmount, outstanding, dpd };
+        });
+
+        return demoCases;
     }, [applications, user, role]);
+
+    const isDemoFallback =
+        role === ROLES.RECOVERY &&
+        recoveryCases.length > 0 &&
+        !recoveryCases.some((c) => c.assignedAgent === user?.name);
 
     const filteredCases = useMemo(() => {
         return recoveryCases.filter(c => {
             const matchesSearch = (c.name || '').toLowerCase().includes(search.toLowerCase()) || 
                                  (c.id || '').toLowerCase().includes(search.toLowerCase());
             const matchesStatus = filterStatus === 'All' || c.recoveryStatus === filterStatus;
-            return matchesSearch && matchesStatus;
+            const matchesDpd =
+                dpdFilter === 'all' ||
+                (dpdFilter === 'low' && c.dpd > 0 && c.dpd <= 30) ||
+                (dpdFilter === 'mid' && c.dpd > 30 && c.dpd <= 60) ||
+                (dpdFilter === 'high' && c.dpd > 60);
+            return matchesSearch && matchesStatus && matchesDpd;
         });
-    }, [recoveryCases, search, filterStatus]);
+    }, [recoveryCases, search, filterStatus, dpdFilter]);
 
     const stats = useMemo(() => {
         const totalArrears = recoveryCases.reduce((acc, curr) => acc + curr.overdueAmount, 0);
@@ -146,6 +185,11 @@ const RecoveryList = () => {
                 title={role === ROLES.RECOVERY ? "My Recovery Portfolio" : "Recoveries Case Management"} 
                 description={role === ROLES.RECOVERY ? "Focus on your assigned accounts and record collection attempts." : "Monitor delinquency aging, manage PTP cycles, and record collection outcomes."}
             />
+            {isDemoFallback && (
+                <div className="glass p-4 rounded-2xl border border-blue-500/20 bg-blue-500/5 text-blue-400 text-sm font-medium">
+                    Demo visibility enabled: showing recoveries outside your assignment so you can test actions.
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {stats.map((stat, i) => (
@@ -166,6 +210,16 @@ const RecoveryList = () => {
                     </div>
                     
                     <div className="flex gap-4">
+                        <select
+                            value={dpdFilter}
+                            onChange={(e) => setDpdFilter(e.target.value)}
+                            className="bg-slate-900 border border-slate-800 rounded-2xl px-6 py-3.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                        >
+                            <option value="all">All DPD Bands</option>
+                            <option value="low">DPD 1-30</option>
+                            <option value="mid">DPD 31-60</option>
+                            <option value="high">DPD 60+</option>
+                        </select>
                         <select 
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
@@ -176,6 +230,14 @@ const RecoveryList = () => {
                                 <option key={s} value={s}>{s}</option>
                             ))}
                         </select>
+                        {isManager && selectedCases.length > 0 && (
+                            <button
+                                onClick={() => setShowBulkAssign(true)}
+                                className="px-6 py-3.5 rounded-2xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-500 transition-all"
+                            >
+                                Assign {selectedCases.length}
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -241,7 +303,7 @@ const RecoveryList = () => {
                                         </div>
                                     </td>
                                     <td className="px-8 py-6 text-center">
-                                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${
+                                        <span className={`inline-flex items-center justify-center min-w-[5rem] whitespace-nowrap text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${
                                             caseItem.dpd > 60 ? "border-red-500/30 bg-red-500/10 text-red-500" : 
                                             caseItem.dpd > 30 ? "border-amber-500/30 bg-amber-500/10 text-amber-500" : "border-blue-500/30 bg-blue-500/10 text-blue-500"
                                         }`}>
@@ -249,15 +311,18 @@ const RecoveryList = () => {
                                         </span>
                                     </td>
                                     <td className="px-8 py-6">
-                                        <Badge variant={
-                                            caseItem.recoveryStatus === RECOVERY_STATUSES.LEGAL ? 'danger' : 
-                                            caseItem.recoveryStatus === RECOVERY_STATUSES.IN_ARREARS ? 'warning' : 'primary'
-                                        }>
-                                            {caseItem.recoveryStatus || 'Active Collection'}
-                                        </Badge>
+                                        <div className="flex flex-wrap items-center gap-2 max-w-[14rem]">
+                                            <Badge variant={
+                                                caseItem.recoveryStatus === RECOVERY_STATUSES.LEGAL ? 'danger' : 
+                                                caseItem.recoveryStatus === RECOVERY_STATUSES.IN_ARREARS ? 'warning' : 'primary'
+                                            }>
+                                                {caseItem.recoveryStatus || 'Active Collection'}
+                                            </Badge>
+                                            <Badge variant="neutral">{caseItem.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}</Badge>
+                                        </div>
                                     </td>
                                     <td className="px-8 py-6">
-                                        <div className="space-y-1">
+                                        <div className="space-y-1 min-w-[8rem]">
                                             <p className="text-xs font-bold text-slate-400">{caseItem.lastActionDate ? new Date(caseItem.lastActionDate).toLocaleDateString() : 'No activity'}</p>
                                             <p className="text-[10px] text-slate-600 font-bold uppercase">{caseItem.assignedAgent || 'Unassigned'}</p>
                                         </div>
@@ -304,7 +369,7 @@ const RecoveryList = () => {
                 <div className="md:hidden p-6 space-y-6">
                     {filteredCases.map((caseItem) => (
                         <div key={caseItem.id} className="glass rounded-[32px] p-6 border border-slate-800/50 space-y-6">
-                            <div className="flex justify-between items-start">
+                            <div className="flex justify-between items-start gap-3">
                                 <div className="flex gap-4">
                                     <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center">
                                         <User className="w-6 h-6 text-slate-500" />
@@ -314,9 +379,12 @@ const RecoveryList = () => {
                                         <p className="text-[10px] text-slate-500 font-mono">{caseItem.id}</p>
                                     </div>
                                 </div>
-                                <Badge variant={caseItem.recoveryStatus === RECOVERY_STATUSES.LEGAL ? 'danger' : 'warning'}>
-                                    {caseItem.recoveryStatus}
-                                </Badge>
+                                <div className="flex flex-col items-end gap-2">
+                                    <Badge variant={caseItem.recoveryStatus === RECOVERY_STATUSES.LEGAL ? 'danger' : 'warning'}>
+                                        {caseItem.recoveryStatus}
+                                    </Badge>
+                                    <Badge variant="neutral">{caseItem.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}</Badge>
+                                </div>
                             </div>
                             
                             <div className="grid grid-cols-2 gap-4">
@@ -364,12 +432,30 @@ const RecoveryList = () => {
 
             {/* Recovery Operational Modals */}
             {showPaymentModal && activeActionCase && (
-                <Modal title={`Record Payment: ${activeActionCase.name}`} onClose={() => setShowPaymentModal(false)}>
+                <Modal
+                    isOpen={showPaymentModal}
+                    title={`Record Payment: ${activeActionCase.name}`}
+                    onClose={() => {
+                        setShowPaymentModal(false);
+                        setActiveActionCase(null);
+                    }}
+                >
                     <form onSubmit={(e) => {
                         e.preventDefault();
-                        recordRecoveryPayment(activeActionCase.id, parseFloat(paymentForm.amount), 'Bank Transfer', paymentForm.ref);
+                        const amount = parseFloat(paymentForm.amount);
+                        if (!Number.isFinite(amount) || amount <= 0) {
+                            setToast({ message: 'Enter a valid amount greater than zero.', type: 'danger' });
+                            return;
+                        }
+                        if (amount > activeActionCase.outstanding + 1) {
+                            setToast({ message: `Amount exceeds outstanding balance (R ${activeActionCase.outstanding.toLocaleString()}).`, type: 'danger' });
+                            return;
+                        }
+
+                        recordRecoveryPayment(activeActionCase.id, amount, 'Bank Transfer', paymentForm.ref);
                         setToast({ message: "Repayment recorded successfully", type: 'success' });
                         setShowPaymentModal(false);
+                        setActiveActionCase(null);
                         setPaymentForm({ amount: '', ref: '' });
                     }} className="space-y-6">
                         <div className="space-y-3">
@@ -386,12 +472,23 @@ const RecoveryList = () => {
             )}
 
             {showInteractionModal && activeActionCase && (
-                <Modal title="Log Collection Attempt" onClose={() => setShowInteractionModal(false)}>
+                <Modal
+                    isOpen={showInteractionModal}
+                    title="Log Collection Attempt"
+                    onClose={() => {
+                        setShowInteractionModal(false);
+                        setActiveActionCase(null);
+                    }}
+                >
                     <form onSubmit={(e) => {
                         e.preventDefault();
-                        logRecoveryInteraction(activeActionCase.id, interactionForm);
+                        logRecoveryInteraction(activeActionCase.id, {
+                            ...interactionForm,
+                            agent: user?.name || 'Recovery Agent'
+                        });
                         setToast({ message: "Interaction logged", type: 'info' });
                         setShowInteractionModal(false);
+                        setActiveActionCase(null);
                         setInteractionForm({ type: 'Call', outcome: 'Answered', notes: '' });
                     }} className="space-y-6">
                         <div className="grid grid-cols-2 gap-4">
@@ -405,18 +502,56 @@ const RecoveryList = () => {
             )}
 
             {showPtpModal && activeActionCase && (
-                <Modal title="Set Promise To Pay" onClose={() => setShowPtpModal(false)}>
+                <Modal
+                    isOpen={showPtpModal}
+                    title="Set Promise To Pay"
+                    onClose={() => {
+                        setShowPtpModal(false);
+                        setActiveActionCase(null);
+                    }}
+                >
                     <form onSubmit={(e) => {
                         e.preventDefault();
+                        const today = new Date().toISOString().split('T')[0];
+                        if (ptpForm.date < today) {
+                            setToast({ message: 'Promise date cannot be in the past.', type: 'danger' });
+                            return;
+                        }
                         updatePTP(activeActionCase.id, ptpForm);
                         setToast({ message: "PTP active", type: 'success' });
                         setShowPtpModal(false);
+                        setActiveActionCase(null);
                         setPtpForm({ date: '', amount: '' });
                     }} className="space-y-6">
                         <input required type="date" value={ptpForm.date} onChange={e => setPtpForm({...ptpForm, date: e.target.value})} className="input-field" />
                         <input required type="number" value={ptpForm.amount} onChange={e => setPtpForm({...ptpForm, amount: e.target.value})} className="input-field" placeholder="Amount Promised" />
                         <button className="w-full py-4 bg-amber-600 rounded-2xl font-bold text-white uppercase tracking-widest text-xs">Set Promise</button>
                     </form>
+                </Modal>
+            )}
+
+            {showBulkAssign && (
+                <Modal
+                    isOpen={showBulkAssign}
+                    title="Bulk Assign Recovery Cases"
+                    onClose={() => setShowBulkAssign(false)}
+                >
+                    <div className="space-y-4">
+                        <p className="text-sm text-slate-400">
+                            Assign {selectedCases.length} selected cases to an agent.
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {AGENTS.map((agent) => (
+                                <button
+                                    key={agent}
+                                    onClick={() => handleBulkAssign(agent)}
+                                    className="py-3 px-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-blue-500/40 transition-all text-sm font-bold"
+                                >
+                                    {agent}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </Modal>
             )}
         </div>

@@ -19,7 +19,7 @@ import {
     ShieldAlert,
     Target
 } from 'lucide-react';
-import { useLoans, RECOVERY_STATUSES } from '../../context/LoanContext';
+import { useLoans, RECOVERY_STATUSES, LIFECYCLE_STATUSES } from '../../context/LoanContext';
 import { useAuth, ROLES } from '../../context/AuthContext';
 import { SectionHeader, Badge, StatCard, Toast } from '../../components/ui/Shared';
 
@@ -155,6 +155,9 @@ const RecoveryCaseDetail = () => {
                                 <h1 className="text-4xl font-display font-bold text-slate-200 tracking-tight">{loan.name || 'Unknown Debtor'}</h1>
                                 <Badge variant={financials.dpd > 90 ? 'danger' : financials.dpd > 0 ? 'warning' : 'success'}>
                                     {financials.dpd > 0 ? `${financials.dpd} Days Overdue` : 'Up to Date'}
+                                </Badge>
+                                <Badge variant="neutral">
+                                    {loan.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}
                                 </Badge>
                             </div>
                             <p className="text-slate-500 font-mono text-sm mt-2 flex items-center gap-2">
