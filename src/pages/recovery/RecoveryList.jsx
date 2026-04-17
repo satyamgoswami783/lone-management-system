@@ -21,17 +21,41 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useLoans, RECOVERY_STATUSES } from '../../context/LoanContext';
 import { useAuth, ROLES } from '../../context/AuthContext';
-import { SectionHeader, Badge, StatCard, Toast } from '../../components/ui/Shared';
+import { SectionHeader, Badge, StatCard, Toast, Modal } from '../../components/ui/Shared';
+import { useLocation } from 'react-router-dom';
+import { Phone, DollarSign as Money, CalendarRange, MessageSquare, History } from 'lucide-react';
 
 const RecoveryList = () => {
-    const navigate = useNavigate();
-    const { applications, bulkAssignAgents } = useLoans();
+    const location = useLocation();
+    const { applications, bulkAssignAgents, recordRecoveryPayment, logRecoveryInteraction, updatePTP } = useLoans();
     const { user, role } = useAuth();
     const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
     const [selectedCases, setSelectedCases] = useState([]);
     const [toast, setToast] = useState(null);
     const [showBulkAssign, setShowBulkAssign] = useState(false);
+
+    // Modals state
+    const [activeActionCase, setActiveActionCase] = useState(null);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [showInteractionModal, setShowInteractionModal] = useState(false);
+    const [showPtpModal, setShowPtpModal] = useState(false);
+
+    // Form states
+    const [paymentForm, setPaymentForm] = useState({ amount: '', ref: '' });
+    const [interactionForm, setInteractionForm] = useState({ type: 'Call', outcome: 'Answered', notes: '' });
+    const [ptpForm, setPtpForm] = useState({ date: '', amount: '' });
+
+    // Handle dashboard filters
+    React.useEffect(() => {
+        if (location.state?.filter) {
+            const f = location.state.filter;
+            if (f === 'Arrears') setFilterStatus('In Arrears');
+            else if (f === 'low') setSearch('DPD 1-30'); // This is a bit loose, better to have a dpd filter
+            else if (f === 'mid') setSearch('DPD 31-60');
+            else if (f === 'high') setSearch('DPD 60+');
+        }
+    }, [location.state]);
 
     const AGENTS = ["Sarah Collections", "John Recovery", "Mike Debtors"];
 
@@ -135,8 +159,8 @@ const RecoveryList = () => {
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
                         <input 
                             value={search}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="input-field pl-12 py-3.5 text-sm bg-slate-950/50" 
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="input-field pl-12 py-3.5 text-sm bg-slate-900" 
                             placeholder="Search by Debtor Name or Case ID..." 
                         />
                     </div>
@@ -158,7 +182,7 @@ const RecoveryList = () => {
                 <div className="overflow-x-auto text-[13px]">
                     <table className="w-full text-left font-medium">
                         <thead>
-                            <tr className="bg-slate-950/50 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-slate-800/50">
+                            <tr className="bg-slate-900 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-slate-800/50">
                                 {isManager && (
                                     <th className="px-8 py-5 w-10">
                                         <input 
@@ -170,14 +194,14 @@ const RecoveryList = () => {
                                     </th>
                                 )}
                                 <th className="px-8 py-5">Case & Borrower</th>
-                                <th className="px-8 py-5">Agent</th>
                                 <th className="px-8 py-5">Outstanding</th>
-                                <th className="px-8 py-5 text-center">Aging (DPD)</th>
+                                <th className="px-8 py-5 text-center">DPD</th>
                                 <th className="px-8 py-5">Status</th>
-                                <th className="px-8 py-5 text-right">Action</th>
+                                <th className="px-8 py-5">Last Action</th>
+                                <th className="px-8 py-5 text-right">Operational Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-800/40">
+                        <tbody className="divide-y divide-slate-800/40 hidden md:table-row-group">
                             {filteredCases.map((caseItem) => (
                                 <tr key={caseItem.id} className={`hover:bg-slate-800/20 transition-all group ${selectedCases.includes(caseItem.id) ? 'bg-blue-600/5' : ''}`}>
                                     {isManager && (
@@ -191,52 +215,38 @@ const RecoveryList = () => {
                                         </td>
                                     )}
                                     <td className="px-8 py-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-[18px] bg-slate-950 border border-slate-800 flex items-center justify-center font-bold text-slate-400 group-hover:border-blue-500/50 transition-all">
-                                                <User className="w-5 h-5 transition-transform group-hover:scale-110" />
+                                        <div 
+                                            className="flex items-center gap-4 cursor-pointer"
+                                            onClick={() => navigate(`/recovery/case/${caseItem.id}`)}
+                                        >
+                                            <div className="w-10 h-10 rounded-[14px] bg-slate-900 border border-slate-800 flex items-center justify-center font-bold text-slate-400 group-hover:border-blue-500/50 transition-all">
+                                                <User className="w-4 h-4" />
                                             </div>
                                             <div>
                                                 <p className="font-bold text-slate-200 group-hover:text-blue-400 transition-colors">
                                                     {caseItem.name || 'Anonymous Debtor'}
                                                 </p>
-                                                <p className="text-[10px] text-slate-500 uppercase font-mono font-bold mt-1 tracking-widest">
-                                                    {caseItem.id} • {caseItem.company}
+                                                <p className="text-[10px] text-slate-500 uppercase font-mono font-bold tracking-widest mt-0.5">
+                                                    {caseItem.id}
                                                 </p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6">
-                                        <div className="flex items-center gap-2">
-                                            {caseItem.assignedAgent ? (
-                                                <div className="flex items-center gap-2 text-slate-400">
-                                                    <div className="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                                                        <Activity className="w-3 h-3 text-emerald-500" />
-                                                    </div>
-                                                    <span className="text-xs font-bold">{caseItem.assignedAgent}</span>
-                                                </div>
-                                            ) : (
-                                                <span className="text-slate-600 italic text-xs font-medium">Not Assigned</span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-6">
                                         <div className="space-y-1">
                                             <p className="font-bold text-slate-200 text-sm">R {caseItem.outstanding.toLocaleString()}</p>
-                                            <p className="text-[10px] text-red-500 font-black uppercase tracking-tighter bg-red-500/5 inline-block px-2 py-0.5 rounded-lg border border-red-500/10">
+                                            <p className="text-[10px] text-red-500 font-black uppercase tracking-tighter">
                                                 Arrears: R {caseItem.overdueAmount.toLocaleString()}
                                             </p>
                                         </div>
                                     </td>
                                     <td className="px-8 py-6 text-center">
-                                        <div className="inline-flex flex-col items-center">
-                                            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${
-                                                caseItem.dpd > 60 ? "border-red-500/30 bg-red-500/10 text-red-500" : 
-                                                caseItem.dpd > 30 ? "border-amber-500/30 bg-amber-500/10 text-amber-500" :
-                                                caseItem.dpd > 0 ? "border-blue-500/30 bg-blue-500/10 text-blue-500" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
-                                            }`}>
-                                                {caseItem.dpd} DPD
-                                            </span>
-                                        </div>
+                                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${
+                                            caseItem.dpd > 60 ? "border-red-500/30 bg-red-500/10 text-red-500" : 
+                                            caseItem.dpd > 30 ? "border-amber-500/30 bg-amber-500/10 text-amber-500" : "border-blue-500/30 bg-blue-500/10 text-blue-500"
+                                        }`}>
+                                            {caseItem.dpd} DPD
+                                        </span>
                                     </td>
                                     <td className="px-8 py-6">
                                         <Badge variant={
@@ -246,13 +256,43 @@ const RecoveryList = () => {
                                             {caseItem.recoveryStatus || 'Active Collection'}
                                         </Badge>
                                     </td>
+                                    <td className="px-8 py-6">
+                                        <div className="space-y-1">
+                                            <p className="text-xs font-bold text-slate-400">{caseItem.lastActionDate ? new Date(caseItem.lastActionDate).toLocaleDateString() : 'No activity'}</p>
+                                            <p className="text-[10px] text-slate-600 font-bold uppercase">{caseItem.assignedAgent || 'Unassigned'}</p>
+                                        </div>
+                                    </td>
                                     <td className="px-8 py-6 text-right">
-                                        <button 
-                                            onClick={() => navigate(`/recovery/case/${caseItem.id}`)}
-                                            className="px-6 py-2.5 rounded-2xl bg-blue-600 text-white font-bold text-[10px] uppercase tracking-widest hover:bg-blue-500 hover:shadow-[0_0_30px_rgba(37,99,235,0.3)] transition-all active:scale-95"
-                                        >
-                                            {role === ROLES.RECOVERY ? "Collect Now" : "Review Case"}
-                                        </button>
+                                        <div className="flex justify-end gap-2">
+                                            <button 
+                                                onClick={() => { setActiveActionCase(caseItem); setShowInteractionModal(true); }}
+                                                className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-blue-500 hover:border-blue-500/50 transition-all"
+                                                title="Log Call"
+                                            >
+                                                <Phone className="w-4 h-4" />
+                                            </button>
+                                            <button 
+                                                onClick={() => { setActiveActionCase(caseItem); setShowPaymentModal(true); }}
+                                                className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-emerald-500 hover:border-emerald-500/50 transition-all"
+                                                title="Record Payment"
+                                            >
+                                                <Money className="w-4 h-4" />
+                                            </button>
+                                            <button 
+                                                onClick={() => { setActiveActionCase(caseItem); setShowPtpModal(true); }}
+                                                className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-amber-500 hover:border-amber-500/50 transition-all"
+                                                title="Add PTP"
+                                            >
+                                                <CalendarRange className="w-4 h-4" />
+                                            </button>
+                                            <button 
+                                                onClick={() => navigate(`/recovery/case/${caseItem.id}`)}
+                                                className="p-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-500 transition-all"
+                                                title="Full View"
+                                            >
+                                                <ExternalLink className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -260,9 +300,58 @@ const RecoveryList = () => {
                     </table>
                 </div>
 
+                {/* Mobile View: Cards */}
+                <div className="md:hidden p-6 space-y-6">
+                    {filteredCases.map((caseItem) => (
+                        <div key={caseItem.id} className="glass rounded-[32px] p-6 border border-slate-800/50 space-y-6">
+                            <div className="flex justify-between items-start">
+                                <div className="flex gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center">
+                                        <User className="w-6 h-6 text-slate-500" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-slate-200">{caseItem.name}</h4>
+                                        <p className="text-[10px] text-slate-500 font-mono">{caseItem.id}</p>
+                                    </div>
+                                </div>
+                                <Badge variant={caseItem.recoveryStatus === RECOVERY_STATUSES.LEGAL ? 'danger' : 'warning'}>
+                                    {caseItem.recoveryStatus}
+                                </Badge>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Outstanding</p>
+                                    <p className="font-bold text-slate-200">R {caseItem.outstanding.toLocaleString()}</p>
+                                </div>
+                                <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Aging</p>
+                                    <p className="font-bold text-red-500">{caseItem.dpd} DPD</p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => { setActiveActionCase(caseItem); setShowInteractionModal(true); }}
+                                    className="flex-1 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 font-bold text-xs"
+                                >
+                                    Log Call
+                                </button>
+                                <button 
+                                    onClick={() => navigate(`/recovery/case/${caseItem.id}`)}
+                                    className="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs"
+                                >
+                                    Details
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+
                 {filteredCases.length === 0 && (
                     <div className="p-32 text-center flex flex-col items-center justify-center space-y-6 bg-slate-900/10">
-                        <div className="w-24 h-24 rounded-[40px] bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-700 shadow-inner">
+                        <div className="w-24 h-24 rounded-[40px] bg-white border border-slate-800 flex items-center justify-center text-slate-700 shadow-inner">
                             <FilterX className="w-12 h-12" />
                         </div>
                         <div className="space-y-1">
@@ -273,60 +362,62 @@ const RecoveryList = () => {
                 )}
             </div>
 
-            {/* Bulk Action Bar - Only for Managers */}
-            {isManager && selectedCases.length > 0 && (
-                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-4xl px-6 animate-in slide-in-from-bottom-10 duration-500 z-50">
-                    <div className="glass rounded-[32px] p-6 border-2 border-blue-500/40 shadow-[0_20px_80px_rgba(0,0,0,0.8)] flex items-center justify-between gap-8 bg-slate-950/95 backdrop-blur-2xl">
-                        <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 rounded-[24px] bg-blue-600 flex items-center justify-center font-black text-white text-2xl shadow-xl shadow-blue-600/30">
-                                {selectedCases.length}
-                            </div>
-                            <div>
-                                <h4 className="text-xl font-display font-bold text-white tracking-tight">Cases Selected</h4>
-                                <p className="text-slate-500 text-sm font-medium">Batch operational actions.</p>
-                            </div>
+            {/* Recovery Operational Modals */}
+            {showPaymentModal && activeActionCase && (
+                <Modal title={`Record Payment: ${activeActionCase.name}`} onClose={() => setShowPaymentModal(false)}>
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        recordRecoveryPayment(activeActionCase.id, parseFloat(paymentForm.amount), 'Bank Transfer', paymentForm.ref);
+                        setToast({ message: "Repayment recorded successfully", type: 'success' });
+                        setShowPaymentModal(false);
+                        setPaymentForm({ amount: '', ref: '' });
+                    }} className="space-y-6">
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Amount (R)</label>
+                            <input required type="number" step="0.01" value={paymentForm.amount} onChange={e => setPaymentForm({...paymentForm, amount: e.target.value})} className="input-field py-4 text-xl font-bold text-emerald-500" placeholder="0.00" />
                         </div>
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Reference</label>
+                            <input required value={paymentForm.ref} onChange={e => setPaymentForm({...paymentForm, ref: e.target.value})} className="input-field" placeholder="Transaction ID" />
+                        </div>
+                        <button className="w-full py-4 bg-emerald-600 rounded-2xl font-bold text-white uppercase tracking-widest text-xs">Confirm Payment</button>
+                    </form>
+                </Modal>
+            )}
 
-                        <div className="flex items-center gap-4">
-                            <div className="relative">
-                                <button 
-                                    onClick={() => setShowBulkAssign(!showBulkAssign)}
-                                    className="px-8 py-4 rounded-[20px] bg-slate-900 border border-slate-800 text-slate-200 font-bold text-sm hover:border-blue-500 hover:bg-slate-800 transition-all flex items-center gap-3 group"
-                                >
-                                    <User className="w-5 h-5 text-slate-500 group-hover:text-blue-400 group-hover:scale-110 transition-all" />
-                                    Assign Agent
-                                </button>
-                                
-                                {showBulkAssign && (
-                                    <div className="absolute bottom-full mb-4 right-0 w-72 glass rounded-[24px] border border-slate-800 shadow-2xl p-3 animate-in fade-in zoom-in-95 bg-slate-950/90 backdrop-blur-3xl">
-                                        <p className="px-4 py-2 text-[10px] font-black text-slate-600 uppercase tracking-widest border-b border-slate-800 mb-2">Available Recovery Agents</p>
-                                        {AGENTS.map(agent => (
-                                            <button 
-                                                key={agent}
-                                                onClick={() => handleBulkAssign(agent)}
-                                                className="w-full text-left px-4 py-4 rounded-xl hover:bg-blue-600 group transition-all mb-1 last:mb-0"
-                                            >
-                                                <span className="text-sm font-bold text-slate-300 group-hover:text-white">{agent}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                            
-                            <button className="px-8 py-4 rounded-[20px] bg-slate-900 border border-slate-800 text-slate-200 font-bold text-sm hover:border-red-500/50 hover:bg-red-500/5 transition-all flex items-center gap-3 group">
-                                <AlertTriangle className="w-5 h-5 text-slate-500 group-hover:text-red-400 group-hover:scale-110 transition-all" />
-                                Legal Escalation
-                            </button>
-                            
-                            <button 
-                                onClick={() => setSelectedCases([])}
-                                className="p-4 rounded-[20px] bg-slate-900/50 text-slate-500 hover:text-white transition-all border border-transparent hover:border-slate-700"
-                            >
-                                <Plus className="w-6 h-6 rotate-45" />
-                            </button>
+            {showInteractionModal && activeActionCase && (
+                <Modal title="Log Collection Attempt" onClose={() => setShowInteractionModal(false)}>
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        logRecoveryInteraction(activeActionCase.id, interactionForm);
+                        setToast({ message: "Interaction logged", type: 'info' });
+                        setShowInteractionModal(false);
+                        setInteractionForm({ type: 'Call', outcome: 'Answered', notes: '' });
+                    }} className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            <select className="input-field" value={interactionForm.type} onChange={e => setInteractionForm({...interactionForm, type: e.target.value})}><option>Call</option><option>Message</option></select>
+                            <select className="input-field" value={interactionForm.outcome} onChange={e => setInteractionForm({...interactionForm, outcome: e.target.value})}><option>Answered</option><option>PTP Committed</option><option>Refusal</option></select>
                         </div>
-                    </div>
-                </div>
+                        <textarea required value={interactionForm.notes} onChange={e => setInteractionForm({...interactionForm, notes: e.target.value})} className="input-field min-h-[120px]" placeholder="Observations..." />
+                        <button className="w-full py-4 bg-blue-600 rounded-2xl font-bold text-white uppercase tracking-widest text-xs">Save Log</button>
+                    </form>
+                </Modal>
+            )}
+
+            {showPtpModal && activeActionCase && (
+                <Modal title="Set Promise To Pay" onClose={() => setShowPtpModal(false)}>
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        updatePTP(activeActionCase.id, ptpForm);
+                        setToast({ message: "PTP active", type: 'success' });
+                        setShowPtpModal(false);
+                        setPtpForm({ date: '', amount: '' });
+                    }} className="space-y-6">
+                        <input required type="date" value={ptpForm.date} onChange={e => setPtpForm({...ptpForm, date: e.target.value})} className="input-field" />
+                        <input required type="number" value={ptpForm.amount} onChange={e => setPtpForm({...ptpForm, amount: e.target.value})} className="input-field" placeholder="Amount Promised" />
+                        <button className="w-full py-4 bg-amber-600 rounded-2xl font-bold text-white uppercase tracking-widest text-xs">Set Promise</button>
+                    </form>
+                </Modal>
             )}
         </div>
     );

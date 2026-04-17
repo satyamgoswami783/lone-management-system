@@ -27,6 +27,7 @@ export const RECOVERY_STATUSES = {
   IN_ARREARS: 'In Arrears',
   PTP: 'PTP Active',
   PTP_FAILED: 'PTP Failed',
+  CONTACTED: 'Contacted',
   LEGAL: 'Legal Escalation',
   SUSPENDED: 'Suspended',
   RECOVERED: 'Recovered',
@@ -93,8 +94,73 @@ export const LoanProvider = ({ children }) => {
 
           return updatedApp;
       });
+      
+      // Inject missing test cases for the user to check the recovery features
+      const newSamples = [
+        {
+            id: "REC-9942",
+            name: "Themba Khumalo",
+            email: "themba.k@mining.co.za",
+            company: "Platinum Mines Ltd",
+            amount: 45000,
+            status: STATUSES.DISBURSED,
+            recoveryStatus: RECOVERY_STATUSES.PTP_FAILED,
+            date: new Date(Date.now() - 86400000 * 120).toISOString(),
+            disbursementDate: new Date(Date.now() - 86400000 * 115).toISOString(),
+            assignedAgent: "Agent Smith",
+            tenure: 18,
+            salary: 35000,
+            installments: [
+              { id: 1, dueDate: new Date(Date.now() - 86400000 * 90).toISOString(), amount: 3500, paidAmount: 3500, status: 'PAID' },
+              { id: 2, dueDate: new Date(Date.now() - 86400000 * 60).toISOString(), amount: 3500, paidAmount: 1500, status: 'PARTIAL' },
+              { id: 3, dueDate: new Date(Date.now() - 86400000 * 30).toISOString(), amount: 3500, paidAmount: 0, status: 'UNPAID' }
+            ],
+            interactionLogs: [
+              { id: 1, type: 'Call', outcome: 'Answered', agent: 'Agent Smith', date: new Date(Date.now() - 86400000 * 15).toISOString(), notes: 'Debtor claims temporary cash flow issue.' },
+              { id: 2, type: 'Visit', outcome: 'Answered', agent: 'Field Agent Zoe', date: new Date(Date.now() - 86400000 * 5).toISOString(), notes: 'Site visit confirmed residency. Debtor signed a new PTP.' }
+            ],
+            ptpHistory: [
+              { id: 1, date: new Date(Date.now() - 86400000 * 10).toISOString(), amount: 5000, status: 'FAILED', createdDate: new Date(Date.now() - 86400000 * 15).toISOString() },
+              { id: 2, date: new Date(Date.now() + 86400000 * 2).toISOString(), amount: 3500, status: 'ACTIVE', createdDate: new Date(Date.now() - 86400000 * 5).toISOString() }
+            ],
+            auditHistory: [
+              { status: STATUSES.ACTIVE, date: new Date(Date.now() - 86400000 * 115).toISOString(), user: 'Finance', notes: 'Loan activated' },
+              { status: RECOVERY_STATUSES.IN_ARREARS, date: new Date(Date.now() - 86400000 * 59).toISOString(), user: 'System', notes: 'Default detected' }
+            ]
+        },
+        {
+            id: "REC-2210",
+            name: "Priya Pillay",
+            email: "p.pillay@consult.co",
+            company: "Creative Solutions",
+            amount: 15000,
+            status: STATUSES.DISBURSED,
+            recoveryStatus: RECOVERY_STATUSES.LEGAL,
+            date: new Date(Date.now() - 86400000 * 180).toISOString(),
+            salary: 42000,
+            installments: [
+              { id: 1, dueDate: new Date(Date.now() - 86400000 * 150).toISOString(), amount: 1500, paidAmount: 1500, status: 'PAID' },
+              { id: 2, dueDate: new Date(Date.now() - 86400000 * 120).toISOString(), amount: 1500, paidAmount: 0, status: 'UNPAID' },
+              { id: 3, dueDate: new Date(Date.now() - 86400000 * 95).toISOString(), amount: 1500, paidAmount: 0, status: 'UNPAID' }
+            ],
+            interactionLogs: [
+              { id: 1, type: 'Call', outcome: 'Refusal', agent: 'Legal Clerk', date: new Date(Date.now() - 86400000 * 40).toISOString(), notes: 'Debtor refused to discuss payment. Escalating to legal.' }
+            ],
+            ptpHistory: [],
+            auditHistory: [
+              { status: RECOVERY_STATUSES.LEGAL, date: new Date(Date.now() - 86400000 * 35).toISOString(), user: 'Legal Dept', notes: 'Letter of Demand issued' }
+            ]
+        }
+      ];
 
-      setApplications(processedApps);
+      const finalApps = [...processedApps];
+      newSamples.forEach(sample => {
+          if (!finalApps.find(a => a.id === sample.id)) {
+              finalApps.push(sample);
+          }
+      });
+
+      setApplications(finalApps);
     } else {
       // Seed initial data (Merged version)
       const sampleData = [
@@ -262,6 +328,60 @@ export const LoanProvider = ({ children }) => {
             ],
             auditHistory: [
               { status: STATUSES.DISBURSED, date: new Date(Date.now() - 86400000 * 90).toISOString(), user: 'Finance' }
+            ]
+        },
+        {
+            id: "REC-9942",
+            name: "Themba Khumalo",
+            email: "themba.k@mining.co.za",
+            company: "Platinum Mines Ltd",
+            amount: 45000,
+            status: STATUSES.DISBURSED,
+            recoveryStatus: RECOVERY_STATUSES.PTP_FAILED,
+            date: new Date(Date.now() - 86400000 * 120).toISOString(),
+            disbursementDate: new Date(Date.now() - 86400000 * 115).toISOString(),
+            assignedAgent: "Agent Smith",
+            tenure: 18,
+            salary: 35000,
+            installments: [
+              { id: 1, dueDate: new Date(Date.now() - 86400000 * 90).toISOString(), amount: 3500, paidAmount: 3500, status: 'PAID' },
+              { id: 2, dueDate: new Date(Date.now() - 86400000 * 60).toISOString(), amount: 3500, paidAmount: 1500, status: 'PARTIAL' },
+              { id: 3, dueDate: new Date(Date.now() - 86400000 * 30).toISOString(), amount: 3500, paidAmount: 0, status: 'UNPAID' }
+            ],
+            interactionLogs: [
+              { id: 1, type: 'Call', outcome: 'Answered', agent: 'Agent Smith', date: new Date(Date.now() - 86400000 * 15).toISOString(), notes: 'Debtor claims temporary cash flow issue.' },
+              { id: 2, type: 'Visit', outcome: 'Answered', agent: 'Field Agent Zoe', date: new Date(Date.now() - 86400000 * 5).toISOString(), notes: 'Site visit confirmed residency. Debtor signed a new PTP.' }
+            ],
+            ptpHistory: [
+              { id: 1, date: new Date(Date.now() - 86400000 * 10).toISOString(), amount: 5000, status: 'FAILED', createdDate: new Date(Date.now() - 86400000 * 15).toISOString() },
+              { id: 2, date: new Date(Date.now() + 86400000 * 2).toISOString(), amount: 3500, status: 'ACTIVE', createdDate: new Date(Date.now() - 86400000 * 5).toISOString() }
+            ],
+            auditHistory: [
+              { status: STATUSES.ACTIVE, date: new Date(Date.now() - 86400000 * 115).toISOString(), user: 'Finance', notes: 'Loan activated' },
+              { status: RECOVERY_STATUSES.IN_ARREARS, date: new Date(Date.now() - 86400000 * 59).toISOString(), user: 'System', notes: 'Default detected' }
+            ]
+        },
+        {
+            id: "REC-2210",
+            name: "Priya Pillay",
+            email: "p.pillay@consult.co",
+            company: "Creative Solutions",
+            amount: 15000,
+            status: STATUSES.DISBURSED,
+            recoveryStatus: RECOVERY_STATUSES.LEGAL,
+            date: new Date(Date.now() - 86400000 * 180).toISOString(),
+            salary: 42000,
+            installments: [
+              { id: 1, dueDate: new Date(Date.now() - 86400000 * 150).toISOString(), amount: 1500, paidAmount: 1500, status: 'PAID' },
+              { id: 2, dueDate: new Date(Date.now() - 86400000 * 120).toISOString(), amount: 1500, paidAmount: 0, status: 'UNPAID' },
+              { id: 3, dueDate: new Date(Date.now() - 86400000 * 95).toISOString(), amount: 1500, paidAmount: 0, status: 'UNPAID' }
+            ],
+            interactionLogs: [
+              { id: 1, type: 'Call', outcome: 'Refusal', agent: 'Legal Clerk', date: new Date(Date.now() - 86400000 * 40).toISOString(), notes: 'Debtor refused to discuss payment. Escalating to legal.' }
+            ],
+            ptpHistory: [],
+            auditHistory: [
+              { status: RECOVERY_STATUSES.LEGAL, date: new Date(Date.now() - 86400000 * 35).toISOString(), user: 'Legal Dept', notes: 'Letter of Demand issued' }
             ]
         }
       ];
@@ -506,17 +626,19 @@ export const LoanProvider = ({ children }) => {
 
         const totalOutstanding = newInstallments.reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0);
         const isFullyPaid = totalOutstanding <= 0;
+        const now = new Date().toISOString();
 
         return {
           ...app,
           installments: newInstallments,
+          lastActionDate: now,
           status: isFullyPaid ? STATUSES.PAID : app.status,
-          recoveryStatus: isFullyPaid ? RECOVERY_STATUSES.RECOVERED : app.recoveryStatus,
+          recoveryStatus: isFullyPaid ? RECOVERY_STATUSES.RECOVERED : (app.recoveryStatus === RECOVERY_STATUSES.HEALTHY ? RECOVERY_STATUSES.IN_ARREARS : app.recoveryStatus),
           auditHistory: [
             ...(app.auditHistory || []),
             { 
               status: 'RECOVERY_PAYMENT', 
-              date: new Date().toISOString(), 
+              date: now, 
               user: 'System', 
               notes: `Payment of R ${amount} recorded. Ref: ${reference}` 
             }
@@ -532,9 +654,19 @@ export const LoanProvider = ({ children }) => {
   const logRecoveryInteraction = (id, interaction) => {
     const updatedApps = applications.map(app => {
       if (app.id === id) {
+        const now = new Date().toISOString();
+        let newStatus = app.recoveryStatus || RECOVERY_STATUSES.IN_ARREARS;
+        
+        // Auto-update status based on interaction
+        if (interaction.type === 'Call' || interaction.type === 'Visit') {
+            newStatus = RECOVERY_STATUSES.CONTACTED || 'Contacted'; // Fallback if CONTACTED not in enum
+        }
+
         return {
           ...app,
-          interactionLogs: [{ ...interaction, id: Date.now(), date: new Date().toISOString() }, ...(app.interactionLogs || [])]
+          lastActionDate: now,
+          recoveryStatus: newStatus,
+          interactionLogs: [{ ...interaction, id: Date.now(), date: now }, ...(app.interactionLogs || [])]
         };
       }
       return app;
@@ -545,10 +677,12 @@ export const LoanProvider = ({ children }) => {
   const updatePTP = (id, ptpData) => {
     const updatedApps = applications.map(app => {
       if (app.id === id) {
+        const now = new Date().toISOString();
         return {
           ...app,
+          lastActionDate: now,
           recoveryStatus: RECOVERY_STATUSES.PTP,
-          ptpHistory: [{ ...ptpData, id: Date.now(), createdDate: new Date().toISOString(), status: 'ACTIVE' }, ...(app.ptpHistory || [])]
+          ptpHistory: [{ ...ptpData, id: Date.now(), createdDate: now, status: 'ACTIVE' }, ...(app.ptpHistory || [])]
         };
       }
       return app;

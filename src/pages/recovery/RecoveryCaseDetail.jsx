@@ -152,7 +152,7 @@ const RecoveryCaseDetail = () => {
                         </div>
                         <div>
                             <div className="flex items-center gap-3">
-                                <h1 className="text-4xl font-display font-bold text-white tracking-tight">{loan.name || 'Unknown Debtor'}</h1>
+                                <h1 className="text-4xl font-display font-bold text-slate-200 tracking-tight">{loan.name || 'Unknown Debtor'}</h1>
                                 <Badge variant={financials.dpd > 90 ? 'danger' : financials.dpd > 0 ? 'warning' : 'success'}>
                                     {financials.dpd > 0 ? `${financials.dpd} Days Overdue` : 'Up to Date'}
                                 </Badge>
@@ -188,7 +188,7 @@ const RecoveryCaseDetail = () => {
                         <DollarSign className="w-16 h-16 text-blue-500" />
                     </div>
                     <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Total Outstanding</p>
-                    <h3 className="text-3xl font-display font-bold text-white">R {financials.totalOutstanding.toLocaleString()}</h3>
+                    <h3 className="text-3xl font-display font-bold text-slate-200">R {financials.totalOutstanding.toLocaleString()}</h3>
                     <div className="mt-4 flex items-center gap-2 text-xs font-bold text-slate-400">
                         <span className="text-emerald-500">Principal: R {financials.principalOutstanding.toLocaleString()}</span>
                         <span className="w-1 h-1 rounded-full bg-slate-700" />
@@ -249,7 +249,7 @@ const RecoveryCaseDetail = () => {
                             )}
                             {activeTab === 'timeline' && (
                                 <ActionTimeline 
-                                    logs={loan.interactionLogs || []} 
+                                    loan={loan} 
                                 />
                             )}
                             {activeTab === 'ptp' && (
@@ -265,7 +265,7 @@ const RecoveryCaseDetail = () => {
                 {/* Sidebar Context */}
                 <div className="space-y-8">
                     <div className="glass rounded-[40px] p-8 border border-slate-800/50 bg-slate-900/10">
-                        <h3 className="text-lg font-display font-bold mb-8 flex items-center gap-3">
+                        <h3 className="text-lg font-display font-bold mb-8 flex items-center gap-3 text-slate-200">
                             <Briefcase className="w-5 h-5 text-blue-400" />
                             Collector Assignment
                         </h3>
@@ -291,7 +291,7 @@ const RecoveryCaseDetail = () => {
 
                     <div className="glass rounded-[40px] p-8 border border-slate-800/50 bg-blue-600/5 relative overflow-hidden group">
                         <TrendingUp className="absolute -bottom-4 -right-4 w-32 h-32 text-blue-600/10 group-hover:scale-110 transition-transform duration-700" />
-                        <h3 className="text-lg font-display font-bold mb-4 relative z-10">Risk Advisory</h3>
+                        <h3 className="text-lg font-display font-bold mb-4 relative z-10 text-slate-200">Risk Advisory</h3>
                         <p className="text-slate-400 text-sm leading-relaxed relative z-10">
                             {financials.dpd > 90 
                                 ? "This account has exceeded the 90-day threshold. Mandatory legal escalation protocol is now active."
@@ -430,7 +430,7 @@ const RecoveryCaseDetail = () => {
 const InstallmentList = ({ installments }) => (
     <div className="space-y-4">
         {installments.map((inst, idx) => (
-            <div key={idx} className="flex items-center justify-between p-6 bg-slate-900/40 rounded-[28px] border border-slate-800/50 hover:border-blue-500/30 transition-all group">
+            <div key={idx} className="flex items-center justify-between p-6 bg-white rounded-[28px] border border-slate-700 hover:border-blue-500/30 transition-all group shadow-sm">
                 <div className="flex items-center gap-6">
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
                         inst.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400' : 
@@ -465,37 +465,70 @@ const InstallmentList = ({ installments }) => (
     </div>
 );
 
-const ActionTimeline = ({ logs }) => (
-    <div className="relative pl-10 space-y-10 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-800">
-        {logs.map((log) => (
-            <div key={log.id} className="relative group">
-                <div className="absolute -left-[35px] top-1.5 w-6 h-6 rounded-full bg-slate-950 border-4 border-slate-800 group-hover:border-blue-500 transition-all z-10 flex items-center justify-center">
-                    <div className="w-1 h-1 rounded-full bg-slate-500 group-hover:bg-blue-500" />
+const ActionTimeline = ({ loan }) => {
+    const events = useMemo(() => {
+        const logs = (loan.interactionLogs || []).map(l => ({ ...l, category: 'INTERACTION' }));
+        const history = (loan.auditHistory || []).map(h => ({ 
+            id: `audit-${h.date}`, 
+            type: h.status, 
+            outcome: h.notes || 'Status Updated', 
+            notes: h.notes, 
+            date: h.date, 
+            agent: h.user,
+            category: 'STATUS'
+        }));
+        const ptps = (loan.ptpHistory || []).map(p => ({
+            id: `ptp-${p.id}`,
+            type: 'PTP Created',
+            outcome: `R ${p.amount} promised by ${new Date(p.date).toLocaleDateString()}`,
+            notes: `Status: ${p.status}`,
+            date: p.createdDate,
+            agent: 'System',
+            category: 'PTP'
+        }));
+
+        return [...logs, ...history, ...ptps].sort((a, b) => new Date(b.date) - new Date(a.date));
+    }, [loan]);
+
+    return (
+        <div className="relative pl-10 space-y-10 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-800">
+            {events.map((event) => (
+                <div key={event.id} className="relative group">
+                    <div className="absolute -left-[35px] top-1.5 w-6 h-6 rounded-full bg-slate-950 border-4 border-slate-800 group-hover:border-blue-500 transition-all z-10 flex items-center justify-center">
+                        <div className="w-1 h-1 rounded-full bg-slate-500 group-hover:bg-blue-500" />
+                    </div>
+                    <div className="space-y-4">
+                        <div className="flex flex-wrap items-center gap-4">
+                            <Badge variant={
+                                event.category === 'INTERACTION' ? 'primary' : 
+                                event.category === 'PTP' ? 'warning' : 'neutral'
+                            }>
+                                {event.type}
+                            </Badge>
+                            <span className="text-xs font-black text-slate-600 uppercase tracking-widest">
+                                {new Date(event.date).toLocaleString()}
+                            </span>
+                        </div>
+                        <div className="bg-slate-900/50 p-5 rounded-3xl border border-slate-700 group-hover:border-slate-500 transition-all max-w-2xl shadow-sm">
+                            <p className="font-bold text-slate-200 text-base mb-2">{event.outcome}</p>
+                            {event.notes && <p className="text-slate-400 text-sm leading-relaxed">{event.notes}</p>}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] pt-1 pl-1">
+                            <Activity className="w-3 h-3" />
+                            Activity by: {event.agent}
+                        </div>
+                    </div>
                 </div>
-                <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                        <Badge variant="primary">{log.type}</Badge>
-                        <span className="text-xs font-black text-slate-600 uppercase tracking-widest">{new Date(log.date).toLocaleString()}</span>
-                    </div>
-                    <div className="bg-slate-900/40 p-5 rounded-3xl border border-slate-800 group-hover:border-slate-700 transition-all">
-                        <p className="font-bold text-slate-200 text-base mb-2">{log.outcome}</p>
-                        <p className="text-slate-400 text-sm leading-relaxed">{log.notes}</p>
-                    </div>
-                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] pt-1 pl-1">
-                        <Activity className="w-3 h-3" />
-                        Recorder: {log.agent}
-                    </div>
+            ))}
+            {events.length === 0 && (
+                <div className="text-center py-20 flex flex-col items-center gap-4">
+                    <Activity className="w-12 h-12 text-slate-800" />
+                    <p className="text-slate-600 text-sm font-medium italic">No recovery events recorded for this case.</p>
                 </div>
-            </div>
-        ))}
-        {logs.length === 0 && (
-            <div className="text-center py-20 flex flex-col items-center gap-4">
-                <Activity className="w-12 h-12 text-slate-800" />
-                <p className="text-slate-600 text-sm font-medium italic">No collector activities recorded yet.</p>
-            </div>
-        )}
-    </div>
-);
+            )}
+        </div>
+    );
+};
 
 const PtpHistory = ({ history, onAdd }) => (
     <div className="space-y-8">
@@ -511,7 +544,7 @@ const PtpHistory = ({ history, onAdd }) => (
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {history.map((ptp, idx) => (
-                <div key={idx} className="p-8 rounded-[32px] border border-slate-800 bg-slate-900/40 space-y-6 relative overflow-hidden group">
+                <div key={idx} className="p-8 rounded-[32px] border border-slate-700 bg-white space-y-6 relative overflow-hidden group shadow-sm">
                     <div className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity ${
                         ptp.status === 'FAILED' ? 'bg-red-500' : ptp.status === 'FULFILLED' ? 'bg-emerald-500' : 'bg-blue-500'
                     }`} style={{ borderRadius: '100%' }} />
@@ -546,16 +579,16 @@ const InfoBar = ({ label, value, danger }) => (
 );
 
 const Modal = ({ title, onClose, children }) => (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-0">
-        <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose} />
-        <div className="relative w-full max-w-lg glass rounded-[44px] border border-slate-800/50 overflow-hidden shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-5 duration-300">
-            <div className="p-10 border-b border-slate-800/50 flex items-center justify-between bg-white/[0.02]">
-                <h3 className="text-2xl font-display font-bold text-white tracking-tight">{title}</h3>
-                <button onClick={onClose} className="p-3 hover:bg-slate-800 rounded-2xl transition-all text-slate-500 hover:text-white">
-                    <Plus className="w-7 h-7 rotate-45" />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 overflow-hidden">
+        <div className="absolute inset-0 bg-slate-200/40 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose} />
+        <div className="relative w-full max-w-xl glass rounded-[40px] border border-slate-800/50 overflow-hidden shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-5 duration-300 max-h-[90vh] flex flex-col">
+            <div className="p-8 md:p-10 border-b border-slate-800/50 flex items-center justify-between bg-white/[0.02]">
+                <h3 className="text-2xl font-display font-bold text-slate-200 tracking-tight">{title}</h3>
+                <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-2xl transition-all text-slate-500 hover:text-white">
+                    <Plus className="w-6 h-6 rotate-45" />
                 </button>
             </div>
-            <div className="p-10">
+            <div className="p-8 md:p-10 overflow-y-auto custom-scrollbar">
                 {children}
             </div>
         </div>
