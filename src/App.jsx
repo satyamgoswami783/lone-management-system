@@ -14,23 +14,6 @@ import FinanceDashboard from './pages/finance/FinanceDashboard';
 import ManagementDashboard from './pages/management/ManagementDashboard';
 import RecoveryDashboard from './pages/recovery/RecoveryDashboard';
 
-// Mock components for pages
-const PlaceholderPage = ({ title }) => (
-  <div className="space-y-6">
-    <div className="flex flex-col gap-2">
-      <h1 className="text-3xl font-display font-bold">{title}</h1>
-      <p className="text-slate-400">Welcome to the {title} module. Detailed view is coming soon.</p>
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {[1, 2, 3].map(i => (
-        <div key={i} className="glass p-6 rounded-2xl h-40 flex items-center justify-center border-dashed border-slate-700/50">
-          <span className="text-slate-500 font-medium">Metric Card {i}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
 import MyStatus from './pages/employee/MyStatus';
 import Statements from './pages/employee/Statements';
 import VerificationQueue from './pages/hr/VerificationQueue';

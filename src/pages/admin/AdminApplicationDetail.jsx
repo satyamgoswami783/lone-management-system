@@ -14,14 +14,14 @@ import {
     Clock
 } from 'lucide-react';
 
-import { useLoans, STATUSES } from '../../context/LoanContext';
+import { useLoans, STATUSES, LIFECYCLE_STATUSES, LIFECYCLE_ACTIONS } from '../../context/LoanContext';
 import { Badge, SectionHeader, Toast } from '../../components/ui/Shared';
 import DocumentPreviewModal from '../../components/ui/DocumentPreviewModal';
 
 const AdminApplicationDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { applications, updateStatus } = useLoans();
+    const { applications, transitionLoanLifecycle } = useLoans();
     const [isLoading, setIsLoading] = useState(false);
     const [toast, setToast] = useState(null);
     const [previewTarget, setPreviewTarget] = useState(null);
@@ -51,25 +51,22 @@ const AdminApplicationDetail = () => {
     }
 
     const currentStageIndex = stages.indexOf(application.status);
-    const nextStage = stages[currentStageIndex + 1];
     const prevStage = stages[currentStageIndex - 1];
 
     const handleApprove = () => {
-        if (nextStage) {
-            setIsLoading(true);
-            setTimeout(() => {
-                updateStatus(application.id, nextStage, 'System Admin');
-                setIsLoading(false);
-                setToast({ message: `Successfully advanced to ${nextStage}`, type: 'success' });
-            }, 800);
-        }
+        setIsLoading(true);
+        setTimeout(() => {
+            transitionLoanLifecycle(application.id, LIFECYCLE_ACTIONS.ADMIN_APPROVE, 'System Admin', 'Final admin approval from detail page');
+            setIsLoading(false);
+            setToast({ message: 'Successfully approved for disbursement queue.', type: 'success' });
+        }, 800);
     };
 
     const handleSendBack = () => {
         if (prevStage) {
             setIsLoading(true);
             setTimeout(() => {
-                updateStatus(application.id, prevStage, 'System Admin');
+            transitionLoanLifecycle(application.id, LIFECYCLE_ACTIONS.REOPEN, 'System Admin', 'Sent back for rework');
                 setIsLoading(false);
                 setToast({ message: `Reverted back to ${prevStage}`, type: 'info' });
             }, 800);
@@ -79,15 +76,15 @@ const AdminApplicationDetail = () => {
     const handleReject = () => {
         setIsLoading(true);
         setTimeout(() => {
-            updateStatus(application.id, STATUSES.DECLINED, 'System Admin');
+            transitionLoanLifecycle(application.id, LIFECYCLE_ACTIONS.ADMIN_REJECT, 'System Admin', 'Rejected at admin stage');
             setIsLoading(false);
             setToast({ message: 'Application Rejected & Archived', type: 'danger' });
             setTimeout(() => navigate('/admin/applications'), 1500);
         }, 800);
     };
 
-    const isCompleted = application.status === STATUSES.PAID;
-    const isRejected = application.status === STATUSES.DECLINED || application.status === STATUSES.REJECTED;
+    const isCompleted = application.lifecycleStatus === LIFECYCLE_STATUSES.CLOSED;
+    const isRejected = application.lifecycleStatus === LIFECYCLE_STATUSES.REJECTED;
     const isProcessed = isCompleted || isRejected;
 
     return (
@@ -217,7 +214,7 @@ const AdminApplicationDetail = () => {
                                     className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-2xl font-black uppercase text-xs tracking-widest transition-all flex items-center justify-center gap-3 shadow-lg shadow-blue-600/30 active:scale-95"
                                 >
                                     {isLoading ? <Clock className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
-                                    {nextStage === STATUSES.APPROVED ? 'Finalize & Approve' : `Move to ${nextStage?.replace(/_/g, ' ')}`}
+                                    Finalize & Approve
                                 </button>
 
                                 <button

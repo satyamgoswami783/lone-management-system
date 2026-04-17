@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileSearch } from 'lucide-react';
 import { Toast, Badge } from '../../components/ui/Shared';
-import { useLoans, STATUSES } from '../../context/LoanContext';
+import { useLoans, LIFECYCLE_ACTIONS } from '../../context/LoanContext';
 import VerificationDetailsView from '../../components/hr/VerificationDetailsView';
 
 const HRVerificationDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { applications, updateStatus } = useLoans();
+    const { applications, transitionLoanLifecycle } = useLoans();
     const [isLoading, setIsLoading] = useState(false);
     const [toast, setToast] = useState(null);
 
@@ -19,24 +19,17 @@ const HRVerificationDetail = () => {
         setIsLoading(true);
         // Simulate network delay
         setTimeout(() => {
-            updateStatus(application.id, STATUSES.HR_APPROVED, 'HR Manager');
-
-            // Move to next stage automatically after HR approval
-            setTimeout(() => {
-                updateStatus(application.id, STATUSES.CREDIT_PENDING, 'System');
-                setIsLoading(false);
-                setToast({ message: 'HR Verification Successful! Moving to Credit Assessment.', type: 'success' });
-
-                // Redirect back to queue after showing toast
-                setTimeout(() => navigate('/hr/verifications'), 1500);
-            }, 500);
+            transitionLoanLifecycle(application.id, LIFECYCLE_ACTIONS.HR_VERIFY, 'HR Manager', 'Verified from HR detail');
+            setIsLoading(false);
+            setToast({ message: 'HR Verification Successful! Moving to Credit Assessment.', type: 'success' });
+            setTimeout(() => navigate('/hr/verifications'), 1500);
         }, 1200);
     };
 
     const handleReject = (reason) => {
         setIsLoading(true);
         setTimeout(() => {
-            updateStatus(application.id, STATUSES.HR_REJECTED, 'HR Manager');
+            transitionLoanLifecycle(application.id, LIFECYCLE_ACTIONS.HR_REJECT, 'HR Manager', reason);
             setIsLoading(false);
             setToast({ message: `Application ${application.id} rejected. Redirecting...`, type: 'danger' });
 

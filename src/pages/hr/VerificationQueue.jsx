@@ -16,12 +16,12 @@ import {
     ArrowUpDown,
     FilterX
 } from 'lucide-react';
-import { useLoans, STATUSES } from '../../context/LoanContext';
+import { useLoans, STATUSES, LIFECYCLE_STATUSES, LIFECYCLE_ACTIONS } from '../../context/LoanContext';
 import { StatCard, SectionHeader, Badge, Toast, Modal } from '../../components/ui/Shared';
 import { useNavigate } from 'react-router-dom';
 
 const VerificationQueue = () => {
-    const { applications, updateStatus } = useLoans();
+    const { applications, transitionLoanLifecycle } = useLoans();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
@@ -36,9 +36,9 @@ const VerificationQueue = () => {
         const id = app.id || '';
         const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                              id.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === 'ALL' 
-            ? (app.status === STATUSES.HR_PENDING || app.status === STATUSES.SUBMITTED)
-            : app.status === statusFilter;
+        const matchesStatus = statusFilter === 'ALL'
+            ? app.lifecycleStatus === LIFECYCLE_STATUSES.SUBMITTED
+            : app.lifecycleStatus === statusFilter;
         return matchesSearch && matchesStatus;
     });
 
@@ -75,8 +75,7 @@ const VerificationQueue = () => {
         if (window.confirm('Confirm HR Verification Approval?')) {
             setIsLoading(true);
             setTimeout(() => {
-                updateStatus(id, STATUSES.HR_APPROVED, 'HR Manager');
-                setTimeout(() => updateStatus(id, STATUSES.CREDIT_PENDING, 'System'), 500);
+                transitionLoanLifecycle(id, LIFECYCLE_ACTIONS.HR_VERIFY, 'HR Manager', 'HR verification approved');
                 setIsLoading(false);
                 setToast({ message: `Application ${id} approved successfully!`, type: 'success' });
             }, 800);
@@ -91,7 +90,7 @@ const VerificationQueue = () => {
     const confirmReject = () => {
         setIsLoading(true);
         setTimeout(() => {
-            updateStatus(selectedAppId, STATUSES.HR_REJECTED, 'HR Manager');
+            transitionLoanLifecycle(selectedAppId, LIFECYCLE_ACTIONS.HR_REJECT, 'HR Manager', 'Rejected during HR verification');
             setShowRejectModal(false);
             setSelectedAppId(null);
             setIsLoading(false);
@@ -132,8 +131,7 @@ const VerificationQueue = () => {
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
                                 <option value="ALL">All Active</option>
-                                <option value={STATUSES.SUBMITTED}>Submitted</option>
-                                <option value={STATUSES.HR_PENDING}>HR Pending</option>
+                                <option value={LIFECYCLE_STATUSES.SUBMITTED}>Submitted</option>
                             </select>
                         </div>
                     </div>

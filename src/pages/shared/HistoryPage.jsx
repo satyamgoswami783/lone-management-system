@@ -8,7 +8,7 @@ import {
   Clock,
   Activity
 } from 'lucide-react';
-import { useLoans, STATUSES } from '../../context/LoanContext';
+import { useLoans, STATUSES, EVENT_TYPES } from '../../context/LoanContext';
 import { SectionHeader, Badge } from '../../components/ui/Shared';
 import { useAuth } from '../../context/AuthContext';
 
@@ -31,7 +31,7 @@ const HistoryPage = ({ title }) => {
                                 row.type.toLowerCase().includes(searchQuery.toLowerCase());
             
             if (user?.role === 'finance' || user?.role === 'management') {
-                const financeEventTypes = ['DISBURSED', 'PAID', 'FAILED'];
+                const financeEventTypes = [EVENT_TYPES.DISBURSED, EVENT_TYPES.PAID, EVENT_TYPES.FAILED, EVENT_TYPES.PAYMENT_RECORDED];
                 return matchesSearch && financeEventTypes.includes(row.type);
             }
             return matchesSearch;
@@ -103,7 +103,7 @@ const HistoryPage = ({ title }) => {
                                                 <Activity className="w-4 h-4" />
                                             </div>
                                             <span className="text-sm font-bold text-slate-400">
-                                                {log.type}
+                                                {String(log.type || '').replaceAll('_', ' ')}
                                             </span>
                                         </div>
                                     </td>

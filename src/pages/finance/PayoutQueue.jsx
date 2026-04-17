@@ -13,7 +13,7 @@ import {
     FileDown,
     ChevronRight
 } from 'lucide-react';
-import { useLoans, STATUSES } from '../../context/LoanContext';
+import { useLoans, STATUSES, LIFECYCLE_STATUSES } from '../../context/LoanContext';
 import { SectionHeader, Badge, StatCard, Toast } from '../../components/ui/Shared';
 
 const PayoutQueue = () => {
@@ -23,10 +23,10 @@ const PayoutQueue = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedIds, setSelectedIds] = useState([]);
 
-    // STRICT FILTER: Only APPROVED loans
+    // STRICT FILTER: Only admin-approved loans awaiting disbursement
     const queue = useMemo(() => {
         return applications.filter(app =>
-            app.status === STATUSES.APPROVED &&
+            app.lifecycleStatus === LIFECYCLE_STATUSES.ADMIN_APPROVED &&
             (app.name.toLowerCase().includes(searchQuery.toLowerCase()) || app.id.toLowerCase().includes(searchQuery.toLowerCase()))
         );
     }, [applications, searchQuery]);
