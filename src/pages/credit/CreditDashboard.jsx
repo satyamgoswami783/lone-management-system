@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   ShieldCheck, 
   AlertTriangle, 
@@ -21,6 +21,7 @@ import { useLoans, STATUSES } from '../../context/LoanContext';
 const CreditDashboard = () => {
     const navigate = useNavigate();
     const { applications } = useLoans();
+    const [prioritySearch, setPrioritySearch] = useState('');
 
     const pendingCount = applications.filter(a => a.status === STATUSES.CREDIT_PENDING || a.status === STATUSES.HR_APPROVED).length;
     const highRiskCount = applications.filter(a => a.risk === 'High' && a.status === STATUSES.CREDIT_PENDING).length;
@@ -49,6 +50,18 @@ const CreditDashboard = () => {
             onClick: () => navigate('/credit/history')
         },
     ];
+
+    const priorityAssessments = useMemo(() => {
+        const source = applications
+            .filter((a) => [STATUSES.NEW, STATUSES.CREDIT_PENDING, STATUSES.HR_APPROVED].includes(a.status))
+            .filter((a) => {
+                if (!prioritySearch.trim()) return true;
+                const q = prioritySearch.toLowerCase();
+                return (a.name || '').toLowerCase().includes(q) || (a.id || '').toLowerCase().includes(q);
+            })
+            .slice(0, 5);
+        return source;
+    }, [applications, prioritySearch]);
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -86,7 +99,12 @@ const CreditDashboard = () => {
                             <div className="flex items-center gap-4">
                                 <div className="relative hidden md:block">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                    <input className="input-field pl-9 py-1.5 text-xs w-48" placeholder="Search..." />
+                                    <input
+                                        className="input-field pl-9 py-1.5 text-xs w-48"
+                                        placeholder="Search..."
+                                        value={prioritySearch}
+                                        onChange={(e) => setPrioritySearch(e.target.value)}
+                                    />
                                 </div>
                                 <button 
                                     onClick={() => navigate('/credit/queue')}
@@ -107,10 +125,7 @@ const CreditDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-800/50">
-                                    {applications
-                                        .filter(a => [STATUSES.NEW, STATUSES.CREDIT_PENDING, STATUSES.HR_APPROVED].includes(a.status))
-                                        .slice(0, 5)
-                                        .map((app, i) => (
+                                    {priorityAssessments.map((app, i) => (
                                         <tr key={i} className="hover:bg-slate-800/30 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
@@ -153,7 +168,10 @@ const CreditDashboard = () => {
                             <ShieldCheck className="absolute -right-4 -bottom-4 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform" />
                             <h3 className="text-xl font-display font-bold text-white">Policy Compliance</h3>
                             <p className="text-blue-100 text-sm opacity-80">98.4% of assessments today meet internal risk mitigation protocols.</p>
-                            <button className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-xl text-xs font-bold hover:bg-white/30 transition-all text-center">
+                            <button
+                                onClick={() => navigate('/credit/reviews', { state: { tab: 'policy' } })}
+                                className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-xl text-xs font-bold hover:bg-white/30 transition-all text-center"
+                            >
                                 View Guidelines
                             </button>
                         </div>
@@ -161,7 +179,10 @@ const CreditDashboard = () => {
                             <BarChart3 className="absolute -right-4 -bottom-4 w-32 h-32 text-slate-800 group-hover:scale-110 transition-transform" />
                             <h3 className="text-xl font-display font-bold text-slate-100">Efficiency Stats</h3>
                             <p className="text-slate-500 text-sm">Average turnaround time for credit decisions: <span className="text-blue-400 font-bold">4.2 hours</span></p>
-                            <button className="px-4 py-2 bg-slate-800 rounded-xl text-xs font-bold hover:bg-slate-700 transition-all text-center">
+                            <button
+                                onClick={() => navigate('/credit/history')}
+                                className="px-4 py-2 bg-slate-800 rounded-xl text-xs font-bold hover:bg-slate-700 transition-all text-center"
+                            >
                                 Performance Report
                             </button>
                         </div>
@@ -191,7 +212,10 @@ const CreditDashboard = () => {
                                 </div>
                             </div>
                         </div>
-                        <button className="w-full py-3 rounded-2xl bg-slate-800 text-slate-300 font-bold text-sm hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-center">
+                        <button
+                            onClick={() => navigate('/credit/reviews')}
+                            className="w-full py-3 rounded-2xl bg-slate-800 text-slate-300 font-bold text-sm hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-center"
+                        >
                             <BarChart3 className="w-4 h-4" />
                             Detailed Risk Report
                         </button>
@@ -203,7 +227,10 @@ const CreditDashboard = () => {
                             Quick Actions
                         </h3>
                         <div className="grid grid-cols-1 gap-3">
-                            <button className="w-full flex items-center justify-between p-4 bg-slate-950 border border-slate-800 rounded-2xl hover:border-blue-500 transition-all group text-center">
+                            <button
+                                onClick={() => navigate('/credit/queue', { state: { quickAction: 'approve' } })}
+                                className="w-full flex items-center justify-between p-4 bg-slate-950 border border-slate-800 rounded-2xl hover:border-blue-500 transition-all group text-center"
+                            >
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400 text-center">
                                         <UserCheck className="w-5 h-5" />
@@ -212,7 +239,10 @@ const CreditDashboard = () => {
                                 </div>
                                 <ArrowRight className="w-4 h-4 text-slate-700 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
                             </button>
-                            <button className="w-full flex items-center justify-between p-4 bg-slate-950 border border-slate-800 rounded-2xl hover:border-red-500 transition-all group text-center">
+                            <button
+                                onClick={() => navigate('/credit/queue', { state: { risk: 'High' } })}
+                                className="w-full flex items-center justify-between p-4 bg-slate-950 border border-slate-800 rounded-2xl hover:border-red-500 transition-all group text-center"
+                            >
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-red-500/10 rounded-lg text-red-400 text-center">
                                         <AlertCircle className="w-5 h-5" />

@@ -116,11 +116,6 @@ const LoginPage = () => {
           </div>
         </div>
 
-        <div className="text-center pt-2">
-          <p className="text-slate-500 text-sm font-medium">
-            First time? <button type="button" className="text-blue-600 font-bold hover:underline">Register Profile</button>
-          </p>
-        </div>
       </div>
     </div>
   );

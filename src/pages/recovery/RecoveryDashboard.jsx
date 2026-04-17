@@ -142,7 +142,7 @@ const RecoveryDashboard = () => {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="space-y-8 overflow-x-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
             <SectionHeader
                 title={isManager ? "Administrative Recovery Control" : "Recovery Performance Dashboard"}
@@ -160,9 +160,9 @@ const RecoveryDashboard = () => {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Aging Analysis */}
-                <div className="glass rounded-[40px] p-8 border border-slate-800/50 flex flex-col shadow-xl">
+                <div className="glass rounded-3xl sm:rounded-[40px] p-5 sm:p-6 lg:p-8 border border-slate-800/50 flex flex-col shadow-xl min-w-0">
                     <h3 className="text-xl font-display font-bold mb-8 flex items-center gap-3 text-slate-200">
                         <PieChart className="w-5 h-5 text-blue-400" />
                         {isManager ? 'Global Aging' : 'My Portfolio Aging'}
@@ -175,13 +175,13 @@ const RecoveryDashboard = () => {
                 </div>
 
                 {/* Priority Collections */}
-                <div className="lg:col-span-2 glass rounded-[40px] border border-slate-800/50 overflow-hidden flex flex-col shadow-xl">
-                    <div className="p-6 lg:p-8 border-b border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-slate-900/10">
+                <div className="lg:col-span-2 glass rounded-3xl sm:rounded-[40px] border border-slate-800/50 overflow-hidden flex flex-col min-w-0 shadow-xl">
+                    <div className="p-4 sm:p-6 lg:p-8 border-b border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 bg-slate-900/10">
                         <div className="flex items-center gap-3">
                             <Calendar className="w-5 h-5 lg:w-6 lg:h-6 text-slate-500" />
                             <h3 className="text-lg lg:text-xl font-display font-bold text-slate-200">Priority Collections</h3>
                         </div>
-                        <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full sm:w-auto min-w-0">
                             <div className="relative hidden md:block">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                                 <input 
@@ -201,43 +201,43 @@ const RecoveryDashboard = () => {
                         </div>
                     </div>
                     <div className="flex-1 overflow-x-auto">
-                        <table className="w-full text-left">
+                        <table className="w-full min-w-[760px] text-left">
                             <thead>
                                 <tr className="bg-slate-900 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-800/40">
-                                    <th className="px-8 py-5">Borrower</th>
-                                    <th className="px-8 py-5 text-center">Outstanding</th>
-                                    <th className="px-8 py-5">Status / Assignment</th>
-                                    <th className="px-8 py-5 text-right">Actions</th>
+                                    <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5">Borrower</th>
+                                    <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 text-center">Outstanding</th>
+                                    <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5">Status / Assignment</th>
+                                    <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-800/40 font-medium hidden md:table-row-group">
                                 {filteredPriorityCases.map((row) => (
                                     <tr key={row.id} className="hover:bg-slate-800/30 transition-colors group cursor-pointer" onClick={() => navigate(`/recovery/case/${row.id}`)}>
-                                        <td className="px-8 py-6">
+                                        <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
                                             <div className="font-bold text-slate-200">{row.name || 'Anonymous'}</div>
                                             <div className="text-[10px] text-slate-500 font-mono font-bold mt-1 uppercase tracking-tighter">Ref: {row.id}</div>
                                         </td>
-                                        <td className="px-8 py-6 text-center">
+                                        <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-center">
                                             <p className="text-sm font-bold text-red-500 whitespace-nowrap">
                                                 R {row.installments?.filter(i => i.status !== 'PAID' && new Date(i.dueDate) < new Date())
                                                     .reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0).toLocaleString()}
                                             </p>
                                         </td>
-                                        <td className="px-8 py-6">
-                                            <div className="flex flex-wrap items-center gap-2 max-w-[14rem]">
+                                        <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+                                            <div className="flex flex-wrap items-center gap-2 max-w-full">
                                                 <Badge variant={row.recoveryStatus === RECOVERY_STATUSES.PTP_FAILED ? 'danger' : row.recoveryStatus === RECOVERY_STATUSES.PTP ? 'primary' : 'warning'}>
                                                     {row.recoveryStatus || 'In Arrears'}
                                                 </Badge>
                                                 <Badge variant="neutral">
                                                     {row.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}
                                                 </Badge>
-                                                <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest w-full pt-1">
+                                                <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest w-full pt-1 break-all">
                                                     <User className="w-3 h-3" />
                                                     {row.assignedAgent || 'Unassigned'}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-8 py-6 text-right">
+                                        <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-right">
                                             <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                                                 <button 
                                                     onClick={(e) => openAction(e, row, 'interaction')}
@@ -268,12 +268,12 @@ const RecoveryDashboard = () => {
                         </table>
 
                         {/* Mobile Priority Cards */}
-                        <div className="md:hidden p-6 space-y-6">
+                        <div className="md:hidden p-4 sm:p-6 space-y-4 sm:space-y-6">
                             {filteredPriorityCases.map((row) => (
-                                <div key={row.id} className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800/50 space-y-4 shadow-lg group active:bg-slate-800/50 transition-all" onClick={() => navigate(`/recovery/case/${row.id}`)}>
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <h4 className="font-bold text-slate-200">{row.name}</h4>
+                                <div key={row.id} className="p-4 sm:p-6 rounded-3xl bg-slate-900/50 border border-slate-800/50 space-y-4 shadow-lg group active:bg-slate-800/50 transition-all min-w-0" onClick={() => navigate(`/recovery/case/${row.id}`)}>
+                                    <div className="flex justify-between items-start gap-3">
+                                        <div className="min-w-0">
+                                            <h4 className="font-bold text-slate-200 truncate">{row.name}</h4>
                                             <p className="text-[10px] text-slate-500 font-mono mt-0.5 uppercase">{row.id}</p>
                                         </div>
                                         <Badge variant={row.recoveryStatus === RECOVERY_STATUSES.PTP_FAILED ? 'danger' : 'warning'}>
@@ -283,7 +283,7 @@ const RecoveryDashboard = () => {
                                     <Badge variant="neutral">
                                         {row.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}
                                     </Badge>
-                                    <div className="flex justify-between items-end">
+                                    <div className="flex justify-between items-end gap-3">
                                         <div>
                                             <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Total Arrears</p>
                                             <p className="text-lg font-display font-bold text-red-500">
@@ -311,7 +311,7 @@ const RecoveryDashboard = () => {
                         </div>
 
                         {filteredPriorityCases.length === 0 && (
-                            <div className="p-32 text-center flex flex-col items-center justify-center space-y-4">
+                            <div className="p-10 sm:p-16 lg:p-24 text-center flex flex-col items-center justify-center space-y-4">
                                 <div className="w-16 h-16 rounded-[24px] bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600">
                                     <ShieldCheck className="w-8 h-8" />
                                 </div>
@@ -395,7 +395,7 @@ const RecoveryDashboard = () => {
                         }} 
                         className="space-y-6"
                     >
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Method</label>
                                 <select 

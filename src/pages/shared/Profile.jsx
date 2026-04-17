@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     UserCircle,
     Mail,
@@ -15,19 +15,91 @@ import {
 } from 'lucide-react';
 import { SectionHeader, Badge } from '../../components/ui/Shared';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { Toast } from '../../components/ui/Shared';
 
 function cn(...inputs) {
     return twMerge(clsx(inputs));
 }
 
 const Profile = () => {
-    const { user, role } = useAuth();
+    const { user, role, logout } = useAuth();
+    const navigate = useNavigate();
     const [editing, setEditing] = useState(false);
+    const avatarInputRef = useRef(null);
+    const [toast, setToast] = useState(null);
+    const [profileFields, setProfileFields] = useState({
+        email: user?.email || '',
+        phone: '+27 (0) 82 123 4567',
+        employerName: 'TechFlow South Africa',
+        employeeReference: 'TF-90412',
+    });
+    const [securitySettings, setSecuritySettings] = useState({
+        twoFactorAuth: true,
+        pushNotifications: true,
+    });
+
+    useEffect(() => {
+        const stored = localStorage.getItem(`lms_profile_${user?.id || 'default'}`);
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored);
+                setProfileFields((prev) => ({ ...prev, ...(parsed.profileFields || {}) }));
+                setSecuritySettings((prev) => ({ ...prev, ...(parsed.securitySettings || {}) }));
+            } catch {
+                // ignore invalid profile storage
+            }
+        }
+    }, [user?.id]);
+
+    const persistProfile = (nextFields = profileFields, nextSecurity = securitySettings) => {
+        localStorage.setItem(
+            `lms_profile_${user?.id || 'default'}`,
+            JSON.stringify({ profileFields: nextFields, securitySettings: nextSecurity })
+        );
+    };
+
+    const handleEditToggle = () => {
+        if (editing) {
+            persistProfile();
+            setToast({ type: 'success', message: 'Profile updates saved successfully.' });
+        }
+        setEditing((prev) => !prev);
+    };
+
+    const handleFieldChange = (key, value) => {
+        setProfileFields((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const handleToggleSecurity = (key) => {
+        const next = { ...securitySettings, [key]: !securitySettings[key] };
+        setSecuritySettings(next);
+        persistProfile(profileFields, next);
+        setToast({
+            type: 'info',
+            message: `${key === 'twoFactorAuth' ? 'Two-Factor Auth' : 'Push Notifications'} ${next[key] ? 'enabled' : 'disabled'}.`,
+        });
+    };
+
+    const handleAvatarSelect = (event) => {
+        const selectedFile = event.target.files?.[0];
+        if (!selectedFile) return;
+        setToast({ type: 'success', message: `Profile photo selected: ${selectedFile.name}` });
+    };
+
+    const handleTerminate = () => {
+        const confirmDelete = window.confirm('Do you want to terminate this session and remove profile settings from this device?');
+        if (!confirmDelete) return;
+        localStorage.removeItem(`lms_profile_${user?.id || 'default'}`);
+        logout();
+        navigate('/login');
+    };
 
     return (
         <div className="space-y-8 animate-in duration-700 pb-20">
+            {toast && <Toast {...toast} onClose={() => setToast(null)} />}
             <SectionHeader
                 title="Account Settings"
                 description="Manage your personal information, security preferences, and notification settings."
@@ -44,9 +116,19 @@ const Profile = () => {
                             <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-[32px] lg:rounded-[40px] bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-3xl lg:text-4xl font-bold text-white shadow-2xl group-hover:scale-105 transition-transform duration-500">
                                 {user?.name?.[0]}
                             </div>
-                            <button className="absolute -bottom-3 -right-3 p-3 bg-white border border-slate-800 rounded-2xl text-blue-600 hover:text-blue-500 transition-all shadow-xl hover:scale-110">
+                            <button
+                                onClick={() => avatarInputRef.current?.click()}
+                                className="absolute -bottom-3 -right-3 p-3 bg-white border border-slate-800 rounded-2xl text-blue-600 hover:text-blue-500 transition-all shadow-xl hover:scale-110"
+                            >
                                 <Camera className="w-5 h-5" />
                             </button>
+                            <input
+                                ref={avatarInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleAvatarSelect}
+                            />
                         </div>
 
                         <div className="space-y-2 relative z-10">
@@ -69,7 +151,7 @@ const Profile = () => {
                         </div>
 
                         <button
-                            onClick={() => setEditing(!editing)}
+                            onClick={handleEditToggle}
                             className="w-full flex items-center justify-center gap-2 py-4 bg-slate-900 border border-slate-800 rounded-2xl text-sm font-bold text-slate-400 hover:text-slate-200 transition-all hover:bg-white hover:border-blue-500 group relative z-10"
                         >
                             <Edit2 className="w-4 h-4 transition-transform group-hover:rotate-12" />
@@ -94,15 +176,27 @@ const Profile = () => {
                             <div className="space-y-6 lg:space-y-8">
                                 <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.25em] border-b border-white/5 pb-4">Personal Association</h3>
                                 <div className="space-y-10">
-                                    <ProfileField icon={Mail} label="Email Address" value={user?.email} editable={editing} />
-                                    <ProfileField icon={Phone} label="Mobile Contact" value="+27 (0) 82 123 4567" editable={editing} />
+                                    <ProfileField
+                                        icon={Mail}
+                                        label="Email Address"
+                                        value={profileFields.email}
+                                        editable={editing}
+                                        onChange={(value) => handleFieldChange('email', value)}
+                                    />
+                                    <ProfileField
+                                        icon={Phone}
+                                        label="Mobile Contact"
+                                        value={profileFields.phone}
+                                        editable={editing}
+                                        onChange={(value) => handleFieldChange('phone', value)}
+                                    />
                                 </div>
                             </div>
                             <div className="space-y-8">
                                 <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.25em] border-b border-slate-800 pb-4">Entity Information</h3>
                                 <div className="space-y-10">
-                                    <ProfileField icon={Building2} label="Employer Name" value="TechFlow South Africa" editable={false} />
-                                    <ProfileField icon={Lock} label="Employee Reference" value="TF-90412" editable={false} />
+                                    <ProfileField icon={Building2} label="Employer Name" value={profileFields.employerName} editable={false} />
+                                    <ProfileField icon={Lock} label="Employee Reference" value={profileFields.employeeReference} editable={false} />
                                 </div>
                             </div>
                         </div>
@@ -114,13 +208,15 @@ const Profile = () => {
                                     icon={Settings}
                                     title="Two-Factor Auth"
                                     desc="Multi-layer protocol active"
-                                    enabled={true}
+                                    enabled={securitySettings.twoFactorAuth}
+                                    onToggle={() => handleToggleSecurity('twoFactorAuth')}
                                 />
                                 <SecuritySetting
                                     icon={Bell}
                                     title="Push Notifications"
                                     desc="Live loan status alerts"
-                                    enabled={true}
+                                    enabled={securitySettings.pushNotifications}
+                                    onToggle={() => handleToggleSecurity('pushNotifications')}
                                 />
                             </div>
                         </div>
@@ -132,7 +228,10 @@ const Profile = () => {
                             <h4 className="text-xl font-bold text-red-500">Request Data Erasure</h4>
                             <p className="text-sm text-red-500/60 font-medium max-w-sm">Permanently remove your profile and all financial log history from our vaults.</p>
                         </div>
-                        <button className="w-full sm:w-auto px-10 py-4 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-red-600/20 active:scale-95 transition-all relative z-10">
+                        <button
+                            onClick={handleTerminate}
+                            className="w-full sm:w-auto px-10 py-4 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-red-600/20 active:scale-95 transition-all relative z-10"
+                        >
                             Terminate
                         </button>
                     </div>
@@ -142,7 +241,7 @@ const Profile = () => {
     );
 };
 
-const ProfileField = ({ icon: Icon, label, value, editable }) => (
+const ProfileField = ({ icon: Icon, label, value, editable, onChange }) => (
     <div className="flex gap-6 group/field">
         <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 text-slate-500 h-fit group-hover/field:border-blue-500/50 transition-all">
             <Icon className="w-6 h-6" />
@@ -152,7 +251,8 @@ const ProfileField = ({ icon: Icon, label, value, editable }) => (
             {editable ? (
                 <input
                     type="text"
-                    defaultValue={value}
+                    value={value || ''}
+                    onChange={(e) => onChange?.(e.target.value)}
                     className="bg-transparent border-none p-0 text-lg font-bold text-blue-600 focus:ring-0 w-full tracking-tight"
                 />
             ) : (
@@ -162,7 +262,7 @@ const ProfileField = ({ icon: Icon, label, value, editable }) => (
     </div>
 );
 
-const SecuritySetting = ({ icon: Icon, title, desc, enabled }) => (
+const SecuritySetting = ({ icon: Icon, title, desc, enabled, onToggle }) => (
     <div className="p-5 lg:p-8 bg-slate-900/40 rounded-[28px] lg:rounded-[32px] border border-slate-800 flex items-center justify-between group hover:border-blue-500 transition-all shadow-sm">
         <div className="flex items-center gap-4 lg:gap-5 min-w-0 flex-1">
             <div className="p-3 lg:p-4 bg-slate-950 rounded-[16px] lg:rounded-[20px] border border-slate-800 text-slate-500 group-hover:text-blue-500 transition-colors shrink-0">
@@ -173,13 +273,17 @@ const SecuritySetting = ({ icon: Icon, title, desc, enabled }) => (
                 <p className="text-[9px] lg:text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1 truncate">{desc}</p>
             </div>
         </div>
-        <div className={cn("w-12 lg:w-14 h-6 lg:h-7 rounded-full p-1 lg:p-1.5 transition-all cursor-pointer shadow-inner shrink-0 ml-4", 
-            enabled ? 'bg-blue-600' : 'bg-slate-700'
-        )}>
+        <button
+            onClick={onToggle}
+            className={cn("w-12 lg:w-14 h-6 lg:h-7 rounded-full p-1 lg:p-1.5 transition-all cursor-pointer shadow-inner shrink-0 ml-4",
+                enabled ? 'bg-blue-600' : 'bg-slate-700'
+            )}
+            aria-label={`Toggle ${title}`}
+        >
             <div className={cn("w-4 h-4 rounded-full transition-all shadow-md", 
                 enabled ? 'translate-x-6 lg:translate-x-7 bg-white' : 'translate-x-0 bg-slate-400'
             )} />
-        </div>
+        </button>
     </div>
 );
 

@@ -19,6 +19,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import DocumentPreviewModal from '../../components/ui/DocumentPreviewModal';
 import { buildLetterPayload, LETTER_TYPES } from '../../features/letters/generator';
+import { cleanupHtml2PdfArtifacts } from '../../utils/pdfCleanup';
 
 const DocumentsCenter = () => {
     const { applications } = useLoans();
@@ -65,6 +66,7 @@ const DocumentsCenter = () => {
 
     const handleDownloadPdf = async (element, filename) => {
         try {
+            cleanupHtml2PdfArtifacts();
             const html2pdfModule = await import('html2pdf.js');
             const html2pdf = html2pdfModule.default || html2pdfModule;
             await html2pdf()
@@ -81,6 +83,8 @@ const DocumentsCenter = () => {
             setToast({ type: 'success', message: `${filename} downloaded successfully.` });
         } catch (error) {
             setToast({ type: 'danger', message: 'Failed to generate PDF. Please try again.' });
+        } finally {
+            cleanupHtml2PdfArtifacts();
         }
     };
 

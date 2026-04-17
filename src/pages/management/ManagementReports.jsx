@@ -38,30 +38,39 @@ const ManagementReports = () => {
     ];
 
     const handleExportCSV = () => {
-        if (filteredApps.length === 0) return;
-        
+        if (filteredApps.length === 0) {
+            setToast({ message: 'No records available to export for current filters.', type: 'warning' });
+            return;
+        }
+
         const headers = ['ID', 'Employee', 'Company', 'Amount', 'Status', 'Date', 'ID Number'];
-        const rows = filteredApps.map(app => [
-            app.id,
-            app.name,
-            app.company,
-            app.amount,
-            app.status,
-            new Date(app.date).toLocaleDateString(),
-            app.idNumber
+        const rows = filteredApps.map((app) => [
+            app.id ?? '',
+            app.name ?? '',
+            app.company ?? '',
+            Number(app.amount || 0),
+            app.status ?? '',
+            app.date ? new Date(app.date).toLocaleDateString() : '',
+            app.idNumber ?? ''
         ]);
 
-        const csvContent = "data:text/csv;charset=utf-8," 
-            + headers.map(e => e.join(",")).join("\n");
+        const escapeCsv = (value) => `"${String(value).replace(/"/g, '""')}"`;
+        const csvLines = [
+            headers.map(escapeCsv).join(','),
+            ...rows.map((row) => row.map(escapeCsv).join(','))
+        ];
+        const csvText = csvLines.join('\n');
 
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `lms_report_${new Date().toISOString().split('T')[0]}.csv`);
+        const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = `lms_report_${new Date().toISOString().split('T')[0]}.csv`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+        URL.revokeObjectURL(url);
+
         setToast({ message: `Exported ${filteredApps.length} records successfully.`, type: 'success' });
     };
 

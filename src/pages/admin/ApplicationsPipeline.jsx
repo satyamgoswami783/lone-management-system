@@ -18,16 +18,54 @@ import { SectionHeader, Badge } from '../../components/ui/Shared';
 const ApplicationsPipeline = () => {
     const { applications, transitionLoanLifecycle } = useLoans();
     const [searchTerm, setSearchTerm] = useState('');
+    const [showFilters, setShowFilters] = useState(false);
+    const [statusFilter, setStatusFilter] = useState('ALL');
+    const [minAmount, setMinAmount] = useState('');
+    const [maxAmount, setMaxAmount] = useState('');
     const navigate = useNavigate();
 
 
     const filteredApps = applications.filter(app => {
         const isAdminQueue = app.lifecycleStatus === LIFECYCLE_STATUSES.CREDIT_APPROVED;
         if (!isAdminQueue) return false;
-        return app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        const matchesSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             app.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
             app.status.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === 'ALL' || app.status === statusFilter;
+        const appAmount = Number(app.amount) || 0;
+        const minOk = minAmount === '' || appAmount >= Number(minAmount);
+        const maxOk = maxAmount === '' || appAmount <= Number(maxAmount);
+        return matchesSearch && matchesStatus && minOk && maxOk;
     });
+
+    const handleExportCsv = () => {
+        const headers = ['Application ID', 'Employee', 'Email', 'Amount', 'Status', 'Lifecycle', 'Date'];
+        const rows = filteredApps.map((app) => [
+            app.id,
+            app.name,
+            app.email || 'N/A',
+            Number(app.amount || 0).toFixed(2),
+            app.status,
+            app.lifecycleStatus || 'N/A',
+            app.date ? new Date(app.date).toLocaleDateString() : 'N/A',
+        ]);
+
+        const csv = [headers, ...rows]
+            .map((row) =>
+                row.map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`).join(',')
+            )
+            .join('\n');
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `admin_pipeline_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
 
     const getStatusVariant = (status) => {
         switch (status) {
@@ -76,16 +114,53 @@ const ApplicationsPipeline = () => {
                         />
                     </div>
                     <div className="flex gap-3">
-                        <button className="flex items-center gap-2 px-5 py-2.5 glass rounded-xl text-sm font-bold text-slate-300 hover:text-white transition-all">
+                        <button
+                            onClick={() => setShowFilters((prev) => !prev)}
+                            className="flex items-center gap-2 px-5 py-2.5 glass rounded-xl text-sm font-bold text-slate-300 hover:text-white transition-all"
+                        >
                             <Filter className="w-4 h-4" />
                             Filters
                         </button>
-                        <button className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20">
+                        <button
+                            onClick={handleExportCsv}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
+                        >
                             <Download className="w-4 h-4" />
                             Export CSV
                         </button>
                     </div>
                 </div>
+
+                {showFilters && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-2xl border border-slate-800 bg-slate-900/40">
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="input-field py-3"
+                        >
+                            <option value="ALL">All Statuses</option>
+                            {Object.values(STATUSES).map((status) => (
+                                <option key={status} value={status}>
+                                    {status}
+                                </option>
+                            ))}
+                        </select>
+                        <input
+                            type="number"
+                            value={minAmount}
+                            onChange={(e) => setMinAmount(e.target.value)}
+                            placeholder="Min amount"
+                            className="input-field py-3"
+                        />
+                        <input
+                            type="number"
+                            value={maxAmount}
+                            onChange={(e) => setMaxAmount(e.target.value)}
+                            placeholder="Max amount"
+                            className="input-field py-3"
+                        />
+                    </div>
+                )}
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">

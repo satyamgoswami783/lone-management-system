@@ -14,8 +14,10 @@ import {
 } from 'lucide-react';
 import { SectionHeader, StatCard, Badge } from '../../components/ui/Shared';
 import { useLoans, STATUSES } from '../../context/LoanContext';
+import { useNavigate } from 'react-router-dom';
 
 const HRReports = () => {
+    const navigate = useNavigate();
     const { applications } = useLoans();
 
     // Derived stats
@@ -153,7 +155,10 @@ const HRReports = () => {
                             </div>
                         ))}
                     </div>
-                    <button className="w-full py-4 bg-slate-800 rounded-[20px] text-xs font-black text-slate-400 uppercase tracking-widest hover:bg-slate-700 hover:text-white transition-all">
+                    <button
+                        onClick={() => navigate('/hr/history')}
+                        className="w-full py-4 bg-slate-800 rounded-[20px] text-xs font-black text-slate-400 uppercase tracking-widest hover:bg-slate-700 hover:text-white transition-all"
+                    >
                         View Full Audit Trail
                     </button>
                 </div>

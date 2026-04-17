@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { useLoans, STATUSES } from '../../context/LoanContext';
-import { SectionHeader, Badge } from '../../components/ui/Shared';
+import { SectionHeader, Badge, Toast } from '../../components/ui/Shared';
 import { Receipt, Calendar, Download, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import html2pdf from 'html2pdf.js';
+import { cleanupHtml2PdfArtifacts } from '../../utils/pdfCleanup';
 
 const Statements = () => {
     const { applications } = useLoans();
     const activeLoan = applications.find(app => app.status === STATUSES.DISBURSED);
+    const statementRef = useRef(null);
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [toast, setToast] = useState(null);
 
     const mockTransactions = [
         { id: 'TX-9021', date: '2024-03-31', description: 'Salary Deduction Repayment', amount: 1250, type: 'repayment' },
@@ -15,8 +20,42 @@ const Statements = () => {
         { id: 'TX-1029', date: '2024-01-31', description: 'Initial Loan Disbursement', amount: 5000, type: 'disbursement' },
     ];
 
+    const handleDownloadPdf = async () => {
+        const target = statementRef.current;
+        if (!target) {
+            setToast({ type: 'danger', message: 'Statement content is not ready. Please retry.' });
+            return;
+        }
+        try {
+            setIsDownloading(true);
+            setToast({ type: 'info', message: 'Preparing statement PDF...' });
+            cleanupHtml2PdfArtifacts();
+            await html2pdf()
+                .set({
+                    margin: 8,
+                    filename: `Statement-${activeLoan?.id || 'Loan'}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                })
+                .from(target)
+                .save();
+            setToast({ type: 'success', message: 'Statement PDF downloaded successfully.' });
+        } catch (error) {
+            window.print();
+            setToast({
+                type: 'info',
+                message: `PDF export fallback opened print dialog${error?.message ? ` (${error.message})` : ''}.`,
+            });
+        } finally {
+            cleanupHtml2PdfArtifacts();
+            setIsDownloading(false);
+        }
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {toast && <Toast {...toast} onClose={() => setToast(null)} />}
             <SectionHeader
                 title="Repayment Statements"
                 description="View your active loan balance and transaction history."
@@ -31,7 +70,7 @@ const Statements = () => {
                     <p className="text-slate-500 max-w-md">Statements are only generated once your loan has been approved and disbursed.</p>
                 </div>
             ) : (
-                <div className="space-y-8">
+                <div className="space-y-8" ref={statementRef}>
                     {/* Summary Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div className="glass p-6 rounded-3xl bg-blue-600/5 border-blue-500/10">
@@ -53,9 +92,13 @@ const Statements = () => {
                     <div className="glass rounded-[40px] overflow-hidden border border-slate-800/50">
                         <div className="p-6 border-b border-slate-800/50 flex items-center justify-between">
                             <h2 className="text-xl font-display font-bold">Transaction History</h2>
-                            <button className="flex items-center gap-2 px-4 py-2 bg-slate-900 rounded-xl text-sm font-bold text-slate-300 hover:text-white transition-colors">
+                            <button
+                                onClick={handleDownloadPdf}
+                                disabled={isDownloading}
+                                className="flex items-center gap-2 px-4 py-2 bg-slate-900 rounded-xl text-sm font-bold text-slate-300 hover:text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
                                 <Download className="w-4 h-4" />
-                                Download PDF
+                                {isDownloading ? 'Generating PDF...' : 'Download PDF'}
                             </button>
                         </div>
                         <div className="overflow-x-auto">
