@@ -232,7 +232,7 @@ const CreditProfilePage = () => {
 
     return (
         <>
-            <div className="pb-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="pb-48 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
             {/* Header */}
@@ -529,10 +529,10 @@ const CreditProfilePage = () => {
             </div>
 
             </div>
-
-            {/* Decision Action Bar (INLINE) */}
-            <div className="p-4 sm:p-8 glass rounded-[40px] border border-slate-800/50 shadow-2xl">
-                <div className="flex flex-col xl:flex-row items-center justify-between gap-6">
+            
+            {/* Decision Action Bar (FIXED BOTTOM) */}
+            <div className="fixed bottom-0 left-0 right-0 z-50 pt-4 pb-12 px-4 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] sm:pb-8 sm:px-6 bg-slate-950/80 backdrop-blur-2xl border-t border-slate-800">
+                <div className="max-w-7xl mx-auto flex flex-col xl:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-4 w-full xl:w-auto">
                         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
                             <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
@@ -546,19 +546,19 @@ const CreditProfilePage = () => {
                     <div className="grid grid-cols-2 lg:flex lg:items-center gap-3 w-full xl:w-auto">
                         <button 
                             onClick={() => setIsRejectModalOpen(true)}
-                            className="px-4 sm:px-8 py-3 sm:py-4 rounded-2xl border border-red-500/20 text-red-500 font-black uppercase text-[10px] tracking-wider hover:bg-red-500 hover:text-white transition-all shadow-lg truncate"
+                            className="px-4 sm:px-8 py-3 sm:py-4 rounded-2xl bg-red-600 text-white font-black uppercase text-[10px] tracking-wider hover:bg-red-500 transition-all shadow-xl shadow-red-600/10 truncate"
                         >
                             Reject
                         </button>
                         <button 
                             onClick={() => setIsHoldModalOpen(true)}
-                            className="px-4 sm:px-8 py-3 sm:py-4 rounded-2xl border border-amber-500/20 text-amber-500 font-black uppercase text-[10px] tracking-wider hover:bg-amber-500 hover:text-white transition-all shadow-lg truncate"
+                            className="px-4 sm:px-8 py-3 sm:py-4 rounded-2xl bg-amber-600 text-white font-black uppercase text-[10px] tracking-wider hover:bg-amber-500 transition-all shadow-xl shadow-amber-600/10 truncate"
                         >
                             Hold
                         </button>
                         <button 
                             onClick={() => setIsRequestInfoModalOpen(true)}
-                            className="px-4 sm:px-8 py-3 sm:py-4 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 font-black uppercase text-[10px] tracking-wider hover:bg-slate-800 hover:text-white transition-all shadow-lg truncate"
+                            className="px-4 sm:px-8 py-3 sm:py-4 rounded-2xl bg-slate-800 text-slate-200 font-black uppercase text-[10px] tracking-wider hover:bg-slate-700 transition-all shadow-xl truncate"
                         >
                             Request Info
                         </button>

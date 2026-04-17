@@ -142,195 +142,199 @@ const RecoveryDashboard = () => {
     };
 
     return (
-        <div className="space-y-8 overflow-x-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {toast && <Toast {...toast} onClose={() => setToast(null)} />}
-            <SectionHeader
-                title={isManager ? "Administrative Recovery Control" : "Recovery Performance Dashboard"}
-                description={isManager ? "Corporate-level oversight of global delinquency metrics and agent productivity." : `Welcome back, ${user?.name}. Manage your assigned accounts and track your performance.`}
-            />
-            {isDemoFallback && (
-                <div className="glass p-4 rounded-2xl border border-blue-500/20 bg-blue-500/5 text-blue-400 text-sm font-medium">
-                    Demo visibility enabled: showing portfolio recovery cases because no cases are currently assigned to your profile.
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {stats.map((stat, i) => (
-                    <StatCard key={i} {...stat} />
-                ))}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Aging Analysis */}
-                <div className="glass rounded-3xl sm:rounded-[40px] p-5 sm:p-6 lg:p-8 border border-slate-800/50 flex flex-col shadow-xl min-w-0">
-                    <h3 className="text-xl font-display font-bold mb-8 flex items-center gap-3 text-slate-200">
-                        <PieChart className="w-5 h-5 text-blue-400" />
-                        {isManager ? 'Global Aging' : 'My Portfolio Aging'}
-                    </h3>
-                    <div className="space-y-6 flex-1">
-                        <AgingBar label="DPD 1-30" count={recoveryData.agingBuckets.low} color="bg-emerald-500" total={recoveryData.cases.length} onClick={() => navigate('/recovery/list', { state: { filter: 'low' } })} />
-                        <AgingBar label="DPD 31-60" count={recoveryData.agingBuckets.mid} color="bg-amber-500" total={recoveryData.cases.length} onClick={() => navigate('/recovery/list', { state: { filter: 'mid' } })} />
-                        <AgingBar label="DPD 60+" count={recoveryData.agingBuckets.high} color="bg-red-500" total={recoveryData.cases.length} onClick={() => navigate('/recovery/list', { state: { filter: 'high' } })} />
+        <>
+            <div className="space-y-8 pb-32 overflow-x-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+                {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+                <SectionHeader
+                    title={isManager ? "Administrative Recovery Control" : "Recovery Performance Dashboard"}
+                    description={isManager ? "Corporate-level oversight of global delinquency metrics and agent productivity." : `Welcome back, ${user?.name}. Manage your assigned accounts and track your performance.`}
+                />
+                {isDemoFallback && (
+                    <div className="glass p-4 rounded-2xl border border-blue-500/20 bg-blue-500/5 text-blue-400 text-sm font-medium">
+                        Demo visibility enabled: showing portfolio recovery cases because no cases are currently assigned to your profile.
                     </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {stats.map((stat, i) => (
+                        <StatCard key={i} {...stat} />
+                    ))}
                 </div>
 
-                {/* Priority Collections */}
-                <div className="lg:col-span-2 glass rounded-3xl sm:rounded-[40px] border border-slate-800/50 overflow-hidden flex flex-col min-w-0 shadow-xl">
-                    <div className="p-4 sm:p-6 lg:p-8 border-b border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 bg-slate-900/10">
-                        <div className="flex items-center gap-3">
-                            <Calendar className="w-5 h-5 lg:w-6 lg:h-6 text-slate-500" />
-                            <h3 className="text-lg lg:text-xl font-display font-bold text-slate-200">Priority Collections</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Aging Analysis */}
+                    <div className="glass rounded-3xl sm:rounded-[40px] p-5 sm:p-6 lg:p-8 border border-slate-800/50 flex flex-col shadow-xl min-w-0">
+                        <h3 className="text-xl font-display font-bold mb-8 flex items-center gap-3 text-slate-200">
+                            <PieChart className="w-5 h-5 text-blue-400" />
+                            {isManager ? 'Global Aging' : 'My Portfolio Aging'}
+                        </h3>
+                        <div className="space-y-6 flex-1">
+                            <AgingBar label="DPD 1-30" count={recoveryData.agingBuckets.low} color="bg-emerald-500" total={recoveryData.cases.length} onClick={() => navigate('/recovery/list', { state: { filter: 'low' } })} />
+                            <AgingBar label="DPD 31-60" count={recoveryData.agingBuckets.mid} color="bg-amber-500" total={recoveryData.cases.length} onClick={() => navigate('/recovery/list', { state: { filter: 'mid' } })} />
+                            <AgingBar label="DPD 60+" count={recoveryData.agingBuckets.high} color="bg-red-500" total={recoveryData.cases.length} onClick={() => navigate('/recovery/list', { state: { filter: 'high' } })} />
                         </div>
-                        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full sm:w-auto min-w-0">
-                            <div className="relative hidden md:block">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                <input 
-                                    className="input-field pl-9 py-1.5 text-xs w-48 bg-slate-900 border-slate-700" 
-                                    placeholder="Search..." 
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                />
+                    </div>
+
+                    {/* Priority Collections */}
+                    <div className="lg:col-span-2 glass rounded-3xl sm:rounded-[40px] border border-slate-800/50 overflow-hidden flex flex-col min-w-0 shadow-xl">
+                        <div className="p-4 sm:p-6 lg:p-8 border-b border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 bg-slate-900/10">
+                            <div className="flex items-center gap-3">
+                                <Calendar className="w-5 h-5 lg:w-6 lg:h-6 text-slate-500" />
+                                <h3 className="text-lg lg:text-xl font-display font-bold text-slate-200">Priority Collections</h3>
                             </div>
-                            <button 
-                                onClick={() => navigate('/recovery/list')}
-                                className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] hover:text-white transition-all flex items-center gap-1 group"
-                            >
-                                View All
-                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                            </button>
+                            <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full sm:w-auto min-w-0">
+                                <div className="relative hidden md:block">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                    <input 
+                                        className="input-field pl-9 py-1.5 text-xs w-48 bg-slate-900 border-slate-700" 
+                                        placeholder="Search..." 
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                </div>
+                                <button 
+                                    onClick={() => navigate('/recovery/list')}
+                                    className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] hover:text-white transition-all flex items-center gap-1 group"
+                                >
+                                    View All
+                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex-1 overflow-x-auto">
-                        <table className="w-full min-w-[760px] text-left">
-                            <thead>
-                                <tr className="bg-slate-900 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-800/40">
-                                    <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5">Borrower</th>
-                                    <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 text-center">Outstanding</th>
-                                    <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5">Status / Assignment</th>
-                                    <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-800/40 font-medium">
-                                {filteredPriorityCases.map((row) => (
-                                    <tr key={row.id} className="hover:bg-slate-800/30 transition-colors group cursor-pointer" onClick={() => navigate(`/recovery/case/${row.id}`)}>
-                                        <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
-                                            <div className="font-bold text-slate-200">{row.name || 'Anonymous'}</div>
-                                            <div className="text-[10px] text-slate-500 font-mono font-bold mt-1 uppercase tracking-tighter">Ref: {row.id}</div>
-                                        </td>
-                                        <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-center">
-                                            <p className="text-sm font-bold text-red-500 whitespace-nowrap">
-                                                R {row.installments?.filter(i => i.status !== 'PAID' && new Date(i.dueDate) < new Date())
-                                                    .reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0).toLocaleString()}
-                                            </p>
-                                        </td>
-                                        <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
-                                            <div className="flex flex-wrap items-center gap-2 max-w-full">
-                                                <Badge variant={row.recoveryStatus === RECOVERY_STATUSES.PTP_FAILED ? 'danger' : row.recoveryStatus === RECOVERY_STATUSES.PTP ? 'primary' : 'warning'}>
-                                                    {row.recoveryStatus || 'In Arrears'}
-                                                </Badge>
-                                                <Badge variant="neutral">
-                                                    {row.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}
-                                                </Badge>
-                                                <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest w-full pt-1 break-all">
-                                                    <User className="w-3 h-3" />
-                                                    {row.assignedAgent || 'Unassigned'}
+                        <div className="flex-1 overflow-x-auto">
+                            <table className="w-full min-w-[760px] text-left">
+                                <thead>
+                                    <tr className="bg-slate-900 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-800/40">
+                                        <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5">Borrower</th>
+                                        <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 text-center">Outstanding</th>
+                                        <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5">Status / Assignment</th>
+                                        <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-800/40 font-medium">
+                                    {filteredPriorityCases.map((row) => (
+                                        <tr key={row.id} className="hover:bg-slate-800/30 transition-colors group cursor-pointer" onClick={() => navigate(`/recovery/case/${row.id}`)}>
+                                            <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+                                                <div className="font-bold text-slate-200">{row.name || 'Anonymous'}</div>
+                                                <div className="text-[10px] text-slate-500 font-mono font-bold mt-1 uppercase tracking-tighter">Ref: {row.id}</div>
+                                            </td>
+                                            <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-center">
+                                                <p className="text-sm font-bold text-red-500 whitespace-nowrap">
+                                                    R {row.installments?.filter(i => i.status !== 'PAID' && new Date(i.dueDate) < new Date())
+                                                        .reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0).toLocaleString()}
+                                                </p>
+                                            </td>
+                                            <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+                                                <div className="flex flex-wrap items-center gap-2 max-w-full">
+                                                    <Badge variant={row.recoveryStatus === RECOVERY_STATUSES.PTP_FAILED ? 'danger' : row.recoveryStatus === RECOVERY_STATUSES.PTP ? 'primary' : 'warning'}>
+                                                        {row.recoveryStatus || 'In Arrears'}
+                                                    </Badge>
+                                                    <Badge variant="neutral">
+                                                        {row.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}
+                                                    </Badge>
+                                                    <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest w-full pt-1 break-all">
+                                                        <User className="w-3 h-3" />
+                                                        {row.assignedAgent || 'Unassigned'}
+                                                    </div>
                                                 </div>
+                                            </td>
+                                            <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-right">
+                                                <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                                    <button 
+                                                        onClick={(e) => openAction(e, row, 'interaction')}
+                                                        className="p-2.5 text-slate-500 hover:text-blue-400 hover:bg-blue-400/10 rounded-xl transition-all" 
+                                                        title="Call"
+                                                    >
+                                                        <Phone className="w-4 h-4" />
+                                                    </button>
+                                                    <button 
+                                                        onClick={(e) => openAction(e, row, 'payment')}
+                                                        className="p-2.5 text-slate-500 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-xl transition-all" 
+                                                        title="Record Payment"
+                                                    >
+                                                        <DollarSign className="w-4 h-4" />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => navigate(`/recovery/case/${row.id}`)}
+                                                        className="p-2.5 text-slate-500 hover:text-purple-400 hover:bg-purple-400/10 rounded-xl transition-all" 
+                                                        title="View Detail"
+                                                    >
+                                                        <History className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                            {/* Mobile Priority Cards */}
+                            <div className="md:hidden p-4 sm:p-6 space-y-4 sm:space-y-6">
+                                {filteredPriorityCases.map((row) => (
+                                    <div key={row.id} className="p-5 sm:p-6 rounded-[32px] bg-slate-900 border border-slate-800/50 space-y-4 shadow-lg group active:bg-slate-800/50 transition-all min-w-0" onClick={() => navigate(`/recovery/case/${row.id}`)}>
+                                        <div className="flex justify-between items-start gap-3">
+                                            <div className="min-w-0">
+                                                <h4 className="font-bold text-slate-100 truncate text-base leading-tight">{row.name}</h4>
+                                                <p className="text-[10px] text-slate-500 font-mono mt-0.5 uppercase tracking-tighter">{row.id}</p>
                                             </div>
-                                        </td>
-                                        <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6 text-right">
-                                            <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                            <Badge variant={row.recoveryStatus === RECOVERY_STATUSES.PTP_FAILED ? 'danger' : 'warning'}>
+                                                {row.recoveryStatus || 'Arrears'}
+                                            </Badge>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge variant="neutral" className="border-slate-800 bg-slate-950/50">
+                                                {row.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}
+                                            </Badge>
+                                        </div>
+                                        <div className="flex justify-between items-end gap-3 pt-2">
+                                            <div>
+                                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1 leading-none">Delinquent Amt</p>
+                                                <p className="text-xl font-display font-bold text-red-500">
+                                                    R {row.installments?.filter(i => i.status !== 'PAID' && new Date(i.dueDate) < new Date())
+                                                        .reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0).toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-2.5" onClick={(e) => e.stopPropagation()}>
                                                 <button 
                                                     onClick={(e) => openAction(e, row, 'interaction')}
-                                                    className="p-2.5 text-slate-500 hover:text-blue-400 hover:bg-blue-400/10 rounded-xl transition-all" 
-                                                    title="Call"
+                                                    className="p-3.5 rounded-2xl bg-slate-800 hover:bg-blue-500/10 text-blue-400 transition-colors shadow-lg border border-slate-700/50"
                                                 >
-                                                    <Phone className="w-4 h-4" />
+                                                    <Phone className="w-4.5 h-4.5" />
                                                 </button>
                                                 <button 
                                                     onClick={(e) => openAction(e, row, 'payment')}
-                                                    className="p-2.5 text-slate-500 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-xl transition-all" 
-                                                    title="Record Payment"
+                                                    className="p-3.5 rounded-2xl bg-slate-800 hover:bg-emerald-500/10 text-emerald-400 transition-colors shadow-lg border border-slate-700/50"
                                                 >
-                                                    <DollarSign className="w-4 h-4" />
-                                                </button>
-                                                <button 
-                                                    onClick={() => navigate(`/recovery/case/${row.id}`)}
-                                                    className="p-2.5 text-slate-500 hover:text-purple-400 hover:bg-purple-400/10 rounded-xl transition-all" 
-                                                    title="View Detail"
-                                                >
-                                                    <History className="w-4 h-4" />
+                                                    <DollarSign className="w-4.5 h-4.5" />
                                                 </button>
                                             </div>
-                                        </td>
-                                    </tr>
+                                        </div>
+                                    </div>
                                 ))}
-                            </tbody>
-                        </table>
-
-                        {/* Mobile Priority Cards */}
-                        <div className="md:hidden p-4 sm:p-6 space-y-4 sm:space-y-6">
-                            {filteredPriorityCases.map((row) => (
-                                <div key={row.id} className="p-4 sm:p-6 rounded-3xl bg-slate-900/50 border border-slate-800/50 space-y-4 shadow-lg group active:bg-slate-800/50 transition-all min-w-0" onClick={() => navigate(`/recovery/case/${row.id}`)}>
-                                    <div className="flex justify-between items-start gap-3">
-                                        <div className="min-w-0">
-                                            <h4 className="font-bold text-slate-200 truncate">{row.name}</h4>
-                                            <p className="text-[10px] text-slate-500 font-mono mt-0.5 uppercase">{row.id}</p>
-                                        </div>
-                                        <Badge variant={row.recoveryStatus === RECOVERY_STATUSES.PTP_FAILED ? 'danger' : 'warning'}>
-                                            {row.recoveryStatus || 'Arrears'}
-                                        </Badge>
-                                    </div>
-                                    <Badge variant="neutral">
-                                        {row.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}
-                                    </Badge>
-                                    <div className="flex justify-between items-end gap-3">
-                                        <div>
-                                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Total Arrears</p>
-                                            <p className="text-lg font-display font-bold text-red-500">
-                                                R {row.installments?.filter(i => i.status !== 'PAID' && new Date(i.dueDate) < new Date())
-                                                    .reduce((acc, curr) => acc + (curr.amount - curr.paidAmount), 0).toLocaleString()}
-                                            </p>
-                                        </div>
-                                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                                            <button 
-                                                onClick={(e) => openAction(e, row, 'interaction')}
-                                                className="p-3 rounded-2xl bg-slate-800 text-blue-400"
-                                            >
-                                                <Phone className="w-4 h-4" />
-                                            </button>
-                                            <button 
-                                                onClick={(e) => openAction(e, row, 'payment')}
-                                                className="p-3 rounded-2xl bg-slate-800 text-emerald-400"
-                                            >
-                                                <DollarSign className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {filteredPriorityCases.length === 0 && (
-                            <div className="p-10 sm:p-16 lg:p-24 text-center flex flex-col items-center justify-center space-y-4">
-                                <div className="w-16 h-16 rounded-[24px] bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600">
-                                    <ShieldCheck className="w-8 h-8" />
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-xl font-display font-bold text-slate-400 italic">All accounts are healthy</p>
-                                    <button 
-                                        onClick={() => navigate('/recovery/list')}
-                                        className="text-xs font-bold text-blue-500 hover:underline"
-                                    >
-                                        View All Loans
-                                    </button>
-                                </div>
                             </div>
-                        )}
+
+                            {filteredPriorityCases.length === 0 && (
+                                <div className="p-10 sm:p-16 lg:p-24 text-center flex flex-col items-center justify-center space-y-4">
+                                    <div className="w-16 h-16 rounded-[24px] bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600">
+                                        <ShieldCheck className="w-8 h-8" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-xl font-display font-bold text-slate-400 italic">All accounts are healthy</p>
+                                        <button 
+                                            onClick={() => navigate('/recovery/list')}
+                                            className="text-xs font-bold text-blue-500 hover:underline"
+                                        >
+                                            View All Loans
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Modals for Quick Actions */}
+            {/* Modals for Quick Actions moved OUTSIDE the animated div */}
             {showPaymentModal && activeActionCase && (
                 <Modal
                     isOpen={showPaymentModal}
@@ -438,7 +442,7 @@ const RecoveryDashboard = () => {
                     </form>
                 </Modal>
             )}
-        </div>
+        </>
     );
 };
 
