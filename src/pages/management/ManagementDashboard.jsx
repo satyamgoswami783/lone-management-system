@@ -73,7 +73,7 @@ const ManagementDashboard = () => {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 min-w-0 max-w-full">
       <SectionHeader
         title="Executive Insights"
         description="Real-time performance metrics and portfolio analytics synchronized with LMS core."

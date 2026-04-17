@@ -121,9 +121,10 @@ const AdminApplicationDetail = () => {
                 {/* Left & Middle Column */}
                 <div className="lg:col-span-2 space-y-8">
                     {/* Lifecycle Stepper */}
-                    <div className="glass p-8 rounded-[40px] border-slate-800/50 bg-slate-900/20">
-                        <div className="flex items-center justify-between max-w-2xl mx-auto relative px-4">
-                            <div className="absolute top-[20px] left-0 w-full h-0.5 bg-slate-800 -z-10"></div>
+                    <div className="glass p-4 sm:p-8 rounded-[40px] border-slate-800/50 bg-slate-900/20 min-w-0">
+                        <div className="overflow-x-auto overscroll-x-contain pb-2 -mx-1 px-1 sm:overflow-visible sm:mx-0 sm:px-0">
+                        <div className="flex items-center justify-between min-w-[min(100%,18rem)] sm:min-w-0 max-w-2xl mx-auto relative px-2 sm:px-4">
+                            <div className="absolute top-[20px] left-0 w-full h-0.5 bg-slate-800 -z-10 hidden sm:block"></div>
                             {stages.map((stage, i) => {
                                 const isDone = currentStageIndex > i || isCompleted;
                                 const isActive = application.status === stage;
@@ -146,6 +147,7 @@ const AdminApplicationDetail = () => {
                                     </div>
                                 );
                             })}
+                        </div>
                         </div>
                     </div>
 

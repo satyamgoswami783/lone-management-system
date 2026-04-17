@@ -193,13 +193,13 @@ function App() {
       />
 
       <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/unauthorized" element={<div className="min-h-screen bg-white flex flex-col items-center justify-center text-slate-200 space-y-6">
-        <h1 className="text-8xl font-display font-black text-red-500 tracking-tighter">403</h1>
-        <div className="text-center space-y-2">
-            <p className="text-2xl font-bold tracking-tight">Access Denied</p>
-            <p className="text-slate-400 font-medium lowercase">you do not have permission to view this section.</p>
+      <Route path="/unauthorized" element={<div className="min-h-screen min-h-dvh bg-white flex flex-col items-center justify-center text-slate-200 space-y-6 px-6 py-10">
+        <h1 className="text-6xl sm:text-8xl font-display font-black text-red-500 tracking-tighter">403</h1>
+        <div className="text-center space-y-2 max-w-md">
+            <p className="text-xl sm:text-2xl font-bold tracking-tight">Access Denied</p>
+            <p className="text-slate-400 font-medium lowercase text-sm sm:text-base">you do not have permission to view this section.</p>
         </div>
-        <button onClick={() => window.history.back()} className="btn-primary mt-4">Return back</button>
+        <button onClick={() => window.history.back()} className="btn-primary mt-4 w-full max-w-xs">Return back</button>
       </div>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

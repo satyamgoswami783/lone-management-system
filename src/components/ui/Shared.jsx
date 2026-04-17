@@ -54,7 +54,7 @@ export const StatCard = ({ title, value, subValue, icon: Icon, trend, variant = 
     <div 
       onClick={onClick}
       className={cn(
-        "relative group glass p-7 rounded-[32px] overflow-hidden border border-slate-800/50 transition-all duration-500",
+        "relative group glass p-5 sm:p-7 rounded-[24px] sm:rounded-[32px] overflow-hidden border border-slate-800/50 transition-all duration-500 min-w-0",
         onClick && "cursor-pointer hover:bg-slate-800/20 active:scale-[0.98]"
       )}
     >
@@ -92,7 +92,7 @@ export const StatCard = ({ title, value, subValue, icon: Icon, trend, variant = 
             {title}
           </p>
           <div className="flex flex-col">
-            <h3 className="text-3xl font-display font-bold text-slate-200 leading-none py-1">
+            <h3 className="text-2xl sm:text-3xl font-display font-bold text-slate-200 leading-none py-1 break-words">
               {value}
             </h3>
             {subValue && (
@@ -108,12 +108,12 @@ export const StatCard = ({ title, value, subValue, icon: Icon, trend, variant = 
 };
 
 export const SectionHeader = ({ title, description, actions }) => (
-  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12">
-    <div className="space-y-2">
-      <h1 className="text-3xl lg:text-4xl font-display font-bold tracking-tight text-slate-200">{title}</h1>
-      {description && <p className="text-slate-400 text-base lg:text-lg font-medium">{description}</p>}
+  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 mb-8 sm:mb-12 min-w-0">
+    <div className="space-y-2 min-w-0">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold tracking-tight text-slate-200 break-words">{title}</h1>
+      {description && <p className="text-slate-400 text-sm sm:text-base lg:text-lg font-medium">{description}</p>}
     </div>
-    {actions && <div className="flex flex-wrap items-center gap-4">{actions}</div>}
+    {actions && <div className="flex flex-wrap items-stretch sm:items-center gap-3 sm:gap-4 w-full lg:w-auto">{actions}</div>}
   </div>
 );
 
@@ -131,7 +131,7 @@ export const Toast = ({ message, type = 'success', onClose }) => {
 
   return (
     <div className={cn(
-      "fixed bottom-6 right-6 lg:bottom-10 lg:right-10 z-[300] px-6 lg:px-8 py-4 lg:py-5 rounded-[24px] border shadow-2xl animate-in slide-in-from-right-20 duration-500 flex items-center gap-4",
+      "fixed bottom-4 right-4 left-4 sm:left-auto sm:max-w-md lg:bottom-10 lg:right-10 z-[300] px-4 sm:px-6 lg:px-8 py-4 lg:py-5 rounded-[24px] border shadow-2xl animate-in slide-in-from-right-20 duration-500 flex items-center gap-3 sm:gap-4 min-w-0",
       variants[type]
     )}>
       <div className={cn("p-2 rounded-xl", 
@@ -142,19 +142,19 @@ export const Toast = ({ message, type = 'success', onClose }) => {
         {type === 'danger' && <XCircle className="w-5 h-5" />}
         {type === 'info' && <Info className="w-5 h-5" />}
       </div>
-      <span className="font-bold text-sm tracking-tight">{message}</span>
+      <span className="font-bold text-sm tracking-tight min-w-0 break-words">{message}</span>
     </div>
   );
 };
 
 export const ApplicationTable = ({ data, columns, onRowClick }) => (
-    <div className="glass rounded-[40px] overflow-hidden border-slate-800/50">
-        <div className="overflow-x-auto">
-            <table className="w-full text-left">
+    <div className="glass rounded-[24px] sm:rounded-[40px] overflow-hidden border-slate-800/50 min-w-0 max-w-full">
+        <div className="overflow-x-auto overscroll-x-contain -mx-px">
+            <table className="w-full text-left min-w-0">
                 <thead>
                     <tr className="bg-slate-900/50 border-b border-slate-800/50">
                         {columns.map((col, i) => (
-                            <th key={i} className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{col.header}</th>
+                            <th key={i} className="px-4 py-4 sm:px-8 sm:py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] whitespace-nowrap">{col.header}</th>
                         ))}
                     </tr>
                 </thead>
@@ -162,8 +162,8 @@ export const ApplicationTable = ({ data, columns, onRowClick }) => (
                     {data.map((row, i) => (
                         <tr key={i} onClick={() => onRowClick?.(row)} className="hover:bg-slate-900/50 transition-all cursor-pointer group">
                              {columns.map((col, j) => (
-                                <td key={j} className="px-8 py-7">
-                                    {col.render ? col.render(row) : <span className="text-sm font-bold text-slate-200">{row[col.key]}</span>}
+                                <td key={j} className="px-4 py-5 sm:px-8 sm:py-7 align-top min-w-0">
+                                    {col.render ? col.render(row) : <span className="text-sm font-bold text-slate-200 break-words">{row[col.key]}</span>}
                                 </td>
                             ))}
                         </tr>

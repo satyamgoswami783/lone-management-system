@@ -42,12 +42,12 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen min-h-dvh bg-white flex items-center justify-center p-4 sm:p-6 relative overflow-x-hidden">
       {/* Background Decor */}
-      <div className="absolute top-0 -left-20 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[120px]"></div>
-      <div className="absolute bottom-0 -right-20 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px]"></div>
+      <div className="absolute top-0 -left-20 w-[min(600px,120vw)] h-[min(600px,120vw)] max-w-none bg-blue-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-0 -right-20 w-[min(600px,120vw)] h-[min(600px,120vw)] max-w-none bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="glass w-full max-w-md p-8 rounded-[40px] border-slate-800 relative z-10 space-y-6 animate-in duration-700 shadow-2xl flex flex-col justify-center">
+      <div className="glass w-full max-w-md p-6 sm:p-8 rounded-[28px] sm:rounded-[40px] border-slate-800 relative z-10 space-y-6 animate-in duration-700 shadow-2xl flex flex-col justify-center min-w-0">
         <div className="text-center space-y-4">
           <div className="w-16 h-16 bg-blue-600 rounded-[20px] flex items-center justify-center mx-auto mb-3 shadow-xl shadow-blue-500/20">
             <ShieldCheck className="w-8 h-8 text-white" />

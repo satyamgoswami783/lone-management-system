@@ -102,7 +102,7 @@ const HRDashboard = () => {
                 <div className="space-y-6">
                     <div className="glass p-8 rounded-[40px] border border-slate-800/50 bg-gradient-to-br from-blue-600/5 to-transparent space-y-6 shadow-xl">
                         <h3 className="text-lg font-display font-bold text-slate-100 px-2">Quick Access</h3>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <ShortcutCard
                                 title="Employee List"
                                 description="Browse directory"

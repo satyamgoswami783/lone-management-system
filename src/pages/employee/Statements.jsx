@@ -23,7 +23,7 @@ const Statements = () => {
             />
 
             {!activeLoan ? (
-                <div className="glass p-12 rounded-[40px] flex flex-col items-center justify-center text-center space-y-4">
+                <div className="glass p-6 sm:p-12 rounded-[40px] flex flex-col items-center justify-center text-center space-y-4 min-w-0">
                     <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-slate-500">
                         <Receipt className="w-8 h-8" />
                     </div>

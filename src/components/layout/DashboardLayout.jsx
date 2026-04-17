@@ -74,7 +74,7 @@ const DashboardLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex overflow-hidden">
+    <div className="min-h-screen min-h-dvh bg-slate-950 text-slate-100 flex overflow-x-hidden overflow-y-hidden">
       {/* Sidebar */}
       <aside className={cn(
         "glass border-r border-slate-800/50 transition-all duration-300 z-50 fixed inset-y-0 lg:static",
@@ -148,7 +148,7 @@ const DashboardLayout = ({ children }) => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-10">
+        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-10">
           {children}
         </main>
       </div>

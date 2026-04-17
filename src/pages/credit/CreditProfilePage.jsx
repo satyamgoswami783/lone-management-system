@@ -149,33 +149,33 @@ const CreditProfilePage = () => {
                     ))}
                 </div>
 
-                <div className="glass p-8 rounded-[40px] border-slate-800/50 shadow-2xl relative overflow-hidden min-h-[500px]">
+                <div className="glass p-4 sm:p-8 rounded-[24px] sm:rounded-[40px] border-slate-800/50 shadow-2xl relative overflow-hidden min-h-[min(500px,70vh)] sm:min-h-[500px]">
                     {/* Tab Views */}
                     {activeTab === 'overview' && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-in fade-in duration-500">
                             <div className="space-y-8">
                                 <div className="space-y-4">
                                     <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">General Information</h3>
-                                    <div className="grid grid-cols-2 gap-6 bg-slate-950/50 p-6 rounded-3xl border border-slate-800/50">
-                                        <div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-950/50 p-4 sm:p-6 rounded-3xl border border-slate-800/50">
+                                        <div className="min-w-0">
                                             <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Full Identity</p>
-                                            <p className="text-lg font-bold text-slate-200">{displayName}</p>
+                                            <p className="text-lg font-bold text-slate-200 break-words">{displayName}</p>
                                         </div>
-                                        <div>
+                                        <div className="min-w-0">
                                             <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Company</p>
-                                            <p className="text-lg font-bold text-slate-200">{app.company || 'Not Specified'}</p>
+                                            <p className="text-lg font-bold text-slate-200 break-words">{app.company || 'Not Specified'}</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4">
                                     <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Loan Request</h3>
-                                    <div className="grid grid-cols-2 gap-6 bg-blue-600/5 p-6 rounded-3xl border border-blue-500/10">
-                                        <div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-blue-600/5 p-4 sm:p-6 rounded-3xl border border-blue-500/10">
+                                        <div className="min-w-0">
                                             <p className="text-[10px] text-blue-500 uppercase font-bold mb-1">Amount Requested</p>
-                                            <p className="text-2xl font-display font-black text-blue-400">R {app.amount?.toLocaleString()}</p>
+                                            <p className="text-2xl font-display font-black text-blue-400 break-words">R {app.amount?.toLocaleString()}</p>
                                         </div>
-                                        <div>
+                                        <div className="min-w-0">
                                             <p className="text-[10px] text-blue-500 uppercase font-bold mb-1">Requested Term</p>
                                             <p className="text-2xl font-display font-black text-blue-400">12 Months</p>
                                         </div>
@@ -186,12 +186,12 @@ const CreditProfilePage = () => {
                             <div className="space-y-8">
                                 <div className="space-y-4">
                                     <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Risk & Score</h3>
-                                    <div className="grid grid-cols-2 gap-6 bg-slate-950/50 p-6 rounded-3xl border border-slate-800/50">
-                                        <div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-950/50 p-4 sm:p-6 rounded-3xl border border-slate-800/50">
+                                        <div className="min-w-0">
                                             <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Credit Score</p>
-                                            <p className={`text-4xl font-display font-black ${app.score >= 700 ? 'text-emerald-400' : 'text-amber-400'}`}>{app.score || '612'}</p>
+                                            <p className={`text-3xl sm:text-4xl font-display font-black ${app.score >= 700 ? 'text-emerald-400' : 'text-amber-400'}`}>{app.score || '612'}</p>
                                         </div>
-                                        <div>
+                                        <div className="min-w-0 flex flex-col justify-center">
                                             <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Risk Level</p>
                                             <Badge variant={app.risk === 'High' ? 'danger' : 'success'}>{app.risk || 'Medium'}</Badge>
                                         </div>
@@ -200,12 +200,12 @@ const CreditProfilePage = () => {
 
                                 <div className="space-y-4">
                                     <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Verification Status</h3>
-                                    <div className="p-6 bg-emerald-500/5 rounded-3xl border border-emerald-500/10 flex items-center justify-between">
-                                        <div>
+                                    <div className="p-4 sm:p-6 bg-emerald-500/5 rounded-3xl border border-emerald-500/10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between min-w-0">
+                                        <div className="min-w-0">
                                             <p className="text-sm font-bold text-emerald-400">HR Certified</p>
-                                            <p className="text-xs text-slate-500">Verified by Sarah Miller on 12/04/2026</p>
+                                            <p className="text-xs text-slate-500 break-words">Verified by Sarah Miller on 12/04/2026</p>
                                         </div>
-                                        <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                                        <CheckCircle2 className="w-8 h-8 text-emerald-500 flex-shrink-0" />
                                     </div>
                                 </div>
                             </div>

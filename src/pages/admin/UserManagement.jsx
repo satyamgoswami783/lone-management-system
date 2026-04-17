@@ -187,7 +187,7 @@ const UserManagement = () => {
                                     <Badge variant={getRoleVariant(u.role)}>{u.role}</Badge>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 relative z-10 pt-4 border-t border-slate-800/50">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10 pt-4 border-t border-slate-800/50">
                                     <div className="space-y-1">
                                         <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Organization</p>
                                         <p className="text-xs font-bold text-slate-300 truncate">{u.company}</p>

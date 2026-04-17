@@ -377,7 +377,7 @@ const RecoveryCaseDetail = () => {
             {showInteractionModal && (
                 <Modal title="Log Collector Activity" onClose={() => setShowInteractionModal(false)}>
                     <form onSubmit={handleInteraction} className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-3">
                                 <label className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] pl-1">Method</label>
                                 <select 
@@ -430,16 +430,16 @@ const RecoveryCaseDetail = () => {
 const InstallmentList = ({ installments }) => (
     <div className="space-y-4">
         {installments.map((inst, idx) => (
-            <div key={idx} className="flex items-center justify-between p-6 bg-slate-900/40 rounded-[28px] border border-slate-800/50 hover:border-blue-500/30 transition-all group">
-                <div className="flex items-center gap-6">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
+            <div key={idx} className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 bg-slate-900/40 rounded-[28px] border border-slate-800/50 hover:border-blue-500/30 transition-all group min-w-0">
+                <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all flex-shrink-0 ${
                         inst.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-400' : 
                         inst.status === 'PARTIAL' ? 'bg-amber-500/10 text-amber-400' : 'bg-slate-800 text-slate-500'
                     }`}>
                         {inst.status === 'PAID' ? <CheckCircle2 className="w-7 h-7" /> : <Clock className="w-7 h-7" />}
                     </div>
-                    <div>
-                        <div className="flex items-center gap-3">
+                    <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                             <p className="font-display font-bold text-white text-lg">R {inst.amount.toLocaleString()}</p>
                             <Badge variant={inst.status === 'PAID' ? 'success' : inst.status === 'PARTIAL' ? 'warning' : 'neutral'}>
                                 {inst.status}
@@ -448,12 +448,12 @@ const InstallmentList = ({ installments }) => (
                         <p className="text-xs text-slate-500 font-bold mt-1">Due: {new Date(inst.dueDate).toLocaleDateString()}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-10">
-                    <div className="text-right">
+                <div className="flex items-center justify-between sm:justify-end gap-6 sm:gap-10 border-t border-slate-800/50 pt-4 sm:border-0 sm:pt-0">
+                    <div className="text-left sm:text-right">
                         <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Received</p>
                         <p className="font-mono font-bold text-emerald-400 text-sm">R {inst.paidAmount.toLocaleString()}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right">
                         <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Balance</p>
                         <p className={`font-mono font-bold text-sm ${inst.amount - inst.paidAmount > 0 ? 'text-red-400' : 'text-slate-500'}`}>
                             R {(inst.amount - inst.paidAmount).toLocaleString()}
@@ -499,11 +499,11 @@ const ActionTimeline = ({ logs }) => (
 
 const PtpHistory = ({ history, onAdd }) => (
     <div className="space-y-8">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
             <h4 className="text-sm font-black text-slate-500 uppercase tracking-[0.2em]">PTP Audit Trail</h4>
             <button 
                 onClick={onAdd}
-                className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-blue-600/10 text-blue-400 font-bold text-xs hover:bg-blue-600 hover:text-white transition-all shadow-lg"
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-blue-600/10 text-blue-400 font-bold text-xs hover:bg-blue-600 hover:text-white transition-all shadow-lg w-full sm:w-auto"
             >
                 <Plus className="w-4 h-4" />
                 Capture Promise
@@ -546,17 +546,22 @@ const InfoBar = ({ label, value, danger }) => (
 );
 
 const Modal = ({ title, onClose, children }) => (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-0">
-        <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose} />
-        <div className="relative w-full max-w-lg glass rounded-[44px] border border-slate-800/50 overflow-hidden shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-5 duration-300">
-            <div className="p-10 border-b border-slate-800/50 flex items-center justify-between bg-white/[0.02]">
-                <h3 className="text-2xl font-display font-bold text-white tracking-tight">{title}</h3>
-                <button onClick={onClose} className="p-3 hover:bg-slate-800 rounded-2xl transition-all text-slate-500 hover:text-white">
-                    <Plus className="w-7 h-7 rotate-45" />
-                </button>
-            </div>
-            <div className="p-10">
-                {children}
+    <div className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain">
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose} aria-hidden />
+        <div className="relative z-10 flex min-h-full items-center justify-center p-4 sm:p-6 pointer-events-none">
+            <div
+                className="relative w-full max-w-lg max-h-[min(90dvh,90vh)] flex flex-col glass rounded-[28px] sm:rounded-[44px] border border-slate-800/50 overflow-hidden shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-5 duration-300 my-auto pointer-events-auto"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="p-5 sm:p-8 border-b border-slate-800/50 flex items-center justify-between gap-3 bg-white/[0.02] flex-shrink-0 min-w-0">
+                    <h3 className="text-lg sm:text-2xl font-display font-bold text-white tracking-tight min-w-0 pr-2">{title}</h3>
+                    <button type="button" onClick={onClose} className="p-3 hover:bg-slate-800 rounded-2xl transition-all text-slate-500 hover:text-white flex-shrink-0">
+                        <Plus className="w-6 h-6 sm:w-7 sm:h-7 rotate-45" />
+                    </button>
+                </div>
+                <div className="p-5 sm:p-8 overflow-y-auto overflow-x-hidden flex-1 min-h-0 custom-scrollbar">
+                    {children}
+                </div>
             </div>
         </div>
     </div>

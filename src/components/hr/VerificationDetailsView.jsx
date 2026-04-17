@@ -85,9 +85,10 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
   return (
     <div className="space-y-12 animate-in duration-700">
       {/* Status Flow Stepper */}
-      <div className="glass p-10 rounded-[48px] border-slate-800 bg-white shadow-sm">
-        <div className="flex items-center justify-between max-w-4xl mx-auto relative px-8">
-          <div className="absolute top-1/2 left-0 w-full h-[3px] bg-slate-800 -translate-y-1/2 -z-10"></div>
+      <div className="glass p-4 sm:p-8 lg:p-10 rounded-[24px] sm:rounded-[48px] border-slate-800 bg-white shadow-sm min-w-0">
+        <div className="overflow-x-auto overscroll-x-contain pb-2 -mx-1 px-1 sm:overflow-visible sm:mx-0 sm:px-0">
+        <div className="flex items-center justify-between min-w-[min(100%,20rem)] sm:min-w-0 max-w-4xl mx-auto relative px-4 sm:px-8">
+          <div className="absolute top-1/2 left-0 w-full h-[3px] bg-slate-800 -translate-y-1/2 -z-10 hidden sm:block"></div>
           {steps.map((step, i) => (
             <div key={i} className="flex flex-col items-center gap-4 bg-white p-3 rounded-2xl relative z-10 transition-all duration-500">
               <div className={cn("w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all", 
@@ -103,9 +104,10 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
             </div>
           ))}
         </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 min-w-0">
         <div className="space-y-10">
           <DetailCard
             title="Employee Identity"
@@ -142,19 +144,19 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
                 { name: 'Identity Copy', type: 'id_copy' },
                 { name: 'Bank Statement', type: 'bank_statement' }
               ].map((doc) => (
-                <div key={doc.name} className="flex items-center justify-between p-6 bg-slate-900 border border-slate-800 rounded-[32px] group hover:border-blue-500/30 transition-all shadow-sm">
-                  <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-slate-500 group-hover:text-blue-600 group-hover:rotate-6 transition-all border border-slate-800">
+                <div key={doc.name} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 bg-slate-900 border border-slate-800 rounded-[32px] group hover:border-blue-500/30 transition-all shadow-sm min-w-0">
+                  <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+                    <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-slate-500 group-hover:text-blue-600 group-hover:rotate-6 transition-all border border-slate-800 flex-shrink-0">
                       <FileText className="w-7 h-7" />
                     </div>
-                    <div className="space-y-1">
-                      <p className="font-bold text-slate-200 lowercase">{doc.name}</p>
+                    <div className="space-y-1 min-w-0">
+                      <p className="font-bold text-slate-200 lowercase truncate">{doc.name}</p>
                       <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">PDF format • verified</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setPreviewTarget({ title: `${doc.name}.pdf`, type: doc.type })}
-                    className="px-8 py-2.5 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 shadow-xl shadow-blue-500/20 transition-all"
+                    className="px-6 sm:px-8 py-2.5 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 shadow-xl shadow-blue-500/20 transition-all w-full sm:w-auto flex-shrink-0"
                   >
                     View
                   </button>
@@ -238,38 +240,46 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
 
       {/* Approval Confirmation Modal */}
       {showApproveModal && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-slate-200/40 backdrop-blur-xl animate-in duration-300">
-          <div className="glass w-full max-w-lg p-12 rounded-[60px] border-slate-800 space-y-10 animate-in zoom-in-95 duration-500 shadow-2xl shadow-blue-500/10" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-6 text-emerald-600">
-              <div className="w-16 h-16 rounded-[24px] bg-emerald-50 flex items-center justify-center border border-emerald-100 shadow-sm">
-                <ShieldCheck className="w-8 h-8" />
-              </div>
-              <div className="space-y-1">
-                <h2 className="text-4xl font-display font-black text-slate-200 tracking-tighter lowercase leading-none">confirm.</h2>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] font-mono mt-2">REFERENCE: {application.id}</p>
-              </div>
-            </div>
+        <div className="fixed inset-0 z-[1000] overflow-y-auto overscroll-contain animate-in duration-300">
+          <div className="fixed inset-0 bg-slate-200/40 backdrop-blur-xl" aria-hidden />
+          <div className="relative z-10 flex min-h-full items-center justify-center p-4 sm:p-6 pointer-events-none">
+            <div
+              className="glass w-full max-w-lg max-h-[min(90dvh,90vh)] flex flex-col overflow-hidden rounded-[32px] sm:rounded-[60px] border-slate-800 shadow-2xl shadow-blue-500/10 my-auto animate-in zoom-in-95 duration-500 pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="overflow-y-auto overflow-x-hidden p-6 sm:p-10 space-y-6 sm:space-y-10 custom-scrollbar">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-emerald-600 min-w-0">
+                  <div className="w-16 h-16 rounded-[24px] bg-emerald-50 flex items-center justify-center border border-emerald-100 shadow-sm flex-shrink-0">
+                    <ShieldCheck className="w-8 h-8" />
+                  </div>
+                  <div className="space-y-1 min-w-0">
+                    <h2 className="text-3xl sm:text-4xl font-display font-black text-slate-200 tracking-tighter lowercase leading-none">confirm.</h2>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] font-mono mt-2 break-all">REFERENCE: {application.id}</p>
+                  </div>
+                </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-8 rounded-[32px]">
-              <p className="text-slate-400 text-lg font-medium leading-relaxed lowercase italic">
-                are you certain you want to verify this request? this will escalate it to <strong className="text-slate-200">credit assessment</strong>.
-              </p>
-            </div>
+                <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-[32px]">
+                  <p className="text-slate-400 text-base sm:text-lg font-medium leading-relaxed lowercase italic">
+                    are you certain you want to verify this request? this will escalate it to <strong className="text-slate-200">credit assessment</strong>.
+                  </p>
+                </div>
 
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowApproveModal(false)}
-                className="flex-1 py-5 bg-white border border-slate-800 rounded-[24px] text-[10px] font-black text-slate-500 hover:text-slate-200 transition-all uppercase tracking-widest"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleApprove}
-                disabled={isLoading}
-                className="flex-1 py-5 bg-blue-600 rounded-[24px] text-[10px] font-black text-white hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/30 flex items-center justify-center gap-3 uppercase tracking-widest"
-              >
-                {isLoading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : 'Confirm'}
-              </button>
+                <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4">
+                  <button
+                    onClick={() => setShowApproveModal(false)}
+                    className="flex-1 py-5 bg-white border border-slate-800 rounded-[24px] text-[10px] font-black text-slate-500 hover:text-slate-200 transition-all uppercase tracking-widest"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleApprove}
+                    disabled={isLoading}
+                    className="flex-1 py-5 bg-blue-600 rounded-[24px] text-[10px] font-black text-white hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/30 flex items-center justify-center gap-3 uppercase tracking-widest"
+                  >
+                    {isLoading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : 'Confirm'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -277,61 +287,69 @@ const VerificationDetailsView = ({ application, onApprove, onReject, isLoading }
 
       {/* Rejection Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-slate-200/40 backdrop-blur-xl animate-in duration-300">
-          <div className="glass w-full max-w-xl p-12 rounded-[60px] border-slate-800 space-y-10 animate-in zoom-in-95 duration-500 shadow-2xl shadow-red-500/10" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-6 text-red-600">
-              <div className="w-16 h-16 rounded-[24px] bg-red-50 flex items-center justify-center border border-red-100 shadow-sm">
-                <AlertCircle className="w-8 h-8" />
-              </div>
-              <div className="space-y-1">
-                <h2 className="text-4xl font-display font-black text-slate-200 tracking-tighter lowercase leading-none">reject.</h2>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] font-mono mt-2">REFERENCE: {application.id}</p>
-              </div>
-            </div>
+        <div className="fixed inset-0 z-[1000] overflow-y-auto overscroll-contain animate-in duration-300">
+          <div className="fixed inset-0 bg-slate-200/40 backdrop-blur-xl" aria-hidden />
+          <div className="relative z-10 flex min-h-full items-center justify-center p-4 sm:p-6 pointer-events-none">
+            <div
+              className="glass w-full max-w-xl max-h-[min(90dvh,90vh)] flex flex-col overflow-hidden rounded-[32px] sm:rounded-[60px] border-slate-800 shadow-2xl shadow-red-500/10 my-auto animate-in zoom-in-95 duration-500 pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="overflow-y-auto overflow-x-hidden p-6 sm:p-10 space-y-6 sm:space-y-10 custom-scrollbar">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-red-600 min-w-0">
+                  <div className="w-16 h-16 rounded-[24px] bg-red-50 flex items-center justify-center border border-red-100 shadow-sm flex-shrink-0">
+                    <AlertCircle className="w-8 h-8" />
+                  </div>
+                  <div className="space-y-1 min-w-0">
+                    <h2 className="text-3xl sm:text-4xl font-display font-black text-slate-200 tracking-tighter lowercase leading-none">reject.</h2>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] font-mono mt-2 break-all">REFERENCE: {application.id}</p>
+                  </div>
+                </div>
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-3">
-                {rejectionReasons.map((reason) => (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-3">
+                    {rejectionReasons.map((reason) => (
+                      <button
+                        key={reason}
+                        onClick={() => setRejectReason(reason)}
+                        className={cn(
+                            "text-left px-4 sm:px-8 py-4 sm:py-5 rounded-[28px] border transition-all text-sm font-bold flex items-center justify-between gap-3 shadow-sm min-w-0",
+                            rejectReason === reason
+                            ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-500/20"
+                            : "bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-500"
+                        )}
+                      >
+                        <span className="text-left break-words">{reason}</span>
+                        {rejectReason === reason && <div className="w-3 h-3 rounded-full bg-white shadow-lg flex-shrink-0"></div>}
+                      </button>
+                    ))}
+                  </div>
+
+                  {rejectReason === 'Other' && (
+                    <textarea
+                      className="input-field w-full h-32 p-4 sm:p-8 text-sm focus:border-red-500/50 rounded-[32px] mt-4 shadow-inner"
+                      placeholder="provide specific audit-trail justification..."
+                      value={otherReason}
+                      onChange={(e) => setOtherReason(e.target.value)}
+                    />
+                  )}
+                </div>
+
+                <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4">
                   <button
-                    key={reason}
-                    onClick={() => setRejectReason(reason)}
-                    className={cn(
-                        "text-left px-8 py-5 rounded-[28px] border transition-all text-sm font-bold flex items-center justify-between shadow-sm",
-                        rejectReason === reason
-                        ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-500/20"
-                        : "bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-500"
-                    )}
+                    onClick={() => setShowRejectModal(false)}
+                    className="flex-1 py-5 bg-white border border-slate-800 rounded-[24px] text-[10px] font-black text-slate-500 hover:text-slate-200 transition-all uppercase tracking-widest"
                   >
-                    {reason}
-                    {rejectReason === reason && <div className="w-3 h-3 rounded-full bg-white shadow-lg"></div>}
+                    Back
                   </button>
-                ))}
+                  <button
+                    onClick={handleReject}
+                    disabled={!rejectReason || (rejectReason === 'Other' && !otherReason) || isLoading}
+                    className="flex-1 py-5 bg-red-600 rounded-[24px] text-[10px] font-black text-white hover:bg-red-500 transition-all shadow-xl shadow-red-600/30 flex items-center justify-center gap-3 uppercase tracking-widest"
+                  >
+                    {isLoading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : 'Confirm'}
+                  </button>
+                </div>
               </div>
-
-              {rejectReason === 'Other' && (
-                <textarea
-                  className="input-field w-full h-32 p-8 text-sm focus:border-red-500/50 rounded-[32px] mt-4 shadow-inner"
-                  placeholder="provide specific audit-trail justification..."
-                  value={otherReason}
-                  onChange={(e) => setOtherReason(e.target.value)}
-                />
-              )}
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowRejectModal(false)}
-                className="flex-1 py-5 bg-white border border-slate-800 rounded-[24px] text-[10px] font-black text-slate-500 hover:text-slate-200 transition-all uppercase tracking-widest"
-              >
-                Back
-              </button>
-              <button
-                onClick={handleReject}
-                disabled={!rejectReason || (rejectReason === 'Other' && !otherReason) || isLoading}
-                className="flex-1 py-5 bg-red-600 rounded-[24px] text-[10px] font-black text-white hover:bg-red-500 transition-all shadow-xl shadow-red-600/30 flex items-center justify-center gap-3 uppercase tracking-widest"
-              >
-                {isLoading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div> : 'Confirm'}
-              </button>
             </div>
           </div>
         </div>

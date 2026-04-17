@@ -101,21 +101,25 @@ const DocumentPreviewModal = ({ isOpen, onClose, documentTitle, documentType }) 
             </span>
           </div>
         ) : (
-          <div 
-            className="transition-transform duration-200 origin-top shadow-2xl bg-white border border-slate-200 overflow-hidden"
-            style={{ transform: `scale(${zoom})`, marginBottom: `${(zoom - 1) * 300}px` }}
-          >
-            <div className="w-[210mm] min-h-[297mm] p-[20mm] font-serif relative text-slate-900 bg-white">
+          <div className="w-full max-w-full flex justify-center">
+            <div 
+              className="overflow-x-auto overflow-y-visible max-w-full rounded-lg border border-slate-200 bg-slate-100/50 p-2 sm:p-4"
+            >
+              <div 
+                className="transition-transform duration-200 origin-top shadow-2xl bg-white border border-slate-200 overflow-hidden mx-auto"
+                style={{ transform: `scale(${zoom})`, marginBottom: `${Math.max(0, (zoom - 1)) * 120}px` }}
+              >
+            <div className="w-[210mm] max-w-[min(210mm,100%)] min-h-[297mm] p-[clamp(0.75rem,4vw,20mm)] font-serif relative text-slate-900 bg-white box-border">
               {/* Document Header */}
-              <div className="flex justify-between items-start border-b-2 border-slate-900 pb-12">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col gap-6 sm:flex-row sm:justify-between sm:items-start border-b-2 border-slate-900 pb-8 sm:pb-12">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                   <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-white font-bold text-3xl">L</div>
                   <div className="font-sans">
                     <p className="text-xl font-black tracking-tighter text-slate-900 leading-none">CORPORATE LMS</p>
                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Verification Records</p>
                   </div>
                 </div>
-                <div className="text-right font-sans space-y-1">
+                <div className="text-left sm:text-right font-sans space-y-1 sm:ml-auto min-w-0">
                   <p className="text-xs font-bold">Document v4.0.2</p>
                   <p className="text-[10px] text-slate-500 font-bold tracking-tight">Financial District, Suite 400</p>
                   <p className="text-[10px] font-bold text-blue-600">secure.lms-portal.com</p>
@@ -123,14 +127,14 @@ const DocumentPreviewModal = ({ isOpen, onClose, documentTitle, documentType }) 
               </div>
 
               {/* Document Metadata */}
-              <div className="mt-12 flex justify-between font-sans border-b border-slate-100 pb-8">
+              <div className="mt-8 sm:mt-12 flex flex-col gap-6 sm:flex-row sm:justify-between font-sans border-b border-slate-100 pb-8">
                 <div className="space-y-4">
                   <div className="space-y-0.5">
                     <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Internal ID</p>
                     <p className="text-sm font-mono font-bold uppercase">LMS-SEC-X84291</p>
                   </div>
                 </div>
-                <div className="text-right space-y-4">
+                <div className="text-left sm:text-right space-y-4 sm:ml-auto">
                   <div className="space-y-0.5">
                     <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Timestamp</p>
                     <p className="text-sm font-bold">{new Date().toLocaleString()}</p>
@@ -163,7 +167,7 @@ const DocumentPreviewModal = ({ isOpen, onClose, documentTitle, documentType }) 
               </div>
 
               {/* Signature Area */}
-              <div className="mt-24 pt-12 border-t border-slate-900 flex justify-between items-end">
+              <div className="mt-16 sm:mt-24 pt-8 sm:pt-12 border-t border-slate-900 flex flex-col gap-8 sm:flex-row sm:justify-between sm:items-end">
                 <div className="space-y-6">
                   <div className="italic text-2xl font-serif text-slate-300 select-none opacity-50">Authorized Signatory</div>
                   <div className="space-y-1 font-sans">
@@ -180,6 +184,8 @@ const DocumentPreviewModal = ({ isOpen, onClose, documentTitle, documentType }) 
               {/* Watermark */}
               <div className="absolute inset-0 flex items-center justify-center font-black text-slate-900/5 text-[120px] pointer-events-none select-none -rotate-45 z-0">
                 LMS SECURE
+              </div>
+            </div>
               </div>
             </div>
           </div>

@@ -139,7 +139,7 @@ const ApplicationFullView = () => {
                             <h3 className="text-lg lg:text-xl font-display font-bold">Financial Analysis</h3>
                         </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
                             <MetricBox label="Principal" value={`R ${application.amount?.toLocaleString()}`} color="text-slate-100" />
                             <MetricBox label="Interest (Est)" value="R 450.00" color="text-slate-400" />
                             <MetricBox label="Fee / Service" value="R 150.00" color="text-slate-400" />

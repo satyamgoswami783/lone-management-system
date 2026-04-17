@@ -203,7 +203,7 @@ const AdminDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="p-4 bg-slate-900/50 rounded-2xl border border-slate-800/50">
                                 <TrendingUp className="w-5 h-5 text-blue-400 mb-2" />
                                 <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Success</p>
