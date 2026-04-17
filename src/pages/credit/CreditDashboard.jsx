@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { StatCard, SectionHeader, Badge } from '../../components/ui/Shared';
-import { useLoans, STATUSES } from '../../context/LoanContext';
+import { useLoans, STATUSES, LIFECYCLE_STATUSES } from '../../context/LoanContext';
 
 const CreditDashboard = () => {
     const navigate = useNavigate();
@@ -52,8 +52,18 @@ const CreditDashboard = () => {
     ];
 
     const priorityAssessments = useMemo(() => {
+        const legacyCreditQueue = [
+            STATUSES.NEW,
+            STATUSES.CREDIT_PENDING,
+            STATUSES.HR_APPROVED,
+            STATUSES.UNDER_REVIEW,
+        ];
         const source = applications
-            .filter((a) => [STATUSES.NEW, STATUSES.CREDIT_PENDING, STATUSES.HR_APPROVED].includes(a.status))
+            .filter(
+                (a) =>
+                    a.lifecycleStatus === LIFECYCLE_STATUSES.HR_VERIFIED ||
+                    legacyCreditQueue.includes(a.status)
+            )
             .filter((a) => {
                 if (!prioritySearch.trim()) return true;
                 const q = prioritySearch.toLowerCase();
@@ -125,39 +135,52 @@ const CreditDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-800/50">
-                                    {priorityAssessments.map((app, i) => (
-                                        <tr key={i} className="hover:bg-slate-800/30 transition-colors group">
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center font-bold text-blue-400 text-xs text-center">
-                                                        {(app.name || 'A')[0]}
-                                                    </div>
-                                                    <span className="font-medium text-slate-200">{app.name || `No Name (ID: ${app.id})`}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-col gap-1">
-                                                    <span className="text-sm font-bold text-slate-300">{app.score || '612'}</span>
-                                                    <div className="w-16 h-1 bg-slate-800 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-blue-500" style={{ width: `${(app.score / 850) * 100 || 65}%` }}></div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <Badge variant={app.risk === 'High' ? 'danger' : app.risk === 'Medium' ? 'warning' : 'success'}>
-                                                    {app.risk || 'Medium'}
-                                                </Badge>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <button 
-                                                    onClick={() => navigate(`/credit/profile/${app.id}`)}
-                                                    className="px-4 py-2 rounded-xl bg-blue-600/10 text-blue-400 text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-lg text-center"
-                                                >
-                                                    Assess
-                                                </button>
+                                    {priorityAssessments.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={4} className="px-6 py-12 text-center text-sm text-slate-500 max-w-xl mx-auto">
+                                                <p className="font-bold text-slate-400 mb-2">No applications in this priority list right now</p>
+                                                <p className="text-xs leading-relaxed">
+                                                    Rows are driven by your browser&apos;s saved loan data (<span className="font-mono text-slate-400">localStorage</span>), not by Git.
+                                                    If you already moved these cases past credit review, the table will be empty even though the code is the same.
+                                                    Your teammate can clear site data for this app or remove the <span className="font-mono text-slate-400">lms_applications</span> key, then refresh, to reload demo applications.
+                                                </p>
                                             </td>
                                         </tr>
-                                    ))}
+                                    ) : (
+                                        priorityAssessments.map((app, i) => (
+                                            <tr key={app.id || i} className="hover:bg-slate-800/30 transition-colors group">
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center font-bold text-blue-400 text-xs text-center">
+                                                            {(app.name || 'A')[0]}
+                                                        </div>
+                                                        <span className="font-medium text-slate-200">{app.name || `No Name (ID: ${app.id})`}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-sm font-bold text-slate-300">{app.score || '612'}</span>
+                                                        <div className="w-16 h-1 bg-slate-800 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-blue-500" style={{ width: `${(app.score / 850) * 100 || 65}%` }}></div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <Badge variant={app.risk === 'High' ? 'danger' : app.risk === 'Medium' ? 'warning' : 'success'}>
+                                                        {app.risk || 'Medium'}
+                                                    </Badge>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <button 
+                                                        onClick={() => navigate(`/credit/profile/${app.id}`)}
+                                                        className="px-4 py-2 rounded-xl bg-blue-600/10 text-blue-400 text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-lg text-center"
+                                                    >
+                                                        Assess
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
                                 </tbody>
                             </table>
                         </div>
