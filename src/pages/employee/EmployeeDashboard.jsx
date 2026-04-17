@@ -131,45 +131,48 @@ const EmployeeDashboard = () => {
           </div>
         </div>
 
-        {/* Quick Requests */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-display font-bold px-2">Requests & Letters</h2>
-          <div className="glass p-6 rounded-3xl space-y-4">
+        {/* Quick Requests — explicit text color: Layout uses text-white; glass cards are light */}
+        <div className="space-y-4 text-slate-200">
+          <h2 className="text-xl font-display font-bold px-2 text-slate-200">Requests & Letters</h2>
+          <div className="glass p-6 rounded-3xl space-y-4 text-slate-200">
             <button
+              type="button"
               onClick={() => navigate('/employee/documents')}
-              className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/50 transition-all group"
+              className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/50 transition-all group text-left text-slate-200"
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500 shrink-0">
                   <FileText className="w-5 h-5" />
                 </div>
-                <span className="font-medium">Settlement Letter</span>
+                <span className="font-semibold text-slate-200 truncate">Settlement Letter</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-600 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition-transform" />
             </button>
             <button
+              type="button"
               onClick={() => navigate('/employee/documents')}
-              className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/50 transition-all group"
+              className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/50 transition-all group text-left text-slate-200"
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 shrink-0">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
-                <span className="font-medium">Paid-Up Letter</span>
+                <span className="font-semibold text-slate-200 truncate">Paid-Up Letter</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-600 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition-transform" />
             </button>
             <button
+              type="button"
               onClick={() => navigate('/employee/documents')}
-              className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/50 transition-all group"
+              className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 hover:bg-slate-800/50 transition-all group text-left text-slate-200"
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 shrink-0">
                   <Clock className="w-5 h-5" />
                 </div>
-                <span className="font-medium">Confirmation Letter</span>
+                <span className="font-semibold text-slate-200 truncate">Confirmation Letter</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-600 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         </div>
