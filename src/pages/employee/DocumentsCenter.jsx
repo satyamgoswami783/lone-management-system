@@ -13,11 +13,12 @@ import {
     ChevronDown,
     ChevronUp
 } from 'lucide-react';
-import { SectionHeader, Badge } from '../../components/ui/Shared';
-import { useLoans, STATUSES } from '../../context/LoanContext';
+import { SectionHeader, Badge, Toast } from '../../components/ui/Shared';
+import { useLoans } from '../../context/LoanContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import DocumentPreviewModal from '../../components/ui/DocumentPreviewModal';
+import { buildLetterPayload, LETTER_TYPES } from '../../features/letters/generator';
 
 const DocumentsCenter = () => {
     const { applications } = useLoans();
@@ -25,14 +26,15 @@ const DocumentsCenter = () => {
     const navigate = useNavigate();
     const [viewingApp, setViewingApp] = useState(false);
     const [previewTarget, setPreviewTarget] = useState(null);
+    const [toast, setToast] = useState(null);
 
     // Get active/recent application for this user
     const userApp = applications.find(app => app.email === user?.email) || applications[0];
 
     const letters = [
-        { id: 1, title: 'Settlement Letter', description: 'Official document confirming the outstanding settlement amount.', type: 'Settlement' },
-        { id: 2, title: 'Paid-Up Letter', description: 'Proof that your loan has been fully settled and closed.', type: 'Paid-Up' },
-        { id: 3, title: 'Loan Confirmation', description: 'Summary of your active loan agreement and terms.', type: 'Agreement' },
+        { id: 1, title: 'Settlement Letter', description: 'Official document confirming the outstanding settlement amount.', type: LETTER_TYPES.SETTLEMENT },
+        { id: 2, title: 'Paid-Up Letter', description: 'Proof that your loan has been fully settled and closed.', type: LETTER_TYPES.PAID_UP },
+        { id: 3, title: 'Loan Confirmation', description: 'Summary of your active loan agreement and terms.', type: LETTER_TYPES.CONFIRMATION },
     ];
 
     const userDocuments = [
@@ -45,8 +47,62 @@ const DocumentsCenter = () => {
         window.print();
     };
 
+    const handlePreviewLetter = (letterType) => {
+        try {
+            if (!userApp) {
+                throw new Error('No loan application found for this user.');
+            }
+
+            const payload = buildLetterPayload(letterType, userApp);
+            setPreviewTarget(payload);
+        } catch (error) {
+            setToast({
+                type: 'danger',
+                message: error.message || 'Unable to generate this letter.',
+            });
+        }
+    };
+
+    const handleDownloadPdf = async (element, filename) => {
+        try {
+            const html2pdfModule = await import('html2pdf.js');
+            const html2pdf = html2pdfModule.default || html2pdfModule;
+            await html2pdf()
+                .set({
+                    margin: 8,
+                    filename,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                })
+                .from(element)
+                .save();
+
+            setToast({ type: 'success', message: `${filename} downloaded successfully.` });
+        } catch (error) {
+            setToast({ type: 'danger', message: 'Failed to generate PDF. Please try again.' });
+        }
+    };
+
+    const handleSendEmail = ({ borrowerEmail, bankEmail, documentTitle }) => {
+        if (!borrowerEmail) {
+            setToast({ type: 'danger', message: 'Borrower email is missing.' });
+            return;
+        }
+        if (!bankEmail || !bankEmail.includes('@')) {
+            setToast({ type: 'danger', message: 'Enter a valid bank/compliance email.' });
+            return;
+        }
+
+        setToast({
+            type: 'success',
+            message: `${documentTitle} queued for email to ${borrowerEmail} and ${bankEmail}.`,
+        });
+    };
+
     return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+            {toast && <Toast {...toast} onClose={() => setToast(null)} />}
             <SectionHeader
                 title="Documents Center"
                 description="Access your official loan letters, managed documents, and submitted applications."
@@ -73,14 +129,14 @@ const DocumentsCenter = () => {
                             </div>
                             <div className="pt-4 flex items-center gap-2">
                                 <button
-                                    onClick={() => setPreviewTarget({ title: letter.title, type: letter.type })}
+                                    onClick={() => handlePreviewLetter(letter.type)}
                                     className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-800 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-700 transition-all"
                                 >
                                     <Eye className="w-4 h-4" />
                                     View
                                 </button>
                                 <button
-                                    onClick={() => alert(`Downloading ${letter.title}`)}
+                                    onClick={() => handlePreviewLetter(letter.type)}
                                     className="p-2.5 bg-blue-600 rounded-xl text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
                                 >
                                     <FileDown className="w-4 h-4" />
@@ -267,6 +323,11 @@ const DocumentsCenter = () => {
                 onClose={() => setPreviewTarget(null)}
                 documentTitle={previewTarget?.title}
                 documentType={previewTarget?.type}
+                htmlContent={previewTarget?.html}
+                borrowerEmail={previewTarget?.user?.email}
+                defaultFilename={previewTarget?.filename}
+                onDownloadPdf={handleDownloadPdf}
+                onSendEmail={handleSendEmail}
             />
         </div>
     );

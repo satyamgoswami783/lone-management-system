@@ -1,23 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Download, 
   Printer, 
   FileText, 
+  Mail,
   ZoomIn, 
   ZoomOut, 
   RotateCcw,
   Loader2,
-  CheckCircle2
 } from 'lucide-react';
 import Modal from './Modal';
 
-const DocumentPreviewModal = ({ isOpen, onClose, documentTitle, documentType }) => {
+const DocumentPreviewModal = ({
+  isOpen,
+  onClose,
+  documentTitle,
+  documentType,
+  htmlContent,
+  borrowerEmail = '',
+  defaultFilename,
+  onDownloadPdf,
+  onSendEmail,
+}) => {
   const [zoom, setZoom] = useState(0.75);
   const [isLoading, setIsLoading] = useState(true);
+  const [bankEmail, setBankEmail] = useState('');
+  const documentRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
+      setBankEmail('');
       const timer = setTimeout(() => setIsLoading(false), 800);
       return () => clearTimeout(timer);
     }
@@ -28,7 +41,21 @@ const DocumentPreviewModal = ({ isOpen, onClose, documentTitle, documentType }) 
   };
 
   const handleDownload = () => {
+    if (onDownloadPdf && documentRef.current) {
+      onDownloadPdf(documentRef.current, defaultFilename || `${documentTitle || 'Document'}.pdf`);
+      return;
+    }
     alert(`Initiating production download for: ${documentTitle}.pdf`);
+  };
+
+  const handleSendEmail = () => {
+    if (!onSendEmail) return;
+    onSendEmail({
+      borrowerEmail,
+      bankEmail,
+      documentTitle,
+      documentType,
+    });
   };
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 2));
@@ -109,7 +136,7 @@ const DocumentPreviewModal = ({ isOpen, onClose, documentTitle, documentType }) 
                 className="transition-transform duration-200 origin-top shadow-2xl bg-white border border-slate-200 overflow-hidden mx-auto"
                 style={{ transform: `scale(${zoom})`, marginBottom: `${Math.max(0, (zoom - 1)) * 120}px` }}
               >
-            <div className="w-[210mm] max-w-[min(210mm,100%)] min-h-[297mm] p-[clamp(0.75rem,4vw,20mm)] font-serif relative text-slate-900 bg-white box-border">
+            <div ref={documentRef} className="w-[210mm] max-w-[min(210mm,100%)] min-h-[297mm] p-[clamp(0.75rem,4vw,20mm)] font-serif relative text-slate-900 bg-white box-border">
               {/* Document Header */}
               <div className="flex flex-col gap-6 sm:flex-row sm:justify-between sm:items-start border-b-2 border-slate-900 pb-8 sm:pb-12">
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -144,26 +171,35 @@ const DocumentPreviewModal = ({ isOpen, onClose, documentTitle, documentType }) 
 
               {/* Document Content */}
               <div className="mt-12 space-y-8">
-                <h1 className="text-3xl font-display font-black text-slate-950 uppercase tracking-tight text-center leading-tight">
-                  {documentTitle}
-                </h1>
-                
-                <div className="space-y-6 text-base leading-[1.6] text-slate-800 text-justify">
-                  <p>Dear Stakeholder,</p>
-                  <p>
-                    This official communication serves to confirm the status of the requested documentation within the Corporate Loan Management 
-                    System. The underlying records have been vetted against our core compliance framework and meet the necessary 
-                    standards for verification.
-                  </p>
-                  <p>
-                    Please be advised that this document contains proprietary data protected by the POPIA (Protection of Personal Information Act). 
-                    Any unauthorized reproduction or redistribution of this record is strictly prohibited.
-                  </p>
-                  <p>
-                    The accuracy of the information provided is based on the data submitted by the Employee and verified by our 
-                    automated risk engine and credit committee.
-                  </p>
-                </div>
+                {htmlContent ? (
+                  <div
+                    className="text-slate-900"
+                    dangerouslySetInnerHTML={{ __html: htmlContent }}
+                  />
+                ) : (
+                  <>
+                    <h1 className="text-3xl font-display font-black text-slate-950 uppercase tracking-tight text-center leading-tight">
+                      {documentTitle}
+                    </h1>
+
+                    <div className="space-y-6 text-base leading-[1.6] text-slate-800 text-justify">
+                      <p>Dear Stakeholder,</p>
+                      <p>
+                        This official communication serves to confirm the status of the requested documentation within the Corporate Loan Management
+                        System. The underlying records have been vetted against our core compliance framework and meet the necessary
+                        standards for verification.
+                      </p>
+                      <p>
+                        Please be advised that this document contains proprietary data protected by the POPIA (Protection of Personal Information Act).
+                        Any unauthorized reproduction or redistribution of this record is strictly prohibited.
+                      </p>
+                      <p>
+                        The accuracy of the information provided is based on the data submitted by the Employee and verified by our
+                        automated risk engine and credit committee.
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Signature Area */}
@@ -193,9 +229,35 @@ const DocumentPreviewModal = ({ isOpen, onClose, documentTitle, documentType }) 
       </div>
 
       <div className="mt-8 flex items-center justify-center gap-4 py-4 border-t border-slate-800/50">
-        <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">
-          <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-          Secure 256-bit Encrypted View
+        <div className="w-full space-y-4">
+          <div className="flex items-center justify-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">
+            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            Secure 256-bit Encrypted View
+          </div>
+          {htmlContent && onSendEmail && (
+            <div className="grid grid-cols-1 md:grid-cols-[1fr,1fr,auto] gap-3">
+              <input
+                className="input-field"
+                value={borrowerEmail}
+                readOnly
+                aria-label="Borrower email"
+              />
+              <input
+                className="input-field"
+                value={bankEmail}
+                onChange={(e) => setBankEmail(e.target.value)}
+                placeholder="Bank/Compliance email"
+                aria-label="Bank email"
+              />
+              <button
+                onClick={handleSendEmail}
+                className="px-4 py-2.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 transition-all text-xs font-bold flex items-center justify-center gap-2"
+              >
+                <Mail className="w-4 h-4" />
+                Send Email
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </Modal>
