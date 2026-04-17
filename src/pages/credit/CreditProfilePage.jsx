@@ -49,16 +49,48 @@ const CreditProfilePage = () => {
     const [requestMsg, setRequestMsg] = useState('');
     const [newNote, setNewNote] = useState('');
     const [previewDoc, setPreviewDoc] = useState(null);
+    const [notFound, setNotFound] = useState(false);
 
     useEffect(() => {
-        const foundApp = applications.find(a => a.id === id);
+        const normalizedId = id != null ? String(id).trim() : '';
+        const foundApp = applications.find(
+            (a) => String(a.id).trim().toLowerCase() === normalizedId.toLowerCase()
+        );
         if (foundApp) {
             setApp(foundApp);
-            setApproveData(prev => ({ ...prev, amount: foundApp.amount || '' }));
+            setApproveData((prev) => ({ ...prev, amount: foundApp.amount || '' }));
+            setNotFound(false);
+            return;
+        }
+        setApp(null);
+        if (applications.length > 0) {
+            setNotFound(true);
+        } else {
+            setNotFound(false);
         }
     }, [id, applications]);
 
     if (!app) {
+        if (notFound) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4 px-6 text-center">
+                    <AlertTriangle className="w-14 h-14 text-amber-500" />
+                    <h2 className="text-xl font-display font-bold text-slate-200">Application not found</h2>
+                    <p className="text-slate-500 text-sm max-w-md leading-relaxed">
+                        No loan with ID <span className="font-mono text-slate-400">{id}</span> exists in this browser&apos;s saved data.
+                        Open <span className="font-mono text-slate-400">/credit/dashboard</span> and use <strong>Assess</strong> from the list you actually have, or clear{' '}
+                        <span className="font-mono text-slate-400">lms_applications</span> in localStorage and refresh to reload demo applications.
+                    </p>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/credit/dashboard')}
+                        className="btn-primary"
+                    >
+                        Back to credit dashboard
+                    </button>
+                </div>
+            );
+        }
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
                 <div className="w-16 h-16 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
