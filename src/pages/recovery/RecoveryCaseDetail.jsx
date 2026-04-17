@@ -19,9 +19,14 @@ import {
     ShieldAlert,
     Target
 } from 'lucide-react';
-import { useLoans, RECOVERY_STATUSES, LIFECYCLE_STATUSES } from '../../context/LoanContext';
+import { useLoans, RECOVERY_STATUSES, LIFECYCLE_STATUSES, STATUSES } from '../../context/LoanContext';
 import { useAuth, ROLES } from '../../context/AuthContext';
 import { SectionHeader, Badge, StatCard, Toast } from '../../components/ui/Shared';
+import LetterPreviewModal from '../../components/shared/LetterPreviewModal';
+import { 
+    getSettlementLetter, 
+    getPaidUpLetter 
+} from '../../utils/letterTemplates';
 
 const RecoveryCaseDetail = () => {
     const { id } = useParams();
@@ -40,6 +45,14 @@ const RecoveryCaseDetail = () => {
     const [paymentForm, setPaymentForm] = useState({ amount: '', ref: '' });
     const [interactionForm, setInteractionForm] = useState({ type: 'Call', outcome: 'Answered', notes: '' });
     const [ptpForm, setPtpForm] = useState({ date: '', amount: '' });
+    
+    // Letter modal state
+    const [letterModal, setLetterModal] = useState({
+        isOpen: false,
+        type: '',
+        content: '',
+        title: ''
+    });
 
     const loan = useMemo(() => applications.find(a => a.id === id), [applications, id]);
 
@@ -168,7 +181,35 @@ const RecoveryCaseDetail = () => {
                         </div>
                     </div>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
+                    {/* Letter Actions for Recovery */}
+                    <div className="flex items-center gap-2 p-1.5 bg-slate-950 border border-slate-800 rounded-2xl mr-2">
+                         <button 
+                            onClick={() => setLetterModal({
+                                isOpen: true,
+                                type: 'settlement',
+                                title: 'Settlement Quotation',
+                                content: getSettlementLetter(loan, user, financials.totalOutstanding)
+                            })}
+                            className="px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-400 text-[10px] font-black uppercase tracking-widest transition-all"
+                        >
+                            Settlement
+                        </button>
+                        {loan.recoveryStatus === RECOVERY_STATUSES.RECOVERED && (
+                            <button 
+                                onClick={() => setLetterModal({
+                                    isOpen: true,
+                                    type: 'paidup',
+                                    title: 'Closure Certificate',
+                                    content: getPaidUpLetter(loan, user)
+                                })}
+                                className="px-4 py-2.5 rounded-xl hover:bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest transition-all"
+                            >
+                                Paid-up
+                            </button>
+                        )}
+                    </div>
+
                     <button 
                         onClick={() => setShowInteractionModal(true)}
                         className="px-6 py-4 rounded-2xl border border-slate-700 text-slate-300 font-bold text-sm hover:border-slate-500 hover:text-white transition-all bg-slate-900/40"
@@ -183,6 +224,16 @@ const RecoveryCaseDetail = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Letter Preview Modal */}
+            <LetterPreviewModal 
+                isOpen={letterModal.isOpen}
+                onClose={() => setLetterModal(prev => ({ ...prev, isOpen: false }))}
+                htmlContent={letterModal.content}
+                loanId={loan.id}
+                recipientEmail={loan.email}
+                title={letterModal.title}
+            />
 
             {/* Financial Status Board */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

@@ -178,7 +178,8 @@ const RecoveryList = () => {
     const isManager = role === ROLES.ADMIN || role === ROLES.MANAGEMENT;
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
+        <>
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
             
             <SectionHeader 
@@ -209,11 +210,11 @@ const RecoveryList = () => {
                         />
                     </div>
                     
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
                         <select
                             value={dpdFilter}
                             onChange={(e) => setDpdFilter(e.target.value)}
-                            className="bg-slate-900 border border-slate-800 rounded-2xl px-6 py-3.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                            className="bg-slate-900 border border-slate-800 rounded-2xl px-6 py-3.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-all cursor-pointer w-full sm:w-auto"
                         >
                             <option value="all">All DPD Bands</option>
                             <option value="low">DPD 1-30</option>
@@ -223,7 +224,7 @@ const RecoveryList = () => {
                         <select 
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
-                            className="bg-slate-900 border border-slate-800 rounded-2xl px-6 py-3.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
+                            className="bg-slate-900 border border-slate-800 rounded-2xl px-6 py-3.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-all cursor-pointer w-full sm:w-auto"
                         >
                             <option value="All">All Recovery Statuses</option>
                             {Object.values(RECOVERY_STATUSES).map(s => (
@@ -263,7 +264,7 @@ const RecoveryList = () => {
                                 <th className="px-8 py-5 text-right">Operational Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-800/40 hidden md:table-row-group">
+                        <tbody className="divide-y divide-slate-800/40">
                             {filteredCases.map((caseItem) => (
                                 <tr key={caseItem.id} className={`hover:bg-slate-800/20 transition-all group ${selectedCases.includes(caseItem.id) ? 'bg-blue-600/5' : ''}`}>
                                     {isManager && (
@@ -365,56 +366,7 @@ const RecoveryList = () => {
                     </table>
                 </div>
 
-                {/* Mobile View: Cards */}
-                <div className="md:hidden p-6 space-y-6">
-                    {filteredCases.map((caseItem) => (
-                        <div key={caseItem.id} className="glass rounded-[32px] p-6 border border-slate-800/50 space-y-6">
-                            <div className="flex justify-between items-start gap-3">
-                                <div className="flex gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center">
-                                        <User className="w-6 h-6 text-slate-500" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-slate-200">{caseItem.name}</h4>
-                                        <p className="text-[10px] text-slate-500 font-mono">{caseItem.id}</p>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col items-end gap-2">
-                                    <Badge variant={caseItem.recoveryStatus === RECOVERY_STATUSES.LEGAL ? 'danger' : 'warning'}>
-                                        {caseItem.recoveryStatus}
-                                    </Badge>
-                                    <Badge variant="neutral">{caseItem.lifecycleStatus || LIFECYCLE_STATUSES.IN_ARREARS}</Badge>
-                                </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Outstanding</p>
-                                    <p className="font-bold text-slate-200">R {caseItem.outstanding.toLocaleString()}</p>
-                                </div>
-                                <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800">
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Aging</p>
-                                    <p className="font-bold text-red-500">{caseItem.dpd} DPD</p>
-                                </div>
-                            </div>
 
-                            <div className="flex gap-2">
-                                <button 
-                                    onClick={() => { setActiveActionCase(caseItem); setShowInteractionModal(true); }}
-                                    className="flex-1 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 font-bold text-xs"
-                                >
-                                    Log Call
-                                </button>
-                                <button 
-                                    onClick={() => navigate(`/recovery/case/${caseItem.id}`)}
-                                    className="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs"
-                                >
-                                    Details
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
 
 
                 {filteredCases.length === 0 && (
@@ -430,132 +382,134 @@ const RecoveryList = () => {
                 )}
             </div>
 
-            {/* Recovery Operational Modals */}
-            {showPaymentModal && activeActionCase && (
-                <Modal
-                    isOpen={showPaymentModal}
-                    title={`Record Payment: ${activeActionCase.name}`}
-                    onClose={() => {
-                        setShowPaymentModal(false);
-                        setActiveActionCase(null);
-                    }}
-                >
-                    <form onSubmit={(e) => {
-                        e.preventDefault();
-                        const amount = parseFloat(paymentForm.amount);
-                        if (!Number.isFinite(amount) || amount <= 0) {
-                            setToast({ message: 'Enter a valid amount greater than zero.', type: 'danger' });
-                            return;
-                        }
-                        if (amount > activeActionCase.outstanding + 1) {
-                            setToast({ message: `Amount exceeds outstanding balance (R ${activeActionCase.outstanding.toLocaleString()}).`, type: 'danger' });
-                            return;
-                        }
-
-                        recordRecoveryPayment(activeActionCase.id, amount, 'Bank Transfer', paymentForm.ref);
-                        setToast({ message: "Repayment recorded successfully", type: 'success' });
-                        setShowPaymentModal(false);
-                        setActiveActionCase(null);
-                        setPaymentForm({ amount: '', ref: '' });
-                    }} className="space-y-6">
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Amount (R)</label>
-                            <input required type="number" step="0.01" value={paymentForm.amount} onChange={e => setPaymentForm({...paymentForm, amount: e.target.value})} className="input-field py-4 text-xl font-bold text-emerald-500" placeholder="0.00" />
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Reference</label>
-                            <input required value={paymentForm.ref} onChange={e => setPaymentForm({...paymentForm, ref: e.target.value})} className="input-field" placeholder="Transaction ID" />
-                        </div>
-                        <button className="w-full py-4 bg-emerald-600 rounded-2xl font-bold text-white uppercase tracking-widest text-xs">Confirm Payment</button>
-                    </form>
-                </Modal>
-            )}
-
-            {showInteractionModal && activeActionCase && (
-                <Modal
-                    isOpen={showInteractionModal}
-                    title="Log Collection Attempt"
-                    onClose={() => {
-                        setShowInteractionModal(false);
-                        setActiveActionCase(null);
-                    }}
-                >
-                    <form onSubmit={(e) => {
-                        e.preventDefault();
-                        logRecoveryInteraction(activeActionCase.id, {
-                            ...interactionForm,
-                            agent: user?.name || 'Recovery Agent'
-                        });
-                        setToast({ message: "Interaction logged", type: 'info' });
-                        setShowInteractionModal(false);
-                        setActiveActionCase(null);
-                        setInteractionForm({ type: 'Call', outcome: 'Answered', notes: '' });
-                    }} className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
-                            <select className="input-field" value={interactionForm.type} onChange={e => setInteractionForm({...interactionForm, type: e.target.value})}><option>Call</option><option>Message</option></select>
-                            <select className="input-field" value={interactionForm.outcome} onChange={e => setInteractionForm({...interactionForm, outcome: e.target.value})}><option>Answered</option><option>PTP Committed</option><option>Refusal</option></select>
-                        </div>
-                        <textarea required value={interactionForm.notes} onChange={e => setInteractionForm({...interactionForm, notes: e.target.value})} className="input-field min-h-[120px]" placeholder="Observations..." />
-                        <button className="w-full py-4 bg-blue-600 rounded-2xl font-bold text-white uppercase tracking-widest text-xs">Save Log</button>
-                    </form>
-                </Modal>
-            )}
-
-            {showPtpModal && activeActionCase && (
-                <Modal
-                    isOpen={showPtpModal}
-                    title="Set Promise To Pay"
-                    onClose={() => {
-                        setShowPtpModal(false);
-                        setActiveActionCase(null);
-                    }}
-                >
-                    <form onSubmit={(e) => {
-                        e.preventDefault();
-                        const today = new Date().toISOString().split('T')[0];
-                        if (ptpForm.date < today) {
-                            setToast({ message: 'Promise date cannot be in the past.', type: 'danger' });
-                            return;
-                        }
-                        updatePTP(activeActionCase.id, ptpForm);
-                        setToast({ message: "PTP active", type: 'success' });
-                        setShowPtpModal(false);
-                        setActiveActionCase(null);
-                        setPtpForm({ date: '', amount: '' });
-                    }} className="space-y-6">
-                        <input required type="date" value={ptpForm.date} onChange={e => setPtpForm({...ptpForm, date: e.target.value})} className="input-field" />
-                        <input required type="number" value={ptpForm.amount} onChange={e => setPtpForm({...ptpForm, amount: e.target.value})} className="input-field" placeholder="Amount Promised" />
-                        <button className="w-full py-4 bg-amber-600 rounded-2xl font-bold text-white uppercase tracking-widest text-xs">Set Promise</button>
-                    </form>
-                </Modal>
-            )}
-
-            {showBulkAssign && (
-                <Modal
-                    isOpen={showBulkAssign}
-                    title="Bulk Assign Recovery Cases"
-                    onClose={() => setShowBulkAssign(false)}
-                >
-                    <div className="space-y-4">
-                        <p className="text-sm text-slate-400">
-                            Assign {selectedCases.length} selected cases to an agent.
-                        </p>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            {AGENTS.map((agent) => (
-                                <button
-                                    key={agent}
-                                    onClick={() => handleBulkAssign(agent)}
-                                    className="py-3 px-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-blue-500/40 transition-all text-sm font-bold"
-                                >
-                                    {agent}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </Modal>
-            )}
         </div>
-    );
+
+        {/* Recovery Operational Modals */}
+        {showPaymentModal && activeActionCase && (
+            <Modal
+                isOpen={showPaymentModal}
+                title={`Record Payment: ${activeActionCase.name}`}
+                onClose={() => {
+                    setShowPaymentModal(false);
+                    setActiveActionCase(null);
+                }}
+            >
+                <form onSubmit={(e) => {
+                    e.preventDefault();
+                    const amount = parseFloat(paymentForm.amount);
+                    if (!Number.isFinite(amount) || amount <= 0) {
+                        setToast({ message: 'Enter a valid amount greater than zero.', type: 'danger' });
+                        return;
+                    }
+                    if (amount > activeActionCase.outstanding + 1) {
+                        setToast({ message: `Amount exceeds outstanding balance (R ${activeActionCase.outstanding.toLocaleString()}).`, type: 'danger' });
+                        return;
+                    }
+
+                    recordRecoveryPayment(activeActionCase.id, amount, 'Bank Transfer', paymentForm.ref);
+                    setToast({ message: "Repayment recorded successfully", type: 'success' });
+                    setShowPaymentModal(false);
+                    setActiveActionCase(null);
+                    setPaymentForm({ amount: '', ref: '' });
+                }} className="space-y-6">
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Amount (R)</label>
+                        <input required type="number" step="0.01" value={paymentForm.amount} onChange={e => setPaymentForm({...paymentForm, amount: e.target.value})} className="input-field py-4 text-xl font-bold text-emerald-500" placeholder="0.00" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Reference</label>
+                        <input required value={paymentForm.ref} onChange={e => setPaymentForm({...paymentForm, ref: e.target.value})} className="input-field" placeholder="Transaction ID" />
+                    </div>
+                    <button className="w-full py-4 bg-emerald-600 rounded-2xl font-bold text-white uppercase tracking-widest text-xs">Confirm Payment</button>
+                </form>
+            </Modal>
+        )}
+
+        {showInteractionModal && activeActionCase && (
+            <Modal
+                isOpen={showInteractionModal}
+                title="Log Collection Attempt"
+                onClose={() => {
+                    setShowInteractionModal(false);
+                    setActiveActionCase(null);
+                }}
+            >
+                <form onSubmit={(e) => {
+                    e.preventDefault();
+                    logRecoveryInteraction(activeActionCase.id, {
+                        ...interactionForm,
+                        agent: user?.name || 'Recovery Agent'
+                    });
+                    setToast({ message: "Interaction logged", type: 'info' });
+                    setShowInteractionModal(false);
+                    setActiveActionCase(null);
+                    setInteractionForm({ type: 'Call', outcome: 'Answered', notes: '' });
+                }} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <select className="input-field" value={interactionForm.type} onChange={e => setInteractionForm({...interactionForm, type: e.target.value})}><option>Call</option><option>Message</option></select>
+                        <select className="input-field" value={interactionForm.outcome} onChange={e => setInteractionForm({...interactionForm, outcome: e.target.value})}><option>Answered</option><option>PTP Committed</option><option>Refusal</option></select>
+                    </div>
+                    <textarea required value={interactionForm.notes} onChange={e => setInteractionForm({...interactionForm, notes: e.target.value})} className="input-field min-h-[120px]" placeholder="Observations..." />
+                    <button className="w-full py-4 bg-blue-600 rounded-2xl font-bold text-white uppercase tracking-widest text-xs">Save Log</button>
+                </form>
+            </Modal>
+        )}
+
+        {showPtpModal && activeActionCase && (
+            <Modal
+                isOpen={showPtpModal}
+                title="Set Promise To Pay"
+                onClose={() => {
+                    setShowPtpModal(false);
+                    setActiveActionCase(null);
+                }}
+            >
+                <form onSubmit={(e) => {
+                    e.preventDefault();
+                    const today = new Date().toISOString().split('T')[0];
+                    if (ptpForm.date < today) {
+                        setToast({ message: 'Promise date cannot be in the past.', type: 'danger' });
+                        return;
+                    }
+                    updatePTP(activeActionCase.id, ptpForm);
+                    setToast({ message: "PTP active", type: 'success' });
+                    setShowPtpModal(false);
+                    setActiveActionCase(null);
+                    setPtpForm({ date: '', amount: '' });
+                }} className="space-y-6">
+                    <input required type="date" value={ptpForm.date} onChange={e => setPtpForm({...ptpForm, date: e.target.value})} className="input-field" />
+                    <input required type="number" value={ptpForm.amount} onChange={e => setPtpForm({...ptpForm, amount: e.target.value})} className="input-field" placeholder="Amount Promised" />
+                    <button className="w-full py-4 bg-amber-600 rounded-2xl font-bold text-white uppercase tracking-widest text-xs">Set Promise</button>
+                </form>
+            </Modal>
+        )}
+
+        {showBulkAssign && (
+            <Modal
+                isOpen={showBulkAssign}
+                title="Bulk Assign Recovery Cases"
+                onClose={() => setShowBulkAssign(false)}
+            >
+                <div className="space-y-4">
+                    <p className="text-sm text-slate-400">
+                        Assign {selectedCases.length} selected cases to an agent.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {AGENTS.map((agent) => (
+                            <button
+                                key={agent}
+                                onClick={() => handleBulkAssign(agent)}
+                                className="py-3 px-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-blue-500/40 transition-all text-sm font-bold"
+                            >
+                                {agent}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </Modal>
+        )}
+    </>
+);
 };
 
 export default RecoveryList;

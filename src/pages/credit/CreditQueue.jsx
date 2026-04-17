@@ -92,7 +92,7 @@ const CreditQueue = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-700">
+    <div className="space-y-6 animate-in fade-in duration-700 pb-12">
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -137,9 +137,10 @@ const CreditQueue = () => {
         ))}
       </div>
 
-      {/* Main Queue Table */}
-      <div className="glass rounded-[32px] border border-slate-800/50 overflow-hidden shadow-2xl">
-        <div className="overflow-x-auto">
+      {/* Main Queue Display */}
+      <div className="glass rounded-[32px] overflow-hidden border border-slate-800/50 shadow-2xl">
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-950/50 border-b border-slate-800/50">
@@ -222,6 +223,64 @@ const CreditQueue = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden divide-y divide-slate-800/40">
+          {filteredApps.length > 0 ? (
+            filteredApps.map((app) => (
+              <div 
+                key={app.id} 
+                onClick={() => handleRowClick(app)}
+                className="p-6 space-y-4 hover:bg-blue-600/5 transition-colors active:bg-blue-600/10"
+              >
+                <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                        <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-tight">{app.id}</span>
+                        <p className="text-sm font-bold text-slate-200">{app.name}</p>
+                    </div>
+                    <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${STATUS_CONFIG[app.status]?.bg} ${STATUS_CONFIG[app.status]?.color} ${STATUS_CONFIG[app.status]?.border}`}>
+                        {app.status}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-950/40 border border-slate-800/50">
+                    <div>
+                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">Requested</p>
+                        <p className="text-sm font-black text-white">R {app.amount?.toLocaleString()}</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1">Risk Level</p>
+                        <div className={`inline-flex items-center gap-1 font-bold ${RISK_CONFIG[app.risk]?.color} text-xs uppercase`}>
+                            {app.risk}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center gap-3">
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest leading-none">Credit Score</span>
+                            <span className={`font-display font-black ${app.score > 700 ? 'text-emerald-400' : app.score > 600 ? 'text-amber-400' : 'text-rose-400'}`}>
+                                {app.score || 'N/A'}
+                            </span>
+                        </div>
+                    </div>
+                    <button className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600/10 text-blue-400 font-bold text-[10px] uppercase tracking-widest border border-blue-600/20">
+                        Review Case
+                    </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="p-16 text-center space-y-4">
+              <FileCheck className="w-12 h-12 text-slate-800 mx-auto" />
+              <div>
+                <p className="text-slate-400 font-bold">Queue Clear</p>
+                <p className="text-[10px] text-slate-600 uppercase tracking-[0.2em] mt-1">Ready for next batch</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -210,7 +210,7 @@ const RecoveryDashboard = () => {
                                     <th className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-800/40 font-medium hidden md:table-row-group">
+                            <tbody className="divide-y divide-slate-800/40 font-medium">
                                 {filteredPriorityCases.map((row) => (
                                     <tr key={row.id} className="hover:bg-slate-800/30 transition-colors group cursor-pointer" onClick={() => navigate(`/recovery/case/${row.id}`)}>
                                         <td className="px-4 sm:px-6 lg:px-8 py-5 sm:py-6">

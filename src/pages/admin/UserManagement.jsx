@@ -122,7 +122,8 @@ const UserManagement = () => {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+        <>
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
                 <SectionHeader
                     title="Employee Management"
@@ -169,22 +170,26 @@ const UserManagement = () => {
                             <div key={u.id} className="glass p-6 rounded-[32px] border-slate-800/50 space-y-6 relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-full blur-2xl" />
                                 
-                                <div className="flex items-start justify-between relative z-10">
-                                    <div className="flex items-center gap-4">
-                                        <div className="relative">
-                                            <div className="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center font-black text-lg text-slate-500">
-                                                {u.name[0]}
+                                <div className="flex flex-col gap-4 relative z-10">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex items-center gap-4 min-w-0">
+                                            <div className="relative shrink-0">
+                                                <div className="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center font-black text-lg text-slate-500">
+                                                    {u.name[0]}
+                                                </div>
+                                                {u.status === 'Active' && (
+                                                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-950 shadow-lg" />
+                                                )}
                                             </div>
-                                            {u.status === 'Active' && (
-                                                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-950 shadow-lg" />
-                                            )}
+                                            <div className="min-w-0">
+                                                <p className="font-black text-slate-200 text-base leading-tight truncate">{u.name}</p>
+                                                <p className="text-[10px] text-slate-500 font-bold mt-1 truncate">{u.email}</p>
+                                            </div>
                                         </div>
-                                        <div className="min-w-0">
-                                            <p className="font-black text-slate-200 text-base leading-tight truncate">{u.name}</p>
-                                            <p className="text-[10px] text-slate-500 font-bold mt-1 truncate">{u.email}</p>
+                                        <div className="shrink-0">
+                                            <Badge variant={getRoleVariant(u.role)}>{u.role}</Badge>
                                         </div>
                                     </div>
-                                    <Badge variant={getRoleVariant(u.role)}>{u.role}</Badge>
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10 pt-4 border-t border-slate-800/50">
@@ -323,16 +328,17 @@ const UserManagement = () => {
                 </div>
             </div>
 
-            <UserModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSave={handleSaveUser}
-                userToEdit={editingUser}
-            />
-
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
         </div>
-    );
+
+        <UserModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSave={handleSaveUser}
+            userToEdit={editingUser}
+        />
+    </>
+);
 };
 
 export default UserManagement;
