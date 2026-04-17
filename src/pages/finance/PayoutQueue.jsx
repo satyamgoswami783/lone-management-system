@@ -198,7 +198,7 @@ const PayoutQueue = () => {
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <p className="text-xl font-display font-black text-emerald-400">R {app.amount?.toLocaleString()}</p>
+                                            <p className="text-lg lg:text-xl font-display font-black text-emerald-400">R {app.amount?.toLocaleString()}</p>
                                             <p className="text-[10px] text-slate-600 font-bold uppercase tracking-tighter mt-1 italic">Approved Value</p>
                                         </td>
                                         <td className="px-8 py-6">
@@ -211,20 +211,20 @@ const PayoutQueue = () => {
                                             <button
                                                 disabled={processing === app.id}
                                                 onClick={() => handleDisburse(app.id)}
-                                                className={`flex items-center gap-3 ml-auto px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg active:scale-95 ${processing === app.id
+                                                className={`flex items-center justify-center gap-3 ml-auto px-6 lg:px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.15em] transition-all shadow-lg active:scale-95 whitespace-nowrap ${processing === app.id
                                                         ? 'bg-slate-800 text-slate-500'
                                                         : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-500/20'
                                                     }`}
                                             >
                                                 {processing === app.id ? (
-                                                    <div className="flex items-center gap-2">
+                                                    <>
                                                         <div className="w-3 h-3 border-2 border-slate-600 border-t-white rounded-full animate-spin" />
                                                         Processing
-                                                    </div>
+                                                    </>
                                                 ) : (
                                                     <>
-                                                        <Send className="w-4 h-4" />
-                                                        Disburse Funds
+                                                        <Send className="w-4 h-4 hidden sm:block" />
+                                                        Disburse
                                                     </>
                                                 )}
                                             </button>

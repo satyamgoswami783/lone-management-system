@@ -17,7 +17,7 @@ import {
     FilterX
 } from 'lucide-react';
 import { useLoans, STATUSES } from '../../context/LoanContext';
-import { StatCard, SectionHeader, Badge, Toast } from '../../components/ui/Shared';
+import { StatCard, SectionHeader, Badge, Toast, Modal } from '../../components/ui/Shared';
 import { useNavigate } from 'react-router-dom';
 
 const VerificationQueue = () => {
@@ -218,22 +218,24 @@ const VerificationQueue = () => {
                                             </Badge>
                                         </td>
                                         <td className="px-8 py-6 text-right">
-                                            <div className="flex justify-end gap-3">
-                                                <button
-                                                    onClick={() => handleVerify(app.id)}
-                                                    className="px-4 py-2.5 rounded-2xl bg-emerald-600/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all shadow-lg active:scale-95"
-                                                >
-                                                    Approve
-                                                </button>
-                                                <button
-                                                    onClick={() => handleRejectClick(app.id)}
-                                                    className="px-4 py-2.5 rounded-2xl bg-red-600/10 text-red-400 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95"
-                                                >
-                                                    Reject
-                                                </button>
+                                            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+                                                <div className="flex gap-2 w-full sm:w-auto">
+                                                    <button
+                                                        onClick={() => handleVerify(app.id)}
+                                                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl lg:rounded-2xl bg-emerald-600/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all shadow-lg active:scale-95"
+                                                    >
+                                                        Approve
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRejectClick(app.id)}
+                                                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl lg:rounded-2xl bg-red-600/10 text-red-400 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95"
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </div>
                                                 <button
                                                     onClick={() => navigate(`/hr/verifications/${app.id}`)}
-                                                    className="p-3 bg-slate-900 border border-slate-800 text-slate-500 hover:text-blue-400 hover:bg-blue-400/10 rounded-2xl transition-all shadow-xl active:scale-95"
+                                                    className="p-3 bg-slate-900 border border-slate-800 text-slate-500 hover:text-blue-400 hover:bg-blue-400/10 rounded-xl lg:rounded-2xl transition-all shadow-xl active:scale-95 flex items-center justify-center"
                                                 >
                                                     <Eye className="w-5 h-5" />
                                                 </button>
@@ -248,43 +250,46 @@ const VerificationQueue = () => {
             </div>
 
             {/* Quick Rejection Modal */}
-            {showRejectModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="glass w-full max-w-md p-8 rounded-[40px] border-slate-800 space-y-8 animate-in zoom-in-95 duration-300">
-                        <div className="flex items-center gap-4 text-red-400">
-                            <div className="w-12 h-12 rounded-2xl bg-red-600/20 flex items-center justify-center">
-                                <AlertTriangle className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-display font-bold">Priority Rejection</h2>
-                                <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mt-1">Application: {selectedAppId}</p>
-                            </div>
+            <Modal
+                isOpen={showRejectModal}
+                onClose={() => setShowRejectModal(false)}
+                title="Priority Rejection"
+                maxWidth="max-w-md"
+                footer={
+                    <div className="flex flex-col sm:flex-row gap-4 w-full">
+                        <button
+                            onClick={() => setShowRejectModal(false)}
+                            className="flex-1 py-4 bg-slate-800 rounded-2xl text-sm font-bold text-slate-400 hover:text-white transition-all"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={confirmReject}
+                            className="flex-1 py-4 bg-red-600 rounded-2xl text-sm font-bold text-white hover:bg-red-500 transition-all font-display shadow-lg shadow-red-600/20 active:scale-95"
+                        >
+                            Confirm Rejection
+                        </button>
+                    </div>
+                }
+            >
+                <div className="space-y-6">
+                    <div className="flex items-center gap-4 text-red-400">
+                        <div className="w-12 h-12 rounded-2xl bg-red-600/20 flex items-center justify-center shrink-0">
+                            <AlertTriangle className="w-6 h-6" />
                         </div>
-
-                        <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-3">
-                            <p className="text-slate-300 text-sm leading-relaxed">
-                                You are about to decline this verification request. This action will notify the Employee and stop further processing.
-                            </p>
-                            <p className="text-xs text-slate-500 font-medium">To provide a specific reason like absenteeism or discipline, please go to the detailed verification page.</p>
-                        </div>
-
-                        <div className="flex gap-4">
-                            <button
-                                onClick={() => setShowRejectModal(false)}
-                                className="flex-1 py-4 bg-slate-800 rounded-2xl text-sm font-bold text-slate-400 hover:text-white transition-all"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmReject}
-                                className="flex-1 py-4 bg-red-600 rounded-2xl text-sm font-bold text-white hover:bg-red-500 transition-all font-display shadow-lg shadow-red-600/20 active:scale-95"
-                            >
-                                Confirm Rejection
-                            </button>
+                        <div>
+                            <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Application: {selectedAppId}</p>
                         </div>
                     </div>
+
+                    <div className="bg-slate-950 border border-slate-800 p-6 rounded-3xl space-y-3 shadow-inner">
+                        <p className="text-slate-300 text-sm leading-relaxed">
+                            You are about to decline this verification request. This action will notify the Employee and stop further processing.
+                        </p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Note: For detailed reasons, use the full verification page.</p>
+                    </div>
                 </div>
-            )}
+            </Modal>
 
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
         </div>

@@ -1,451 +1,446 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  ShieldCheck, 
   Search, 
+  Filter, 
   ChevronRight, 
-  AlertCircle, 
-  Clock,
-  ArrowUpDown,
-  UserCheck,
-  FileSearch,
-  Filter,
-  Users,
-  CheckCircle2,
+  CheckCircle2, 
+  XCircle, 
+  Clock, 
+  ShieldAlert,
+  TrendingDown,
   TrendingUp,
-  BarChart3,
-  MessageSquare,
-  XCircle
+  FileText,
+  User,
+  AlertCircle,
+  FileCheck,
+  ShieldCheck,
+  Zap,
+  Loader2
 } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { useLoans, STATUSES } from '../../context/LoanContext';
-import { SectionHeader, Badge, StatCard, Toast } from '../../components/ui/Shared';
+import Modal from '../../components/ui/Modal';
+
+const STATUS_CONFIG = {
+  [STATUSES.CREDIT_PENDING]: { color: 'text-amber-400', bg: 'bg-amber-400/10', border: 'border-amber-400/20', icon: Clock },
+  [STATUSES.UNDER_REVIEW]: { color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', icon: ShieldAlert },
+  [STATUSES.APPROVED]: { color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', icon: CheckCircle2 },
+};
+
+const RISK_CONFIG = {
+  'Low': { color: 'text-emerald-400', bg: 'bg-emerald-400/10', icon: TrendingDown },
+  'Medium': { color: 'text-amber-400', bg: 'bg-amber-400/10', icon: Zap },
+  'High': { color: 'text-rose-400', bg: 'bg-rose-400/10', icon: TrendingUp },
+};
 
 const CreditQueue = () => {
-    const { applications, assignApplication, updateStatus } = useLoans();
-    const navigate = useNavigate();
-    const location = useLocation();
+  const { applications, updateStatus } = useLoans();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [showDetail, setShowDetail] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [decision, setDecision] = useState(null); // 'APPROVE' or 'REJECT'
+  const [notes, setNotes] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Filter applications for the Credit Queue (Pending Credit or Under Review)
+  const filteredApps = useMemo(() => {
+    return applications.filter(app => {
+      const isCreditModule = [STATUSES.CREDIT_PENDING, STATUSES.UNDER_REVIEW, STATUSES.HR_APPROVED].includes(app.status);
+      const matchesSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          app.id.toLowerCase().includes(searchTerm.toLowerCase());
+      return isCreditModule && matchesSearch;
+    });
+  }, [applications, searchTerm]);
+
+  const handleRowClick = (app) => {
+    setSelectedApp(app);
+    setShowDetail(true);
+  };
+
+  const initiateDecision = (type) => {
+    setDecision(type);
+    setShowConfirm(true);
+  };
+
+  const handleFinalAction = async () => {
+    setIsProcessing(true);
+    // Simulate API delay for polish
+    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Filter & Sort States
-    const [search, setSearch] = useState('');
-    const [riskFilter, setRiskFilter] = useState(location.state?.risk || 'All');
-    const [statusFilter, setStatusFilter] = useState(location.state?.status || 'All');
-    const [scoreRange, setScoreRange] = useState('All');
-    const [assignedToMe, setAssignedToMe] = useState(false);
-    const [sortBy, setSortBy] = useState('date');
-    const [sortOrder, setSortOrder] = useState('desc');
-    const [toast, setToast] = useState(null);
-    const [selectedApp, setSelectedApp] = useState(null);
+    const newStatus = decision === 'APPROVE' ? STATUSES.APPROVED : STATUSES.REJECTED;
+    updateStatus(selectedApp.id, newStatus, 'Credit Officer', `Credit Decision: ${decision}${notes ? ' - ' + notes : ''}`);
+    
+    setIsProcessing(false);
+    setShowConfirm(false);
+    setShowDetail(false);
+    setSelectedApp(null);
+    setDecision(null);
+    setNotes('');
+  };
 
-    // Filtered and Sorted Applications
-    const filteredApps = useMemo(() => {
-        return applications
-            .filter(app => {
-                const name = app.name || `No Name (ID: ${app.id})`;
-                const matchesSearch = name.toLowerCase().includes(search.toLowerCase()) || 
-                                     app.id?.toLowerCase().includes(search.toLowerCase()) ||
-                                     app.company?.toLowerCase().includes(search.toLowerCase());
-                
-                const matchesRisk = riskFilter === 'All' || app.risk === riskFilter;
-                const matchesStatus = statusFilter === 'All' || app.status === statusFilter;
-                
-                let matchesScore = true;
-                if (scoreRange === 'High') matchesScore = (app.score || 0) >= 700;
-                if (scoreRange === 'Medium') matchesScore = (app.score || 0) >= 500 && (app.score || 0) < 700;
-                if (scoreRange === 'Low') matchesScore = (app.score || 0) < 500;
+  const getRiskScoreWidth = (score) => {
+    if (!score) return '0%';
+    return `${((score - 300) / 550) * 100}%`;
+  };
 
-                const matchesAssigned = !assignedToMe || app.assignedTo === 'Credit Officer';
-                
-                const relevantStatuses = [
-                    STATUSES.NEW,
-                    STATUSES.CREDIT_PENDING, 
-                    STATUSES.HR_APPROVED,
-                    STATUSES.UNDER_REVIEW, 
-                    STATUSES.ON_HOLD,
-                    STATUSES.NEED_MORE_INFO
-                ];
-                
-                return matchesSearch && matchesRisk && matchesStatus && matchesScore && matchesAssigned && relevantStatuses.includes(app.status);
-            })
-            .sort((a, b) => {
-                let valA = a[sortBy];
-                let valB = b[sortBy];
-                
-                if (sortBy === 'amount') {
-                    valA = a.amount || 0;
-                    valB = b.amount || 0;
-                } else if (sortBy === 'score') {
-                    valA = a.score || 0;
-                    valB = b.score || 0;
-                }
-                
-                if (sortOrder === 'asc') return valA > valB ? 1 : -1;
-                return valA < valB ? 1 : -1;
-            });
-    }, [applications, search, riskFilter, statusFilter, scoreRange, assignedToMe, sortBy, sortOrder]);
+  const calculateDSR = (app) => {
+    if (!app.amount || !app.salary) return 'N/A';
+    // Simplified DSR: (Loan / 12) / Monthly Salary
+    const monthlyPayment = (app.amount * 1.25) / 12; // Assuming 25% total interest/fees for demo
+    const dsr = (monthlyPayment / app.salary) * 100;
+    return dsr.toFixed(1) + '%';
+  };
 
-    const stats = [
-        { 
-            title: 'In Queue', 
-            value: applications.filter(a => [STATUSES.NEW, STATUSES.CREDIT_PENDING, STATUSES.HR_APPROVED].includes(a.status)).length.toString(), 
-            icon: ShieldCheck, 
-            variant: 'primary' 
-        },
-        { 
-            title: 'High Risk', 
-            value: applications.filter(a => a.risk === 'High' && a.status !== STATUSES.APPROVED).length.toString(), 
-            icon: AlertCircle, 
-            variant: 'danger' 
-        },
-        { 
-            title: 'My Assignments', 
-            value: applications.filter(a => a.assignedTo === 'Credit Officer' && a.status !== STATUSES.APPROVED).length.toString(), 
-            icon: Users, 
-            variant: 'success' 
-        },
-    ];
-
-    const toggleSort = (field) => {
-        if (sortBy === field) {
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-        } else {
-            setSortBy(field);
-            setSortOrder('desc');
-        }
-    };
-
-    const handleAssign = (id) => {
-        assignApplication(id, 'Credit Officer');
-        setToast({ message: 'Application assigned to you and moved to REVIEW', type: 'info' });
-    };
-
-    const handleApprove = (id) => {
-        // Logic for recommending approval
-        updateStatus(id, STATUSES.ADMIN_APPROVAL, 'Credit Officer', 'Recommended for final admin approval after credit review.');
-        setToast({ message: 'Sent for Admin Approval', type: 'success' });
-        setSelectedApp(null);
-    };
-
-    const handleDecline = (id) => {
-        updateStatus(id, STATUSES.DECLINED, 'Credit Officer', 'Declined due to risk assessment factors.');
-        setToast({ message: 'Application Declined', type: 'danger' });
-        setSelectedApp(null);
-    };
-
-    return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {toast && <Toast {...toast} onClose={() => setToast(null)} />}
-
-            <SectionHeader 
-                title="Credit Assessment Pipeline" 
-                description="Manage risk analysis and decision workflows across the verification cycle."
+  return (
+    <div className="space-y-6 animate-in fade-in duration-700">
+      {/* Header Area */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-display font-bold text-white tracking-tight">Credit Analysis Queue</h1>
+          <p className="text-slate-500 text-sm mt-1 uppercase font-black tracking-widest">Decision Support & Risk Assessment</p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
+            <input 
+              type="text"
+              placeholder="Search by ID or applicant name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2.5 bg-slate-900/50 border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 w-full md:w-80 transition-all font-medium"
             />
+          </div>
+          <button className="p-2.5 bg-slate-900/50 border border-slate-800 rounded-xl text-slate-400 hover:text-white transition-all">
+            <Filter className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {stats.map((stat, i) => (
-                    <StatCard key={i} {...stat} />
-                ))}
+      {/* Grid Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {[
+          { label: 'Pending Reviews', value: filteredApps.length, icon: Clock, color: 'text-blue-400' },
+          { label: 'High Risk Alert', value: filteredApps.filter(a => a.risk === 'High').length, icon: ShieldAlert, color: 'text-rose-400' },
+          { label: 'Avg Credit Score', value: '640', icon: Zap, color: 'text-amber-400' },
+          { label: 'Today\'s Decisions', value: '0', icon: CheckCircle2, color: 'text-emerald-400' },
+        ].map((stat, i) => (
+          <div key={i} className="glass p-5 rounded-[24px] border border-slate-800/50 flex items-center gap-4">
+            <div className={`p-3 rounded-2xl bg-slate-950 border border-slate-800 ${stat.color}`}>
+              <stat.icon className="w-5 h-5" />
             </div>
+            <div>
+              <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">{stat.label}</p>
+              <p className="text-xl font-display font-bold text-white mt-0.5">{stat.value}</p>
+            </div>
+          </div>
+        ))}
+      </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                {/* List/Table View */}
-                <div className={selectedApp ? "xl:col-span-1" : "xl:col-span-3"}>
-                    <div className="glass rounded-[32px] overflow-hidden border border-slate-800/50 shadow-xl">
-                        {/* Controls Header */}
-                        <div className="p-6 border-b border-slate-800/50 space-y-4 bg-slate-900/10">
-                            <div className="flex-1 relative group">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1-2 w-5 h-5 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
-                                <input 
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className="input-field pl-12 py-3 text-sm" 
-                                    placeholder="Search by Name, ID, or Company..." 
-                                />
-                            </div>
-                            
-                            <div className="flex flex-wrap items-center gap-3">
-                                <div className="flex items-center gap-2 p-1 bg-slate-950/50 border border-slate-800 rounded-2xl">
-                                    <span className="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest"><Filter className="w-3 h-3 inline mr-1" /> Risk</span>
-                                    {['All', 'Low', 'Medium', 'High'].map(r => (
-                                        <button 
-                                            key={r}
-                                            onClick={() => setRiskFilter(r)}
-                                            className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                                                riskFilter === r ? "bg-slate-800 text-white shadow-lg" : "text-slate-500 hover:text-slate-300"
-                                            }`}
-                                        >
-                                            {r}
-                                        </button>
-                                    ))}
-                                </div>
-                                <button 
-                                    onClick={() => setAssignedToMe(!assignedToMe)}
-                                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
-                                        assignedToMe ? "bg-blue-600 text-white shadow-lg" : "bg-slate-950/50 border border-slate-800 text-slate-500"
-                                    }`}
-                                >
-                                    <UserCheck className="w-3 h-3" />
-                                    Assigned
-                                </button>
-                            </div>
-                        </div>
-
-                        {selectedApp ? (
-                            /* Condensed List View when Sidebar is open */
-                            <div className="divide-y divide-slate-800/50 overflow-y-auto max-h-[600px]">
-                                {filteredApps.map((app) => (
-                                    <button
-                                        key={app.id}
-                                        onClick={() => setSelectedApp(app)}
-                                        className={`w-full p-6 text-left hover:bg-slate-800/30 transition-all flex items-center justify-between group ${selectedApp?.id === app.id ? 'bg-blue-600/10 border-l-4 border-blue-600' : ''}`}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center font-bold text-blue-400 group-hover:scale-110 transition-transform">
-                                                {(app.name || 'A')[0]}
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-slate-100">{app.name}</p>
-                                                <p className="text-[10px] text-slate-500 font-mono tracking-widest">{app.id}</p>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-sm font-bold text-slate-200">R {app.amount?.toLocaleString()}</p>
-                                            <Badge variant={app.risk === 'High' ? 'danger' : 'neutral'}>{app.risk}</Badge>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        ) : (
-                            /* Full Table View when Sidebar is closed */
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="bg-slate-900/50 border-b border-slate-800/50">
-                                            <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Applicant & Context</th>
-                                            <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Company</th>
-                                            <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
-                                                <button onClick={() => toggleSort('amount')} className="flex items-center gap-2 hover:text-slate-300 transition-colors">
-                                                    Amount <ArrowUpDown className="w-3 h-3" />
-                                                </button>
-                                            </th>
-                                            <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
-                                                <button onClick={() => toggleSort('score')} className="flex items-center gap-2 hover:text-slate-300 transition-colors">
-                                                    Score <ArrowUpDown className="w-3 h-3" />
-                                                </button>
-                                            </th>
-                                            <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Risk Status</th>
-                                            <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-800/50">
-                                        {filteredApps.map((app) => (
-                                            <tr 
-                                                key={app.id} 
-                                                className="hover:bg-slate-800/20 transition-all cursor-pointer group"
-                                                onClick={() => setSelectedApp(app)}
-                                            >
-                                                <td className="px-8 py-6">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center font-bold text-blue-400">
-                                                            {(app.name || 'A')[0]}
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-bold text-slate-100">{app.name || `No Name (ID: ${app.id})`}</p>
-                                                            <div className="flex items-center gap-2 mt-0.5">
-                                                                <Badge variant={app.status === STATUSES.UNDER_REVIEW ? 'primary' : 'neutral'}>
-                                                                    {app.status || 'NEW'}
-                                                                </Badge>
-                                                                {app.assignedTo && <span className="text-[10px] text-blue-500 font-bold">• Assigned</span>}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-8 py-6 text-sm text-slate-300">{app.company || 'Not Specified'}</td>
-                                                <td className="px-8 py-6 font-mono font-bold text-slate-200 text-sm">R {app.amount?.toLocaleString()}</td>
-                                                <td className="px-8 py-6">
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className={`font-display font-black text-base ${app.score >= 700 ? 'text-emerald-400' : 'text-amber-400'}`}>
-                                                            {app.score || '612'}
-                                                        </span>
-                                                        <div className="w-16 h-1 bg-slate-800 rounded-full overflow-hidden">
-                                                            <div className="h-full bg-blue-500" style={{ width: `${((app.score || 612)/850)*100}%` }}></div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-8 py-6">
-                                                    <Badge variant={app.risk === 'High' ? 'danger' : app.risk === 'Medium' ? 'warning' : 'success'}>
-                                                        {app.risk || 'Medium'}
-                                                    </Badge>
-                                                </td>
-                                                <td className="px-8 py-6 text-right">
-                                                    <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                                                        {!app.assignedTo ? (
-                                                            <button 
-                                                                onClick={() => handleAssign(app.id)}
-                                                                className="px-4 py-2 rounded-xl bg-blue-600/10 text-blue-400 font-bold text-[10px] uppercase hover:bg-blue-600 hover:text-white transition-all shadow-lg"
-                                                            >
-                                                                Assign
-                                                            </button>
-                                                        ) : (
-                                                            <button 
-                                                                onClick={() => setSelectedApp(app)}
-                                                                className="p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white transition-all shadow-lg"
-                                                            >
-                                                                <ChevronRight className="w-4 h-4" />
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+      {/* Main Queue Table */}
+      <div className="glass rounded-[32px] border border-slate-800/50 overflow-hidden shadow-2xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-slate-950/50 border-b border-slate-800/50">
+                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Application ID</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Applicant Details</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Requested</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Credit Score</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Risk Level</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/30">
+              {filteredApps.length > 0 ? (
+                filteredApps.map((app) => (
+                  <tr 
+                    key={app.id} 
+                    onClick={() => handleRowClick(app)}
+                    className="hover:bg-blue-600/5 transition-colors cursor-pointer group"
+                  >
+                    <td className="px-6 py-4">
+                      <span className="text-xs font-mono font-bold text-slate-400 group-hover:text-blue-400 transition-colors uppercase tracking-tight">{app.id}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-200">{app.name}</span>
+                        <span className="text-[10px] text-slate-500 font-medium">{app.company}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-black text-white">R {app.amount?.toLocaleString()}</span>
+                        <span className="text-[10px] text-slate-500 font-medium uppercase tracking-tighter">Gross: R {app.salary?.toLocaleString()}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <span className={`text-sm font-bold ${app.score > 700 ? 'text-emerald-400' : app.score > 600 ? 'text-amber-400' : 'text-rose-400'}`}>
+                          {app.score || 'N/A'}
+                        </span>
+                        {app.score && (
+                          <div className="w-16 h-1 bg-slate-800 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full ${app.score > 700 ? 'bg-emerald-500' : app.score > 600 ? 'bg-amber-500' : 'bg-rose-500'}`}
+                              style={{ width: `${(app.score / 850) * 100}%` }}
+                            />
+                          </div>
                         )}
-
-                        {filteredApps.length === 0 && (
-                            <div className="p-20 text-center space-y-4 bg-slate-900/20">
-                                <FileSearch className="w-12 h-12 text-slate-700 mx-auto" />
-                                <h3 className="text-xl font-display font-bold text-slate-300">No applications matched filters</h3>
-                                <p className="text-slate-500 text-sm">Try resetting your filters or searching for another ID/Company.</p>
-                                <button 
-                                    onClick={() => { setSearch(''); setRiskFilter('All'); setScoreRange('All'); setStatusFilter('All'); setAssignedToMe(false); }}
-                                    className="text-blue-500 font-bold text-sm hover:underline"
-                                >
-                                    Reset filters
-                                </button>
-                            </div>
-                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${RISK_CONFIG[app.risk]?.bg} ${RISK_CONFIG[app.risk]?.color}`}>
+                        {React.createElement(RISK_CONFIG[app.risk]?.icon || AlertCircle, { className: "w-3 h-3" })}
+                        {app.risk || 'Unknown'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${STATUS_CONFIG[app.status]?.bg} ${STATUS_CONFIG[app.status]?.color} ${STATUS_CONFIG[app.status]?.border}`}>
+                        {React.createElement(STATUS_CONFIG[app.status]?.icon || Clock, { className: "w-3 h-3" })}
+                        {app.status}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button className="p-2 text-slate-500 hover:text-white transition-colors">
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center gap-3 opacity-50">
+                      <FileCheck className="w-12 h-12 text-slate-600 mb-2" />
+                      <p className="text-slate-400 font-bold">No applications requiring credit review</p>
+                      <p className="text-xs text-slate-600 uppercase tracking-widest">Queue is currently clear</p>
                     </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Application Detail Modal */}
+      <Modal 
+        isOpen={showDetail} 
+        onClose={() => setShowDetail(false)} 
+        title="Credit Assessment Profile"
+        maxWidth="max-w-5xl"
+      >
+        {selectedApp && (
+          <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Left Column: Basic Info */}
+              <div className="md:col-span-2 space-y-6">
+                <div className="flex items-center gap-5">
+                  <div className="w-20 h-20 rounded-3xl bg-blue-600/10 flex items-center justify-center border border-blue-500/20 shadow-xl shadow-blue-600/10">
+                    <User className="w-10 h-10 text-blue-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-display font-bold text-white tracking-tight">{selectedApp.name}</h2>
+                    <div className="flex items-center gap-3 mt-1.5">
+                      <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{selectedApp.id}</span>
+                      <div className="w-1 h-1 bg-slate-700 rounded-full" />
+                      <span className="text-xs text-slate-500 font-bold uppercase tracking-widest text-blue-400">{selectedApp.company}</span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Detail Sidebar View */}
-                {selectedApp && (
-                    <div className="xl:col-span-2 glass rounded-[32px] border border-blue-500/10 overflow-hidden shadow-2xl animate-in slide-in-from-right-10 duration-500">
-                        <div className="p-8 space-y-8 bg-slate-900/30">
-                            <div className="flex items-start justify-between">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-20 h-20 rounded-3xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center font-bold text-blue-400 text-3xl shadow-inner">
-                                        {selectedApp.name[0]}
-                                    </div>
-                                    <div>
-                                        <h2 className="text-3xl font-display font-bold text-white">{selectedApp.name}</h2>
-                                        <div className="flex items-center gap-3 mt-2">
-                                            <Badge variant="primary">{selectedApp.status}</Badge>
-                                            <span className="text-slate-500 font-mono text-xs">{selectedApp.id}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button 
-                                    onClick={() => setSelectedApp(null)}
-                                    className="p-3 bg-slate-800/50 rounded-2xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
-                                >
-                                    <XCircle className="w-6 h-6" />
-                                </button>
-                            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-slate-950/50 p-5 rounded-3xl border border-slate-800/50 shadow-inner">
+                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Requested Capital</p>
+                    <p className="text-xl font-display font-black text-white">R {selectedApp.amount?.toLocaleString()}</p>
+                    <p className="text-[10px] text-emerald-500 font-bold mt-1 uppercase tracking-tighter">Approved for HR Limit</p>
+                  </div>
+                  <div className="bg-slate-950/50 p-5 rounded-3xl border border-slate-800/50 shadow-inner">
+                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Monthly Salary</p>
+                    <p className="text-xl font-display font-black text-white">R {selectedApp.salary?.toLocaleString()}</p>
+                    <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-tighter">Verified Gross</p>
+                  </div>
+                  <div className="bg-slate-950/50 p-5 rounded-3xl border border-slate-800/50 shadow-inner">
+                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">DSR Ratio</p>
+                    <p className="text-xl font-display font-black text-blue-400">{calculateDSR(selectedApp)}</p>
+                    <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-tighter">Affordability Index</p>
+                  </div>
+                </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-slate-800/50 pt-8">
-                                <div className="space-y-6">
-                                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                                        <Users className="w-3 h-3" /> Employment & Background
-                                    </h3>
-                                    <div className="p-6 bg-slate-950/50 rounded-3xl border border-slate-800 space-y-4 shadow-xl">
-                                        <div className="flex justify-between items-center group">
-                                            <span className="text-slate-500 text-xs">Company</span>
-                                            <span className="text-slate-200 font-bold group-hover:text-blue-400 transition-colors">{selectedApp.company}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center group">
-                                            <span className="text-slate-500 text-xs">Email</span>
-                                            <span className="text-slate-200 font-bold">{selectedApp.email}</span>
-                                        </div>
-                                        <div className="pt-4 border-t border-slate-800/50">
-                                            <p className="text-[10px] text-slate-500 uppercase font-bold mb-2 tracking-widest">HR Context Note</p>
-                                            <p className="text-xs text-slate-400 italic leading-relaxed bg-slate-900 border-l-2 border-slate-700 p-3 rounded-r-xl">
-                                                "Employee in good standing. Verification completed via HR portal."
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Verification Documents</h3>
-                                        <div className="flex gap-3">
-                                            <button className="flex-1 p-4 bg-slate-900/50 border border-slate-800 rounded-2xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center justify-center gap-2 group">
-                                                <FileSearch className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                                Payslip
-                                            </button>
-                                            <button className="flex-1 p-4 bg-blue-600/5 border border-blue-500/20 rounded-2xl text-xs font-bold text-blue-400 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2 group">
-                                                <TrendingUp className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                                Bureau Report
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-6">
-                                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                                        <BarChart3 className="w-3 h-3" /> Financial Risk Profile
-                                    </h3>
-                                    <div className="glass p-8 rounded-[32px] border-blue-500/10 bg-slate-900/40 space-y-6 shadow-inner relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full" />
-                                        
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs text-slate-400">Total Loan Amount</span>
-                                            <span className="text-2xl font-display font-bold text-white tracking-tight">R {selectedApp.amount?.toLocaleString()}</span>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-xs text-slate-500">DSR Ratio</span>
-                                                <span className="text-sm font-bold text-blue-400">8.2%</span>
-                                            </div>
-                                            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden shadow-inner">
-                                                <div className="h-full bg-blue-600 rounded-full group-hover:bg-blue-500 transition-colors" style={{ width: '74%' }}></div>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-3 pt-2">
-                                            <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 text-center">
-                                                <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Affordability</p>
-                                                <p className="text-xl font-display font-bold text-emerald-400">A+</p>
-                                            </div>
-                                            <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 text-center">
-                                                <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Risk Grade</p>
-                                                <p className={`text-xl font-display font-bold ${selectedApp.risk === 'High' ? 'text-red-400' : 'text-blue-400'}`}>{selectedApp.risk[0]}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-3 pt-2">
-                                        <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">
-                                            <MessageSquare className="w-3 h-3" /> Risk Review Notes
-                                        </div>
-                                        <textarea
-                                            className="input-field min-h-[120px] text-sm py-4 bg-slate-950/50"
-                                            placeholder="Add specific risk mitigation or affordability notes here..."
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-4 pt-4 border-t border-slate-800/50">
-                                <button
-                                    onClick={() => handleApprove(selectedApp.id)}
-                                    className="flex-1 py-5 rounded-[24px] bg-blue-600 text-white font-bold text-lg hover:shadow-[0_0_40px_rgba(37,99,235,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
-                                >
-                                    Recommend Approval
-                                </button>
-                                <button
-                                    onClick={() => handleDecline(selectedApp.id)}
-                                    className="flex-1 py-5 rounded-[24px] border border-red-500/20 text-red-500 font-bold hover:bg-red-500 hover:text-white transition-all"
-                                >
-                                    Reject Application
-                                </button>
-                            </div>
-                        </div>
+                {/* Score Area */}
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-amber-400" />
+                    Bureau Credit Score
+                  </h3>
+                  <div className="bg-slate-950/50 border border-slate-800/50 rounded-3xl p-8 space-y-6 shadow-inner">
+                    <div className="flex justify-between items-end">
+                      <div className="space-y-1">
+                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Internal Risk Ranking</p>
+                        <p className={decision === 'APPROVE' ? 'text-emerald-400' : 'text-slate-200'}>
+                           <span className="text-4xl font-display font-black">{selectedApp.score || '640'}</span>
+                           <span className="text-lg text-slate-500 font-bold ml-2">/ 850</span>
+                        </p>
+                      </div>
+                      <div className={`px-4 py-2 rounded-2xl border ${RISK_CONFIG[selectedApp.risk]?.bg} ${RISK_CONFIG[selectedApp.risk]?.color} ${RISK_CONFIG[selectedApp.risk]?.color.replace('text', 'border')}/20`}>
+                        <span className="text-xs font-black uppercase tracking-[0.2em]">{selectedApp.risk} Risk</span>
+                      </div>
                     </div>
-                )}
+                    
+                    <div className="relative h-3 bg-slate-900 rounded-full overflow-hidden shadow-inner">
+                      <div 
+                        className={`absolute h-full rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(59,130,246,0.3)] ${
+                          selectedApp.score > 700 ? 'bg-emerald-500' : selectedApp.score > 600 ? 'bg-amber-500' : 'bg-rose-500'
+                        }`}
+                        style={{ width: getRiskScoreWidth(selectedApp.score) }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[9px] font-black text-slate-600 uppercase tracking-[0.3em] px-1">
+                      <span>300</span>
+                      <span>500</span>
+                      <span>700</span>
+                      <span>850</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Document Verification */}
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <FileCheck className="w-4 h-4 text-blue-400" />
+                    Verified Documents
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {['Recent Payslip', '3-Month Bank Statement', 'Proof of ID', 'Employment Contract'].map((doc, i) => (
+                      <div key={i} className="flex items-center justify-between p-4 bg-slate-950/30 border border-slate-800/50 rounded-2xl hover:bg-slate-800/50 transition-all cursor-pointer group shadow-sm">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center border border-slate-800 group-hover:bg-blue-600/10 group-hover:border-blue-500/20 transition-all">
+                            <FileText className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors" />
+                          </div>
+                          <span className="text-xs font-bold text-slate-400 group-hover:text-slate-100 transition-colors">{doc}</span>
+                        </div>
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Decision Panel */}
+              <div className="space-y-6">
+                <div className="glass p-8 rounded-[40px] border border-slate-700/50 space-y-8 sticky top-0 shadow-2xl relative overflow-hidden bg-slate-900/60 backdrop-blur-xl">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 blur-3xl -z-1" />
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                       <div className="w-1.5 h-6 bg-blue-500 rounded-full" />
+                       <h3 className="text-lg font-display font-bold text-white tracking-tight">Executive Decision</h3>
+                    </div>
+                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest border-l border-slate-700 pl-4 py-1 leading-relaxed">
+                      Final authorization moves flow to Finance. Ensure all risk mitigations are documented.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between ml-1">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Decision Rationale</label>
+                      <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest italic">Optional</span>
+                    </div>
+                    <textarea 
+                      className="w-full h-40 bg-slate-950/80 border border-slate-800 rounded-[28px] p-5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all font-medium resize-none shadow-inner custom-scrollbar"
+                      placeholder="Enter specific risk assessment notes or conditions for approval..."
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-4 pt-4">
+                    <button 
+                      onClick={() => initiateDecision('APPROVE')}
+                      className="group w-full py-5 bg-emerald-600 text-white rounded-[24px] font-black uppercase text-xs tracking-[0.2em] hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-600/20 active:scale-[0.98] flex items-center justify-center gap-3"
+                    >
+                      <CheckCircle2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                      Approve Disbursement
+                    </button>
+                    <button 
+                      onClick={() => initiateDecision('REJECT')}
+                      className="group w-full py-5 bg-slate-950 border border-slate-800 text-rose-400 rounded-[24px] font-black uppercase text-xs tracking-[0.2em] hover:bg-rose-950/20 hover:border-rose-900 transition-all shadow-inner active:scale-[0.98] flex items-center justify-center gap-3"
+                    >
+                      <XCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                      Reject Application
+                    </button>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-slate-800/50">
+                    <div className="flex items-center gap-2 text-[9px] text-slate-600 font-black uppercase tracking-widest">
+                       <ShieldCheck className="w-3 h-3" />
+                       Secure Auditor Logging Enabled
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Confirmation Modal */}
+      <Modal 
+        isOpen={showConfirm} 
+        onClose={() => !isProcessing && setShowConfirm(false)} 
+        title="Verification Lock"
+        maxWidth="max-w-md"
+      >
+        <div className="text-center space-y-6 py-4">
+          <div className={`w-24 h-24 rounded-[36px] mx-auto flex items-center justify-center border-2 animate-in zoom-in-75 duration-500 shadow-2xl ${
+            decision === 'APPROVE' 
+              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 shadow-emerald-500/10" 
+              : "bg-rose-500/10 border-rose-500/20 text-rose-500 shadow-rose-500/10"
+          }`}>
+            {decision === 'APPROVE' ? <ShieldCheck className="w-12 h-12" /> : <ShieldAlert className="w-12 h-12" />}
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-display font-bold text-white tracking-tight">Confirm Policy Action?</h3>
+            <p className="text-slate-400 text-sm font-medium px-4">
+              Authorized User: <span className="text-slate-200">Credit Officer</span><br/>
+              Target State: <span className={decision === 'APPROVE' ? 'text-emerald-400' : 'text-rose-400'}>{decision === 'APPROVE' ? 'APPROVED' : 'REJECTED'}</span>
+            </p>
+          </div>
+          
+          <div className="flex gap-4 pt-4 px-2">
+            <button 
+              disabled={isProcessing}
+              onClick={() => setShowConfirm(false)}
+              className="flex-1 py-4 bg-slate-950 border border-slate-800 text-slate-500 rounded-[20px] font-black uppercase text-xs tracking-[0.2em] hover:bg-slate-800 hover:text-white transition-all disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button 
+              disabled={isProcessing}
+              onClick={handleFinalAction}
+              className={`flex-1 py-4 rounded-[20px] font-black uppercase text-xs tracking-[0.2em] transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 ${
+                decision === 'APPROVE' ? "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-600/20" : "bg-rose-600 text-white hover:bg-rose-500 shadow-rose-600/20"
+              }`}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  Confirm
+                </>
+              )}
+            </button>
+          </div>
         </div>
-    );
+      </Modal>
+    </div>
+  );
 };
 
 export default CreditQueue;

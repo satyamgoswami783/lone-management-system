@@ -16,6 +16,7 @@ export const STATUSES = {
   ACTIVE: 'Active',
   PAID: 'Paid',
   DECLINED: 'Declined',
+  REJECTED: 'Rejected',
   ESCALATED: 'Escalated',
   NEED_REVIEW: 'Need Review',
   DISBURSED: 'Disbursed',
@@ -108,6 +109,8 @@ export const LoanProvider = ({ children }) => {
           idNumber: '920101 5001 081',
           salary: 22500,
           purpose: 'Medical',
+          score: 680,
+          risk: 'Medium',
           bankDetails: { name: 'Standard Bank', account: '123456789', type: 'Savings' },
           auditHistory: [{ status: STATUSES.SUBMITTED, date: new Date(Date.now() - 3600000 * 3).toISOString(), user: 'Applicant' }]
         },
@@ -122,6 +125,8 @@ export const LoanProvider = ({ children }) => {
           idNumber: '880512 5123 084',
           salary: 32000,
           purpose: 'Accounts',
+          score: 720,
+          risk: 'Low',
           bankDetails: { name: 'First National', account: '442199281', type: 'Current' },
           auditHistory: [
             { status: STATUSES.SUBMITTED, date: new Date(Date.now() - 3600000 * 10).toISOString(), user: 'Applicant' },
@@ -139,6 +144,8 @@ export const LoanProvider = ({ children }) => {
           idNumber: '850325 5001 082',
           salary: 45000,
           purpose: 'Housing',
+          score: 790,
+          risk: 'Low',
           bankDetails: { name: 'Absa', account: '992100234', type: 'Savings' },
           auditHistory: [
             { status: STATUSES.SUBMITTED, date: new Date(Date.now() - 86400000 * 3).toISOString(), user: 'Applicant' },

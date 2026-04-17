@@ -10,7 +10,7 @@ import {
     XCircle,
     AlertCircle,
 } from 'lucide-react';
-import { SectionHeader, Badge, StatCard, Toast } from '../../components/ui/Shared';
+import { SectionHeader, Badge, StatCard, Toast, Modal } from '../../components/ui/Shared';
 import { useLoans, STATUSES } from '../../context/LoanContext';
 import VerificationDetailsView from '../../components/hr/VerificationDetailsView';
 
@@ -148,25 +148,19 @@ const HREmployees = () => {
             </div>
 
             {/* Shared Verification Modal */}
-            {selectedEmployee && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/90 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setSelectedEmployee(null)}>
-                    <div className="glass w-full max-w-6xl max-h-[95vh] overflow-y-auto p-12 rounded-[60px] border-slate-800 space-y-10 animate-in zoom-in-95 duration-300 shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-8 border-b border-slate-800 pb-6">
-                            <h2 className="text-4xl font-display font-black text-slate-200 tracking-tighter lowercase">application verification.</h2>
-                            <button onClick={() => setSelectedEmployee(null)} className="p-3 bg-slate-900 rounded-2xl text-slate-500 hover:text-red-500 hover:bg-red-50 border border-slate-800 transition-all">
-                                <XCircle className="w-6 h-6" />
-                            </button>
-                        </div>
-
-                        <VerificationDetailsView
-                            application={activeApp}
-                            onApprove={handleApprove}
-                            onReject={handleReject}
-                            isLoading={isLoading}
-                        />
-                    </div>
-                </div>
-            )}
+            <Modal
+                isOpen={!!selectedEmployee}
+                onClose={() => setSelectedEmployee(null)}
+                title="Application Verification"
+                maxWidth="max-w-6xl"
+            >
+                <VerificationDetailsView
+                    application={activeApp}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                    isLoading={isLoading}
+                />
+            </Modal>
 
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
         </div>

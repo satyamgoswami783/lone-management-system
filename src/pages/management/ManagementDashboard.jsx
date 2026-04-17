@@ -117,13 +117,13 @@ const ManagementDashboard = () => {
         </div>
 
         {/* Status Breakdown */}
-        <div className="glass p-8 rounded-[40px] border border-slate-800/50 space-y-6">
+        <div className="glass p-6 lg:p-8 rounded-[32px] lg:rounded-[40px] border border-slate-800/50 space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-display font-bold">Application Status</h3>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Real-time Distribution</span>
+            <h3 className="text-lg lg:text-xl font-display font-bold">Application Status</h3>
+            <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-widest">Live Distribution</span>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 h-80 min-h-[320px]">
-            <div className="w-full h-full max-w-[240px]">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 lg:gap-8 min-h-[400px] sm:min-h-[320px]">
+            <div className="w-full h-64 sm:h-full max-w-[240px]">
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <PieChart>
                   <Pie
@@ -147,12 +147,12 @@ const ManagementDashboard = () => {
             </div>
             <div className="space-y-3 w-full sm:w-56 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
               {statusData.map((entry, index) => (
-                <div key={entry.name} className="flex items-center justify-between">
+                <div key={entry.name} className="flex items-center justify-between group/legend py-1">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{entry.name}</span>
+                    <div className="w-3 h-3 rounded-full shadow-lg" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                    <span className="text-[10px] text-slate-400 font-black uppercase tracking-tight group-hover/legend:text-slate-200 transition-colors">{entry.name}</span>
                   </div>
-                  <span className="text-xs font-bold text-slate-200">{entry.value}</span>
+                  <span className="text-xs font-black text-slate-200">{entry.value}</span>
                 </div>
               ))}
             </div>

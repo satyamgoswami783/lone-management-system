@@ -104,36 +104,38 @@ const DocumentsCenter = () => {
                     <div className="glass rounded-[32px] overflow-hidden border-slate-800/50">
                         <div className="divide-y divide-slate-800/50">
                             {userDocuments.map((doc) => (
-                                <div key={doc.id} className="p-5 flex items-center justify-between hover:bg-slate-900/40 transition-all">
+                                <div key={doc.id} className="p-4 lg:p-5 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-slate-900/40 transition-all gap-4">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-slate-500">
-                                            <FileText className="w-5 h-5" />
+                                        <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-900 flex items-center justify-center text-slate-500 shrink-0">
+                                            <FileText className="w-5 h-5 lg:w-6 lg:h-6" />
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-slate-200">{doc.name}</p>
-                                            <div className="flex items-center gap-2 mt-1">
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-bold text-slate-200 truncate">{doc.name}</p>
+                                            <div className="flex flex-wrap items-center gap-2 mt-1">
                                                 <span className="text-[10px] text-slate-500 uppercase font-bold">{doc.type}</span>
-                                                <span className="text-[10px] text-slate-600">•</span>
+                                                <span className="text-[10px] text-slate-600 hidden xs:inline">•</span>
                                                 <span className="text-[10px] text-slate-500 font-mono">{doc.date}</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-slate-800/50 pt-3 sm:pt-0">
                                         <Badge variant={doc.status === 'Verified' ? 'success' : 'warning'}>
                                             {doc.status}
                                         </Badge>
-                                        <button
-                                            onClick={() => setPreviewTarget({ title: doc.name, type: doc.type })}
-                                            className="p-2 text-slate-500 hover:text-white transition-colors"
-                                        >
-                                            <Eye className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => alert(`Downloading ${doc.name}`)}
-                                            className="p-2 text-slate-500 hover:text-white transition-colors"
-                                        >
-                                            <Download className="w-4 h-4" />
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setPreviewTarget({ title: doc.name, type: doc.type })}
+                                                className="p-2.5 bg-slate-800 rounded-xl text-slate-500 hover:text-white transition-colors"
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => alert(`Downloading ${doc.name}`)}
+                                                className="p-2.5 bg-slate-800 rounded-xl text-slate-500 hover:text-white transition-colors"
+                                            >
+                                                <Download className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -174,7 +176,7 @@ const DocumentsCenter = () => {
                             </div>
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="flex flex-col sm:flex-row gap-3">
                             <button
                                 onClick={() => setViewingApp(!viewingApp)}
                                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-slate-800 rounded-2xl text-sm font-bold text-slate-300 hover:bg-slate-700 transition-all border border-slate-700"
@@ -182,18 +184,20 @@ const DocumentsCenter = () => {
                                 <Eye className="w-4 h-4" />
                                 {viewingApp ? 'Hide Details' : 'View Full Form'}
                             </button>
-                            <button
-                                onClick={handlePrint}
-                                className="p-3 bg-slate-800 rounded-2xl text-slate-400 hover:text-white transition-all border border-slate-700"
-                            >
-                                <Printer className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={() => navigate(`/employee/application/${userApp?.id}`)}
-                                className="p-3 bg-blue-600 rounded-2xl text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20"
-                            >
-                                <ExternalLink className="w-5 h-5" />
-                            </button>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handlePrint}
+                                    className="flex-1 sm:flex-none p-3 lg:px-4 bg-slate-800 rounded-2xl text-slate-400 hover:text-white transition-all border border-slate-700 flex items-center justify-center"
+                                >
+                                    <Printer className="w-5 h-5 lg:w-5 lg:h-5" />
+                                </button>
+                                <button
+                                    onClick={() => navigate(`/employee/application/${userApp?.id}`)}
+                                    className="flex-1 sm:flex-none p-3 lg:px-4 bg-blue-600 rounded-2xl text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center"
+                                >
+                                    <ExternalLink className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

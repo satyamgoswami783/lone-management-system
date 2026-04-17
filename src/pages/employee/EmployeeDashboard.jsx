@@ -73,32 +73,34 @@ const EmployeeDashboard = () => {
           </div>
 
           <div className="glass rounded-3xl overflow-hidden border border-slate-800/50">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-slate-900/50 border-b border-slate-800/50">
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Reference</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50">
-                {[
-                  { ref: 'LMS-9021', date: '12 Apr 2026', amount: 'R 500.00', status: 'Paid', sVar: 'success' },
-                  { ref: 'LMS-8842', date: '25 Mar 2026', amount: 'R 500.00', status: 'Paid', sVar: 'success' },
-                  { ref: 'LMS-1029', date: '10 Mar 2026', amount: 'R 4,500.00', status: 'Disbursed', sVar: 'primary' },
-                ].map((row, i) => (
-                  <tr key={i} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-300">{row.ref}</td>
-                    <td className="px-6 py-4 text-sm text-slate-400">{row.date}</td>
-                    <td className="px-6 py-4 text-sm font-semibold text-slate-200">{row.amount}</td>
-                    <td className="px-6 py-4">
-                      <Badge variant={row.sVar}>{row.status}</Badge>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left min-w-[600px] lg:min-w-0">
+                <thead>
+                  <tr className="bg-slate-900/50 border-b border-slate-800/50">
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Reference</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-800/50">
+                  {[
+                    { ref: 'LMS-9021', date: '12 Apr 2026', amount: 'R 500.00', status: 'Paid', sVar: 'success' },
+                    { ref: 'LMS-8842', date: '25 Mar 2026', amount: 'R 500.00', status: 'Paid', sVar: 'success' },
+                    { ref: 'LMS-1029', date: '10 Mar 2026', amount: 'R 4,500.00', status: 'Disbursed', sVar: 'primary' },
+                  ].map((row, i) => (
+                    <tr key={i} className="hover:bg-slate-800/30 transition-colors">
+                      <td className="px-6 py-4 font-medium text-slate-300">{row.ref}</td>
+                      <td className="px-6 py-4 text-sm text-slate-400">{row.date}</td>
+                      <td className="px-6 py-4 text-sm font-semibold text-slate-200">{row.amount}</td>
+                      <td className="px-6 py-4">
+                        <Badge variant={row.sVar}>{row.status}</Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 

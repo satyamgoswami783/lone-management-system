@@ -131,15 +131,15 @@ const ApplicationFullView = () => {
                     </div>
 
                     {/* Financial Summary Area */}
-                    <div className="glass p-10 rounded-[40px] border-slate-800/50 space-y-8 bg-gradient-to-br from-slate-900 to-slate-950">
+                    <div className="glass p-6 lg:p-10 rounded-[32px] lg:rounded-[40px] border-slate-800/50 space-y-6 lg:space-y-8 bg-gradient-to-br from-slate-900 to-slate-950">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                                <DollarSign className="w-6 h-6" />
+                            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                                <DollarSign className="w-5 h-5 lg:w-6 lg:h-6" />
                             </div>
-                            <h3 className="text-xl font-display font-bold">Financial Analysis</h3>
+                            <h3 className="text-lg lg:text-xl font-display font-bold">Financial Analysis</h3>
                         </div>
 
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
                             <MetricBox label="Principal" value={`R ${application.amount?.toLocaleString()}`} color="text-slate-100" />
                             <MetricBox label="Interest (Est)" value="R 450.00" color="text-slate-400" />
                             <MetricBox label="Fee / Service" value="R 150.00" color="text-slate-400" />

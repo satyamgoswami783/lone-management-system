@@ -126,21 +126,21 @@ const RecoveryDashboard = () => {
 
                 {/* Priority Collections */}
                 <div className="lg:col-span-2 glass rounded-[40px] border border-slate-800/50 overflow-hidden flex flex-col shadow-xl">
-                    <div className="p-8 border-b border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/10">
+                    <div className="p-6 lg:p-8 border-b border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-slate-900/10">
                         <div className="flex items-center gap-3">
-                            <Calendar className="w-6 h-6 text-slate-500" />
-                            <h3 className="text-xl font-display font-bold text-slate-100">Priority Collections</h3>
+                            <Calendar className="w-5 h-5 lg:w-6 lg:h-6 text-slate-500" />
+                            <h3 className="text-lg lg:text-xl font-display font-bold text-slate-100">Priority Collections</h3>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
                             <div className="relative hidden md:block">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                                 <input className="input-field pl-9 py-1.5 text-xs w-48 bg-slate-950/50" placeholder="Search..." />
                             </div>
                             <button 
                                 onClick={() => navigate('/recovery/list')}
-                                className="text-xs font-black text-blue-400 uppercase tracking-[0.2em] hover:text-white transition-all flex items-center gap-1 group"
+                                className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] hover:text-white transition-all flex items-center gap-1 group"
                             >
-                                View All Cases
+                                View All
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </button>
                         </div>

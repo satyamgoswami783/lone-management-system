@@ -1,13 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useAuth, ROLES } from '../../context/AuthContext';
-import { Bell, Search, User } from 'lucide-react';
+import { Bell, Search, Menu, X } from 'lucide-react';
 
 const Layout = ({ children }) => {
-  const { user, role, isAuthenticated } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { user, role } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const location = useLocation();
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (!mobile) setIsSidebarOpen(true);
+      else setIsSidebarOpen(false);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
@@ -20,19 +33,25 @@ const Layout = ({ children }) => {
   }
 
   return (
-    <div className="flex min-h-screen bg-white text-slate-200">
+    <div className="flex min-h-screen bg-white text-slate-200 overflow-hidden">
       <Sidebar 
         isOpen={isSidebarOpen} 
         toggle={() => setIsSidebarOpen(!isSidebarOpen)} 
+        isMobile={isMobile}
+        closeMobile={() => setIsSidebarOpen(false)}
       />
       
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Header */}
-        <header className="h-20 flex items-center justify-between px-8 bg-white border-b border-slate-800 sticky top-0 z-30">
+        <header className="h-20 flex items-center justify-between px-6 lg:px-8 bg-white border-b border-slate-800 sticky top-0 z-30 flex-shrink-0">
           <div className="flex items-center gap-4">
-             <div className="lg:hidden p-2 text-slate-400">
-                <button onClick={() => setIsSidebarOpen(true)}>
-                    <User className="w-6 h-6" />
+             {/* Mobile Hamburger Menu */}
+             <div className="lg:hidden">
+                <button 
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="p-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-500 hover:text-blue-500 transition-all shadow-lg active:scale-95"
+                >
+                    <Menu className="w-6 h-6" />
                 </button>
              </div>
              <div className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-slate-900 border border-slate-800 rounded-full text-slate-500 w-96 group focus-within:border-blue-500/50 transition-all">

@@ -97,7 +97,38 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="glass rounded-3xl overflow-hidden border border-slate-800/50">
+                    {/* Mobile Card List (Hidden on LG+) */}
+                    <div className="grid grid-cols-1 gap-4 lg:hidden">
+                        {recentApps.map((row) => (
+                            <div 
+                                key={row.id} 
+                                onClick={() => navigate(`/admin/applications/${row.id}`)}
+                                className="glass p-5 rounded-[28px] border-slate-800/50 space-y-4 group active:scale-[0.98] transition-all"
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center font-bold text-sm text-blue-400 shrink-0">
+                                            {row.name[0]}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="font-bold text-slate-200 truncate">{row.name}</p>
+                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest truncate">{row.company}</p>
+                                        </div>
+                                    </div>
+                                    <Badge variant={getStatusVariant(row.status)}>{row.status}</Badge>
+                                </div>
+                                <div className="flex items-center justify-between pt-3 border-t border-slate-800/50">
+                                    <p className="text-lg font-display font-bold text-slate-200">R {row.amount?.toLocaleString()}</p>
+                                    <div className="flex items-center gap-1 text-blue-400 font-black text-[10px] uppercase tracking-widest">
+                                        Details <ChevronRight className="w-3 h-3" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Desktop Table View (Visible on LG+) */}
+                    <div className="hidden lg:block glass rounded-3xl overflow-hidden border border-slate-800/50">
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="bg-slate-900/50 border-b border-slate-800/50">

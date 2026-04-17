@@ -64,7 +64,7 @@ const MyStatus = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Status Timeline */}
-                <div className="lg:col-span-2 glass p-8 rounded-[40px] space-y-12">
+                <div className="lg:col-span-2 glass p-6 lg:p-8 rounded-[32px] lg:rounded-[40px] space-y-8 lg:space-y-12">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-display font-bold">Tracking Timeline</h2>
                         <Badge variant={latestApp.status === STATUSES.DISBURSED ? 'success' : 'primary'}>
@@ -72,40 +72,40 @@ const MyStatus = () => {
                         </Badge>
                     </div>
 
-                    <div className="relative space-y-8">
+                    <div className="relative space-y-6 lg:space-y-8">
                         {/* Vertical Line */}
-                        <div className="absolute left-[27px] top-2 bottom-2 w-0.5 bg-slate-800"></div>
+                        <div className="absolute left-[23px] lg:left-[27px] top-2 bottom-2 w-0.5 bg-slate-800"></div>
 
                         {steps.map((step, i) => {
                             const stepStatus = getStepStatus(step.status);
                             return (
-                                <div key={i} className="relative flex items-center gap-6 group">
+                                <div key={i} className="relative flex items-center gap-4 lg:gap-6 group">
                                     <div className={cn(
-                                        "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 z-10",
+                                        "w-12 h-12 lg:w-14 lg:h-14 rounded-xl lg:rounded-2xl flex items-center justify-center transition-all duration-500 z-10 shrink-0",
                                         stepStatus === 'completed' ? "bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]" :
                                             stepStatus === 'current' ? "bg-blue-600 text-white animate-pulse" :
                                                 stepStatus === 'failed' ? "bg-red-500 text-white" :
                                                     "bg-slate-900 border border-slate-800 text-slate-600"
                                     )}>
-                                        <step.icon className="w-6 h-6" />
+                                        <step.icon className="w-5 h-5 lg:w-6 lg:h-6" />
                                     </div>
-                                    <div className="flex-1">
+                                    <div className="flex-1 min-w-0">
                                         <h3 className={cn(
-                                            "font-display font-bold text-lg",
+                                            "font-display font-bold text-base lg:text-lg truncate",
                                             stepStatus === 'completed' ? "text-slate-200" :
                                                 stepStatus === 'current' ? "text-blue-400" :
                                                     "text-slate-500"
                                         )}>
                                             {step.label}
                                         </h3>
-                                        <p className="text-sm text-slate-500 mt-1">
+                                        <p className="text-xs lg:text-sm text-slate-500 mt-0.5">
                                             {stepStatus === 'completed' ? 'Successfully processed' :
                                                 stepStatus === 'current' ? 'Under review by our team' :
                                                     'Awaiting previous steps'}
                                         </p>
                                     </div>
                                     {stepStatus === 'completed' && (
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                                     )}
                                 </div>
                             );
@@ -115,27 +115,27 @@ const MyStatus = () => {
 
                 {/* Summary Card */}
                 <div className="space-y-6">
-                    <div className="glass p-8 rounded-[40px] bg-blue-600/5 border-blue-500/10 space-y-6">
+                    <div className="glass p-6 lg:p-8 rounded-[32px] lg:rounded-[40px] bg-blue-600/5 border-blue-500/10 space-y-6">
                         <h3 className="text-lg font-display font-bold">Summary</h3>
 
                         <div className="space-y-4">
-                            <div className="flex justify-between items-center py-3 border-b border-slate-800/50">
-                                <span className="text-slate-500">Loan ID</span>
-                                <span className="font-mono text-blue-400 font-bold">{latestApp.id}</span>
+                            <div className="flex justify-between items-center py-3 border-b border-slate-800/50 gap-4">
+                                <span className="text-slate-500 text-sm">Loan ID</span>
+                                <span className="font-mono text-blue-400 font-bold text-xs truncate">{latestApp.id}</span>
                             </div>
-                            <div className="flex justify-between items-center py-3 border-b border-slate-800/50">
-                                <span className="text-slate-500">Requested Amount</span>
-                                <span className="text-lg font-bold">R {latestApp.amount?.toLocaleString()}</span>
+                            <div className="flex justify-between items-center py-3 border-b border-slate-800/50 gap-4">
+                                <span className="text-slate-500 text-sm">Requested Amount</span>
+                                <span className="text-base lg:text-lg font-bold">R {latestApp.amount?.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between items-center py-3 border-b border-slate-800/50">
-                                <span className="text-slate-500">Submitted On</span>
-                                <span className="text-slate-300">{new Date(latestApp.date).toLocaleDateString()}</span>
+                            <div className="flex justify-between items-center py-3 border-b border-slate-800/50 gap-4">
+                                <span className="text-slate-500 text-sm">Submitted On</span>
+                                <span className="text-slate-300 text-sm">{new Date(latestApp.date).toLocaleDateString()}</span>
                             </div>
                         </div>
 
                         <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800 flex gap-4 items-start">
                             <AlertCircle className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-                            <p className="text-xs text-slate-400 leading-relaxed">
+                            <p className="text-[11px] text-slate-400 leading-relaxed">
                                 Our standard processing time is 2-3 business days. You will receive an email notification once your status changes.
                             </p>
                         </div>

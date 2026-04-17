@@ -114,7 +114,7 @@ const LoanApplication = () => {
         </div>
       )}
 
-      <div className="glass p-10 rounded-[48px] border-slate-800 space-y-12 relative overflow-hidden group shadow-sm transition-all hover:shadow-xl">
+      <div className="glass p-6 lg:p-10 rounded-[32px] lg:rounded-[48px] border-slate-800 space-y-8 lg:space-y-12 relative overflow-hidden group shadow-sm transition-all hover:shadow-xl">
         {/* Soft Background Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-blue-600/5 blur-[80px]"></div>
 
@@ -191,15 +191,15 @@ const StepPersonal = ({ data, update }) => (
         { label: 'Are you under Debt Review?', key: 'debtReview' },
         { label: 'Is this an emergency loan?', key: 'emergencyLoan' },
       ].map(q => (
-        <div key={q.key} className="flex items-center justify-between gap-6">
+        <div key={q.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
           <span className="text-sm font-bold text-slate-300">{q.label}</span>
-          <div className="flex bg-white p-1 rounded-xl shadow-sm border border-slate-800">
+          <div className="flex bg-white p-1 rounded-xl shadow-sm border border-slate-800 w-full sm:w-auto">
             {['Yes', 'No'].map(opt => (
               <button
                 key={opt}
                 onClick={() => update({ [q.key]: opt })}
                 className={cn(
-                  "px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all",
+                  "flex-1 sm:flex-none px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all",
                   data[q.key] === opt ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" : "text-slate-500 hover:text-slate-300"
                 )}
               >
@@ -333,19 +333,19 @@ const StepRequest = ({ data, update }) => (
         </div>
     </div>
 
-    <div className="flex items-center justify-between p-8 rounded-[32px] bg-blue-50 border border-blue-100">
-      <div className="flex gap-6 items-center">
-        <div className="w-16 h-16 bg-blue-600 rounded-[20px] flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
-          <HandCoins className="w-8 h-8" />
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between p-6 lg:p-8 rounded-[32px] bg-blue-50 border border-blue-100 gap-6">
+      <div className="flex gap-4 lg:gap-6 items-center">
+        <div className="w-12 h-12 lg:w-16 lg:h-16 bg-blue-600 rounded-[16px] lg:rounded-[20px] flex items-center justify-center text-white shadow-lg shadow-blue-600/20 shrink-0">
+          <HandCoins className="w-6 h-6 lg:w-8 lg:h-8" />
         </div>
         <div>
-          <p className="text-[10px] text-blue-500 uppercase font-black tracking-widest mb-1.5">Estimated Installment</p>
-          <p className="text-4xl font-display font-bold text-slate-800 tracking-tight">R {(data.amount * 1.12 / (parseInt(data.term) || 1)).toFixed(2)}</p>
+          <p className="text-[10px] text-blue-500 uppercase font-black tracking-widest mb-1">Estimated Installment</p>
+          <p className="text-3xl lg:text-4xl font-display font-bold text-slate-800 tracking-tight leading-none">R {(data.amount * 1.12 / (parseInt(data.term) || 1)).toFixed(2)}</p>
         </div>
       </div>
-      <div className="text-right hidden sm:block">
+      <div className="lg:text-right border-t lg:border-t-0 border-blue-200/50 pt-4 lg:pt-0">
         <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Fixed Annual Interest</p>
-        <p className="text-2xl font-bold text-emerald-500">12.0% APR</p>
+        <p className="text-xl lg:text-2xl font-bold text-emerald-500">12.0% APR</p>
       </div>
     </div>
   </div>
@@ -428,7 +428,7 @@ const StepAgreement = ({ data, update }) => (
         <label className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">Digital Execution (Full Name)</label>
         <div className="relative group">
           <input
-            className="input-field font-display italic text-3xl h-24 border-slate-800 focus:border-emerald-500/30 tracking-tight"
+            className="input-field font-display italic text-2xl lg:text-3xl h-20 lg:h-24 border-slate-800 focus:border-emerald-500/30 tracking-tight"
             placeholder="Execution signature here..."
             value={data.signature}
             onChange={e => update({ signature: e.target.value })}

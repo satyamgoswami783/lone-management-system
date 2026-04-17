@@ -33,17 +33,17 @@ const Statements = () => {
             ) : (
                 <div className="space-y-8">
                     {/* Summary Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div className="glass p-6 rounded-3xl bg-blue-600/5 border-blue-500/10">
                             <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-1">Total Balance</p>
-                            <p className="text-3xl font-display font-bold">R 2,500.00</p>
+                            <p className="text-2xl lg:text-3xl font-display font-bold">R 2,500.00</p>
                         </div>
                         <div className="glass p-6 rounded-3xl">
                             <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-1">Next Payment</p>
                             <p className="text-2xl font-display font-bold">R 1,250.00</p>
-                            <p className="text-xs text-emerald-400 mt-1 font-bold">DUE: 30 APR 2024</p>
+                            <p className="text-[10px] text-emerald-400 mt-1 font-bold">DUE: 30 APR 2024</p>
                         </div>
-                        <div className="glass p-6 rounded-3xl">
+                        <div className="glass p-6 rounded-3xl sm:col-span-2 lg:col-span-1">
                             <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-1">Total Repaid</p>
                             <p className="text-2xl font-display font-bold text-emerald-400">R 2,500.00</p>
                         </div>

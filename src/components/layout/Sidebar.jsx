@@ -4,7 +4,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { menuConfig } from '../../config/menuConfig';
@@ -76,15 +77,27 @@ const Sidebar = ({ isOpen, toggle, isMobile, closeMobile }) => {
   const SidebarContent = (
     <div className="flex flex-col h-full bg-white border-r border-slate-800 shadow-sm relative z-20">
       {/* Logo Area - "lenni" branding */}
-      <div className="h-24 flex items-center px-8 gap-3 flex-shrink-0">
-        <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center font-bold text-2xl text-white shadow-xl shadow-blue-500/20">
-          <ShieldCheck className="w-7 h-7" />
-        </div>
-        {(isOpen || isMobile) && (
-          <div className="flex flex-col animate-in fade-in slide-in-from-left-2 duration-300">
-            <span className="font-display font-black text-2xl tracking-tighter text-slate-200 lowercase">lenni.</span>
-            <span className="text-[9px] text-blue-500 uppercase font-black tracking-[0.2em] leading-none mt-1">enterprise</span>
+      <div className="h-24 flex items-center justify-between px-8 gap-3 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center font-bold text-2xl text-white shadow-xl shadow-blue-500/20">
+            <ShieldCheck className="w-7 h-7" />
           </div>
+          {(isOpen || isMobile) && (
+            <div className="flex flex-col animate-in fade-in slide-in-from-left-2 duration-300">
+              <span className="font-display font-black text-2xl tracking-tighter text-slate-200 lowercase">lenni.</span>
+              <span className="text-[9px] text-blue-500 uppercase font-black tracking-[0.2em] leading-none mt-1">enterprise</span>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Close Button */}
+        {isMobile && isOpen && (
+          <button 
+            onClick={closeMobile}
+            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-500 hover:text-white transition-all"
+          >
+            <X className="w-5 h-5" />
+          </button>
         )}
       </div>
 

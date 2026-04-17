@@ -123,7 +123,7 @@ const UserManagement = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
                 <SectionHeader
                     title="Employee Management"
                     description="Enterprise identity access control and real-time verification management."
@@ -133,36 +133,99 @@ const UserManagement = () => {
                         setEditingUser(null);
                         setIsModalOpen(true);
                     }}
-                    className="group relative flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 rounded-[24px] text-sm font-black text-white hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/30 active:scale-95 uppercase tracking-widest whitespace-nowrap overflow-hidden"
+                    className="group relative flex items-center justify-center gap-2 px-6 lg:px-8 py-4 bg-blue-600 rounded-[20px] lg:rounded-[24px] text-[10px] lg:text-sm font-black text-white hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/30 active:scale-95 uppercase tracking-widest whitespace-nowrap overflow-hidden w-full sm:w-auto"
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                    <UserPlus className="w-5 h-5 relative z-10" />
-                    <span className="relative z-10">Enroll New User</span>
+                    <UserPlus className="w-4 h-4 lg:w-5 lg:h-5 relative z-10" />
+                    <span className="relative z-10">Enroll New</span>
                 </button>
             </div>
 
             {/* List Controls */}
-            <div className="glass p-8 rounded-[40px] space-y-8 bg-slate-900/40 border-slate-800/50">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-4 bg-slate-950 px-6 py-4 rounded-3xl border border-slate-800 w-full max-w-xl group focus-within:border-blue-600/50 transition-all shadow-inner">
-                        <Search className="w-5 h-5 text-slate-500 group-focus-within:text-blue-400 group-focus-within:scale-110 transition-transform" />
+            <div className="glass p-6 lg:p-8 rounded-[32px] lg:rounded-[40px] space-y-8 bg-slate-900/40 border-slate-800/50">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div className="flex items-center gap-4 bg-slate-950 px-6 py-4 rounded-2xl border border-slate-800 w-full lg:max-w-xl group focus-within:border-blue-600/50 transition-all shadow-inner">
+                        <Search className="w-4 h-4 lg:w-5 lg:h-5 text-slate-500 group-focus-within:text-blue-400 group-focus-within:scale-110 transition-transform" />
                         <input
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-transparent border-none text-sm focus:ring-0 w-full text-slate-200 placeholder:text-slate-700 font-bold"
-                            placeholder="Enter Name, Email or Role for deep search..."
+                            className="bg-transparent border-none text-xs lg:text-sm focus:ring-0 w-full text-slate-200 placeholder:text-slate-700 font-bold"
+                            placeholder="Search identities..."
                         />
                     </div>
-                    <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Global Ops Status:</span>
-                        <div className="flex items-center gap-2.5 bg-slate-950 px-5 py-2.5 rounded-2xl border border-slate-800 shadow-lg">
+                    <div className="flex items-center justify-between lg:justify-end gap-3 w-full lg:w-auto">
+                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest hidden sm:inline">Status:</span>
+                        <div className="flex items-center gap-2.5 bg-slate-950 px-5 py-2.5 rounded-2xl border border-slate-800 shadow-lg shrink-0">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Live Database Sync</span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Live Sync</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="overflow-x-auto custom-scrollbar rounded-[32px] border border-slate-800/50 shadow-2xl pb-48">
+                {/* Mobile Card View (Hidden on LG+) */}
+                <div className="grid grid-cols-1 gap-6 lg:hidden">
+                    {filteredUsers.length > 0 ? (
+                        filteredUsers.map((u) => (
+                            <div key={u.id} className="glass p-6 rounded-[32px] border-slate-800/50 space-y-6 relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-full blur-2xl" />
+                                
+                                <div className="flex items-start justify-between relative z-10">
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative">
+                                            <div className="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center font-black text-lg text-slate-500">
+                                                {u.name[0]}
+                                            </div>
+                                            {u.status === 'Active' && (
+                                                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-950 shadow-lg" />
+                                            )}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="font-black text-slate-200 text-base leading-tight truncate">{u.name}</p>
+                                            <p className="text-[10px] text-slate-500 font-bold mt-1 truncate">{u.email}</p>
+                                        </div>
+                                    </div>
+                                    <Badge variant={getRoleVariant(u.role)}>{u.role}</Badge>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 relative z-10 pt-4 border-t border-slate-800/50">
+                                    <div className="space-y-1">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Organization</p>
+                                        <p className="text-xs font-bold text-slate-300 truncate">{u.company}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">Clearance</p>
+                                        <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg border w-fit ${u.status === 'Active' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                                            <div className={`w-1 h-1 rounded-full ${u.status === 'Active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                                            <span className="text-[9px] font-black uppercase tracking-tighter">{u.status}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-3 pt-2 relative z-10">
+                                    <button
+                                        onClick={() => { setEditingUser(u); setIsModalOpen(true); }}
+                                        className="flex-1 py-3 bg-blue-600/10 border border-blue-600/20 text-blue-400 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-blue-600 hover:text-white transition-all"
+                                    >
+                                        Edit Profile
+                                    </button>
+                                    <button
+                                        onClick={() => handleToggleStatus(u.id)}
+                                        className={`px-4 rounded-xl border transition-all ${u.status === 'Active' ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-amber-400/10 border-amber-400/20 text-amber-400'}`}
+                                    >
+                                        {u.status === 'Active' ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="glass p-12 text-center rounded-[32px] border-slate-800/50 text-slate-500 italic text-sm font-medium">
+                            No matching identities found.
+                        </div>
+                    )}
+                </div>
+
+                {/* Desktop Table View (Visible on LG+) */}
+                <div className="hidden lg:block overflow-x-auto custom-scrollbar rounded-[32px] border border-slate-800/50 shadow-2xl pb-48">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-950/80 border-b border-slate-800/50">
@@ -254,27 +317,7 @@ const UserManagement = () => {
                                         </td>
                                     </tr>
                                 ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="5" className="px-8 py-32 text-center bg-slate-950/20">
-                                        <div className="flex flex-col items-center gap-6 animate-in fade-in duration-500">
-                                            <div className="w-20 h-20 rounded-3xl bg-slate-900 flex items-center justify-center border border-slate-800 shadow-inner">
-                                                <Search className="w-8 h-8 text-slate-700 animate-pulse" />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="font-black uppercase tracking-[0.3em] text-sm text-slate-300">Identity Not Found</p>
-                                                <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">No matching records detected in live database</p>
-                                            </div>
-                                            <button
-                                                onClick={() => setSearchQuery('')}
-                                                className="px-6 py-2.5 rounded-xl bg-slate-800 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] hover:text-white transition-all border border-slate-700"
-                                            >
-                                                Clear Search Filters
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
+                            ) : null}
                         </tbody>
                     </table>
                 </div>
