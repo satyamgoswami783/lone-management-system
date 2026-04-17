@@ -58,7 +58,8 @@ const CreditDashboard = () => {
             STATUSES.HR_APPROVED,
             STATUSES.UNDER_REVIEW,
         ];
-        const source = applications
+        
+        const filtered = applications
             .filter(
                 (a) =>
                     a.lifecycleStatus === LIFECYCLE_STATUSES.HR_VERIFIED ||
@@ -68,9 +69,17 @@ const CreditDashboard = () => {
                 if (!prioritySearch.trim()) return true;
                 const q = prioritySearch.toLowerCase();
                 return (a.name || '').toLowerCase().includes(q) || (a.id || '').toLowerCase().includes(q);
-            })
-            .slice(0, 5);
-        return source;
+            });
+
+        // Fallback dummy data if no real priority cases exist
+        if (filtered.length === 0 && !prioritySearch) {
+            return [
+                { id: 'APP-004', name: 'Elena Rodriguez', score: 720, risk: 'Low', status: STATUSES.CREDIT_PENDING },
+                { id: 'APP-005', name: 'Lerato Molefe', score: 450, risk: 'High', status: STATUSES.CREDIT_PENDING }
+            ];
+        }
+
+        return filtered.slice(0, 5);
     }, [applications, prioritySearch]);
 
     return (

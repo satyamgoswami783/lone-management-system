@@ -344,6 +344,36 @@ export const LoanProvider = ({ children }) => {
             auditHistory: [
               { status: RECOVERY_STATUSES.LEGAL, date: new Date(Date.now() - 86400000 * 35).toISOString(), user: 'Legal Dept', notes: 'Letter of Demand issued' }
             ]
+        },
+        {
+          id: "APP-004",
+          name: "Elena Rodriguez",
+          email: "elena.r@agency.com",
+          company: "Creative Studio",
+          amount: 12000,
+          status: STATUSES.CREDIT_PENDING,
+          date: "2025-01-15T12:00:00.000Z",
+          idNumber: "900415 5001 083",
+          salary: 28000,
+          purpose: "Education",
+          score: 720,
+          risk: "Low",
+          auditHistory: []
+        },
+        {
+          id: "APP-005",
+          name: "Lerato Molefe",
+          email: "lerato.m@gmail.com",
+          company: "Retail Group",
+          amount: 8000,
+          status: STATUSES.CREDIT_PENDING,
+          date: "2025-01-14T12:00:00.000Z",
+          idNumber: "820712 5001 085",
+          salary: 19500,
+          purpose: "Emergency",
+          score: 450,
+          risk: "High",
+          auditHistory: []
         }
       ];
 

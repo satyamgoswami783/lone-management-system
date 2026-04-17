@@ -231,21 +231,22 @@ const CreditProfilePage = () => {
     };
 
     return (
-        <div className="pb-32 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <>
+            <div className="pb-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex items-center gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
                     <button 
                         onClick={() => navigate('/credit/queue')}
-                        className="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all shadow-lg"
+                        className="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all shadow-lg flex-shrink-0"
                     >
                         <ChevronLeft className="w-5 h-5" />
                     </button>
-                    <div>
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-3xl font-display font-bold">{displayName}</h1>
+                    <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                            <h1 className="text-xl sm:text-3xl font-display font-bold truncate">{displayName}</h1>
                             <Badge variant={
                                 app.status === STATUSES.APPROVED ? 'success' : 
                                 app.status === STATUSES.DECLINED ? 'danger' : 
@@ -254,16 +255,16 @@ const CreditProfilePage = () => {
                                 {app.status || 'NEW'}
                             </Badge>
                         </div>
-                        <p className="text-slate-400 font-mono mt-1">{app.id} • {app.email || 'No Email'}</p>
+                        <p className="text-[10px] sm:text-sm text-slate-400 font-mono mt-1 truncate">{app.id} • {app.email || 'No Email'}</p>
                     </div>
                 </div>
                 
-                <div className="flex items-center gap-4 p-4 glass rounded-2xl border-slate-800/50">
-                    <div className="text-right">
+                <div className="flex items-center gap-4 p-4 glass rounded-2xl border-slate-800/50 w-full lg:w-auto overflow-hidden">
+                    <div className="flex-1 lg:text-right min-w-0">
                         <p className="text-[10px] text-slate-500 uppercase font-black">Assigned To</p>
-                        <p className="text-sm font-bold text-blue-400">{app.assignedTo || 'Unassigned'}</p>
+                        <p className="text-sm font-bold text-blue-400 truncate">{app.assignedTo || 'Unassigned'}</p>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center flex-shrink-0">
                         <User className="w-5 h-5 text-slate-400" />
                     </div>
                 </div>
@@ -271,7 +272,8 @@ const CreditProfilePage = () => {
 
             {/* Main Content Tabs */}
             <div className="space-y-6">
-                <div className="flex items-center gap-2 p-1 bg-slate-900/50 rounded-2xl border border-slate-800/50 w-fit">
+                <div className="flex items-center gap-2 p-1 bg-slate-900/50 rounded-2xl border border-slate-800/50 w-full overflow-x-auto no-scrollbar">
+                    <div className="flex items-center gap-2 min-w-max">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
@@ -286,6 +288,7 @@ const CreditProfilePage = () => {
                             {tab.label}
                         </button>
                     ))}
+                    </div>
                 </div>
 
                 <div className="glass p-4 sm:p-8 rounded-[24px] sm:rounded-[40px] border-slate-800/50 shadow-2xl relative overflow-hidden min-h-[min(500px,70vh)] sm:min-h-[500px]">
@@ -525,49 +528,50 @@ const CreditProfilePage = () => {
                 </div>
             </div>
 
-            {/* Decision Action Bar (FIXED BOTTOM) */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 p-6 bg-slate-950/80 backdrop-blur-2xl border-t border-slate-800 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
-                <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
-                            <ShieldCheck className="w-6 h-6 text-blue-500" />
+            </div>
+
+            {/* Decision Action Bar (INLINE) */}
+            <div className="p-4 sm:p-8 glass rounded-[40px] border border-slate-800/50 shadow-2xl">
+                <div className="flex flex-col xl:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4 w-full xl:w-auto">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
+                            <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                         </div>
-                        <div>
-                            <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em]">Deployment Pipeline</p>
-                            <h4 className="text-sm font-bold text-slate-100 italic">Ready for Credit Decision</h4>
+                        <div className="min-w-0">
+                            <p className="text-[8px] sm:text-[10px] text-slate-500 uppercase font-black tracking-[0.2em]">Deployment Pipeline</p>
+                            <h4 className="text-xs sm:text-sm font-bold text-slate-100 italic truncate">Ready for Credit Decision</h4>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="grid grid-cols-2 lg:flex lg:items-center gap-3 w-full xl:w-auto">
                         <button 
                             onClick={() => setIsRejectModalOpen(true)}
-                            className="px-8 py-4 rounded-2xl border border-red-500/20 text-red-500 font-black uppercase text-xs tracking-wider hover:bg-red-500 hover:text-white transition-all shadow-lg"
+                            className="px-4 sm:px-8 py-3 sm:py-4 rounded-2xl border border-red-500/20 text-red-500 font-black uppercase text-[10px] tracking-wider hover:bg-red-500 hover:text-white transition-all shadow-lg truncate"
                         >
                             Reject
                         </button>
                         <button 
                             onClick={() => setIsHoldModalOpen(true)}
-                            className="px-8 py-4 rounded-2xl border border-amber-500/20 text-amber-500 font-black uppercase text-xs tracking-wider hover:bg-amber-500 hover:text-white transition-all shadow-lg"
+                            className="px-4 sm:px-8 py-3 sm:py-4 rounded-2xl border border-amber-500/20 text-amber-500 font-black uppercase text-[10px] tracking-wider hover:bg-amber-500 hover:text-white transition-all shadow-lg truncate"
                         >
                             Hold
                         </button>
                         <button 
                             onClick={() => setIsRequestInfoModalOpen(true)}
-                            className="px-8 py-4 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 font-black uppercase text-xs tracking-wider hover:bg-slate-800 hover:text-white transition-all shadow-lg"
+                            className="px-4 sm:px-8 py-3 sm:py-4 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 font-black uppercase text-[10px] tracking-wider hover:bg-slate-800 hover:text-white transition-all shadow-lg truncate"
                         >
                             Request Info
                         </button>
                         <button 
                             onClick={() => setIsApproveModalOpen(true)}
-                            className="px-12 py-4 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs tracking-[0.2em] hover:bg-blue-500 transition-all shadow-2xl shadow-blue-600/20 flex items-center gap-3"
+                            className="px-4 sm:px-12 py-3 sm:py-4 rounded-2xl bg-blue-600 text-white font-black uppercase text-[10px] tracking-[0.1em] sm:tracking-[0.2em] hover:bg-blue-500 transition-all shadow-2xl shadow-blue-600/20 flex items-center justify-center gap-2 sm:gap-3 truncate"
                         >
                             Approve
-                            <ArrowRight className="w-4 h-4" />
+                            <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
                         </button>
                     </div>
                 </div>
             </div>
-
             {/* Decision Modals */}
             <Modal
                 isOpen={isApproveModalOpen}
@@ -815,7 +819,7 @@ const CreditProfilePage = () => {
                     });
                 }}
             />
-        </div>
+        </>
     );
 };
 
